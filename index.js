@@ -1,0 +1,49 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+const core_1 = require("@rxdi/core");
+const services_1 = require("./services");
+const apollo_service_1 = require("./services/apollo.service");
+const config_tokens_1 = require("./config.tokens");
+const bootstrap_service_1 = require("./services/bootstrap.service");
+const graphiql_service_1 = require("./services/graphiql.service");
+const start_service_1 = require("./services/start.service");
+let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
+    static forRoot(config) {
+        return {
+            module: GraphQLModule_1,
+            services: [
+                services_1.EffectService,
+                {
+                    provide: config_tokens_1.GRAPHQL_PLUGIN_CONFIG,
+                    useValue: config
+                },
+                services_1.HookService,
+                services_1.SchemaService
+            ]
+        };
+    }
+};
+GraphQLModule = GraphQLModule_1 = __decorate([
+    core_1.Module({
+        services: [
+            bootstrap_service_1.BootstrapService,
+            apollo_service_1.ApolloService,
+            graphiql_service_1.GraphiQLService,
+            start_service_1.StartService
+        ]
+    })
+], GraphQLModule);
+exports.GraphQLModule = GraphQLModule;
+__export(require("./decorators"));
+__export(require("./services"));
+__export(require("./config.tokens"));
+var GraphQLModule_1;

@@ -21,9 +21,9 @@ export class BootstrapService {
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
     ) { }
 
-    generateMetaSchema(): [FieldsModule, string[]] {
+    generateSchema() {
         const methodBasedEffects = [];
-        const Fields = new FieldsModule();
+        const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
@@ -54,14 +54,6 @@ export class BootstrapService {
                     return result;
                 };
             });
-        return [Fields, methodBasedEffects];
-
-    }
-
-    generateSchema() {
-        const metaSchema = this.generateMetaSchema();
-        const Fields = metaSchema[0];
-        const methodBasedEffects = metaSchema[1];
 
         const query = this.generateType(
             Fields.query,
@@ -128,9 +120,9 @@ export type EffectTypes = keyof typeof EffectTypes;
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map((key => <any>this.moduleService.watcherService.getConstructor(key)))
             .forEach((map: { value: any; type: { _descriptors: Map<any, any> } }) => Array.from(map.type._descriptors.keys())
-            .map((k) => map.type._descriptors.get(k))
-            .map(d => d.value)
-            .forEach(v => descriptors.push({ descriptor: v, self: map.value })));
+                .map((k) => map.type._descriptors.get(k))
+                .map(d => d.value)
+                .forEach(v => descriptors.push({ descriptor: v, self: map.value })));
         return descriptors;
     }
 

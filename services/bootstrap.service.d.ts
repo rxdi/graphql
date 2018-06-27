@@ -20,7 +20,6 @@ export declare class BootstrapService {
     private effectService;
     private config;
     constructor(moduleService: ModuleService, hookService: HookService, schemaService: SchemaService, effectService: EffectService, config: GRAPHQL_PLUGIN_CONFIG);
-    generateMetaSchema(): [FieldsModule, string[]];
     generateSchema(): any;
     writeEffectTypes(effects: Array<any>): void;
     generateType(query: any, name: any, description: any): any;

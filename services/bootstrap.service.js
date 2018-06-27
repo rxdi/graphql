@@ -41,9 +41,9 @@ let BootstrapService = class BootstrapService {
         this.effectService = effectService;
         this.config = config;
     }
-    generateMetaSchema() {
+    generateSchema() {
         const methodBasedEffects = [];
-        const Fields = new FieldsModule();
+        const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
@@ -74,12 +74,6 @@ let BootstrapService = class BootstrapService {
                 });
             };
         });
-        return [Fields, methodBasedEffects];
-    }
-    generateSchema() {
-        const metaSchema = this.generateMetaSchema();
-        const Fields = metaSchema[0];
-        const methodBasedEffects = metaSchema[1];
         const query = this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data');
         const mutation = this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data');
         const subscription = this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all rabbitmq subscriptions via pub sub');

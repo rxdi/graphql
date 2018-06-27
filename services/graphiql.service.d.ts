@@ -7,6 +7,5 @@ export declare class GraphiQLService implements PluginInterface {
     constructor(server: Server, config: GRAPHQL_PLUGIN_CONFIG);
     OnInit(): void;
     register(): Promise<void>;
-    registerRoute(): void;
     handler(request: any, h: any): Promise<any>;
 }

@@ -5,6 +5,10 @@ import { SchemaService } from "../services/schema.service";
 import { ensureDirSync, writeFileSync } from "fs-extra";
 import { EffectService } from "./effect.service";
 import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
+import { GenericGapiResolversType } from "../decorators/query/query.decorator";
+
+export class FieldsModule { query: {}; mutation: {}; subscription: {} }
+export class MetaDescriptor { descriptor: () => GenericGapiResolversType; self: any }
 
 @Service()
 export class BootstrapService {
@@ -15,15 +19,13 @@ export class BootstrapService {
         private schemaService: SchemaService,
         private effectService: EffectService,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
-    ) {
-        console.log('BOOTSTRAP Service');
-    }
+    ) { }
 
-    generateSchema() {
+    generateMetaSchema(): [FieldsModule, string[]] {
         const methodBasedEffects = [];
-        const Fields = { query: {}, mutation: {}, subscription: {} };
+        const Fields = new FieldsModule();
         const events = this.effectService;
-        this.getDescriptors()
+        this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
                 const desc = descriptor();
                 Fields[desc.method_type][desc.method_name] = desc;
@@ -39,19 +41,27 @@ export class BootstrapService {
                 }
 
                 desc.resolve = async function resolve(...args: any[]) {
-                      const methodEffect = events.map.has(desc.method_name);
-                      const customEffect = events.map.has(desc.effect);
+                    const methodEffect = events.map.has(desc.method_name);
+                    const customEffect = events.map.has(desc.effect);
                     const result = await originalResolve.apply(self, args);
-                      if (methodEffect || customEffect) {
+                    if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];
                         tempArgs = tempArgs.filter(i => i && i !== 'undefined');
                         events
-                          .getLayer<Array<any>>(effectName)
-                          .putItem({ key: effectName, data: tempArgs });
-                      }
+                            .getLayer<Array<any>>(effectName)
+                            .putItem({ key: effectName, data: tempArgs });
+                    }
                     return result;
                 };
             });
+        return [Fields, methodBasedEffects];
+
+    }
+
+    generateSchema() {
+        const metaSchema = this.generateMetaSchema();
+        const Fields = metaSchema[0];
+        const methodBasedEffects = metaSchema[1];
 
         const query = this.generateType(
             Fields.query,
@@ -81,6 +91,7 @@ export class BootstrapService {
         }
         return schema;
     }
+
     writeEffectTypes(effects: Array<any>) {
         if (this.config.writeEffects) {
             return;
@@ -111,12 +122,16 @@ export type EffectTypes = keyof typeof EffectTypes;
         });
     }
 
-    getDescriptors() {
-        const descriptors = [];
+    getMetaDescriptors(): MetaDescriptor[] {
+        const descriptors: MetaDescriptor[] = [];
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map((key => <any>this.moduleService.watcherService.getConstructor(key)))
-            .forEach((map: { value: any; type: { _descriptors: Map<any, any> } }) => Array.from(map.type._descriptors.keys()).map((k) => map.type._descriptors.get(k)).map(d => d.value).forEach(v => descriptors.push({ descriptor: v, self: map.value })));
+            .forEach((map: { value: any; type: { _descriptors: Map<any, any> } }) => Array.from(map.type._descriptors.keys())
+            .map((k) => map.type._descriptors.get(k))
+            .map(d => d.value)
+            .forEach(v => descriptors.push({ descriptor: v, self: map.value })));
         return descriptors;
     }
+
 }

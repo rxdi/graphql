@@ -5,6 +5,7 @@ export interface GenericGapiResolversType {
     target?: any;
     effect?: string;
     method_name?: string;
+    subscribe?: () => {};
     method_type?: 'query' | 'subscription' | 'mutation' | 'event';
     type: GraphQLObjectType;
     resolve?(root: any, args: Object, context: any);

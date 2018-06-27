@@ -13,18 +13,14 @@ export class GraphiQLService implements PluginInterface {
     ) { }
 
     OnInit() {
+        if (!this.config || !this.config.graphiqlOptions) {
+            throw new Error('Apollo Server GraphiQL requires options.');
+        }
         this.register();
     }
 
     async register() {
-        console.log('Graphiql Register');
-        if (!this.config || !this.config.graphiqlOptions) {
-            throw new Error('Apollo Server GraphiQL requires options.');
-        }
-        this.registerRoute();
-    }
 
-    registerRoute() {
         this.server.route(<any>{
             method: 'GET',
             path: this.config.graphiQlPath || '/graphiql',

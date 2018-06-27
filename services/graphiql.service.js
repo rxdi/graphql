@@ -31,23 +31,19 @@ let GraphiQLService = class GraphiQLService {
         this.config = config;
     }
     OnInit() {
+        if (!this.config || !this.config.graphiqlOptions) {
+            throw new Error('Apollo Server GraphiQL requires options.');
+        }
         this.register();
     }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('Graphiql Register');
-            if (!this.config || !this.config.graphiqlOptions) {
-                throw new Error('Apollo Server GraphiQL requires options.');
-            }
-            this.registerRoute();
-        });
-    }
-    registerRoute() {
-        this.server.route({
-            method: 'GET',
-            path: this.config.graphiQlPath || '/graphiql',
-            config: this.config.route || {},
-            handler: this.handler.bind(this)
+            this.server.route({
+                method: 'GET',
+                path: this.config.graphiQlPath || '/graphiql',
+                config: this.config.route || {},
+                handler: this.handler.bind(this)
+            });
         });
     }
     handler(request, h) {

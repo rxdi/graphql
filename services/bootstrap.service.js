@@ -27,6 +27,12 @@ const schema_service_1 = require("../services/schema.service");
 const fs_extra_1 = require("fs-extra");
 const effect_service_1 = require("./effect.service");
 const config_tokens_1 = require("../config.tokens");
+class FieldsModule {
+}
+exports.FieldsModule = FieldsModule;
+class MetaDescriptor {
+}
+exports.MetaDescriptor = MetaDescriptor;
 let BootstrapService = class BootstrapService {
     constructor(moduleService, hookService, schemaService, effectService, config) {
         this.moduleService = moduleService;
@@ -34,13 +40,12 @@ let BootstrapService = class BootstrapService {
         this.schemaService = schemaService;
         this.effectService = effectService;
         this.config = config;
-        console.log('BOOTSTRAP Service');
     }
-    generateSchema() {
+    generateMetaSchema() {
         const methodBasedEffects = [];
-        const Fields = { query: {}, mutation: {}, subscription: {} };
+        const Fields = new FieldsModule();
         const events = this.effectService;
-        this.getDescriptors()
+        this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
             const desc = descriptor();
             Fields[desc.method_type][desc.method_name] = desc;
@@ -69,6 +74,12 @@ let BootstrapService = class BootstrapService {
                 });
             };
         });
+        return [Fields, methodBasedEffects];
+    }
+    generateSchema() {
+        const metaSchema = this.generateMetaSchema();
+        const Fields = metaSchema[0];
+        const methodBasedEffects = metaSchema[1];
         const query = this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data');
         const mutation = this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data');
         const subscription = this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all rabbitmq subscriptions via pub sub');
@@ -110,12 +121,15 @@ export type EffectTypes = keyof typeof EffectTypes;
             fields: query
         });
     }
-    getDescriptors() {
+    getMetaDescriptors() {
         const descriptors = [];
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map((key => this.moduleService.watcherService.getConstructor(key)))
-            .forEach((map) => Array.from(map.type._descriptors.keys()).map((k) => map.type._descriptors.get(k)).map(d => d.value).forEach(v => descriptors.push({ descriptor: v, self: map.value })));
+            .forEach((map) => Array.from(map.type._descriptors.keys())
+            .map((k) => map.type._descriptors.get(k))
+            .map(d => d.value)
+            .forEach(v => descriptors.push({ descriptor: v, self: map.value })));
         return descriptors;
     }
 };

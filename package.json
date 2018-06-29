@@ -25,8 +25,8 @@
   "module": "index.js",
   "typings": "index.d.ts",
   "peerDependencies": {
-    "@rxdi/core": "^0.0.85",
-    "@rxdi/hapi": "^0.0.85"
+    "@rxdi/core": "^0.0.87",
+    "@rxdi/hapi": "^0.0.87"
   },
   "dependencies": {
     "opn": "^5.3.0",
@@ -37,8 +37,8 @@
     "graphql": "^0.13.2"
   },
   "devDependencies": {
-    "@rxdi/core": "^0.0.85",
-    "@rxdi/hapi": "^0.0.85",
+    "@rxdi/core": "^0.0.87",
+    "@rxdi/hapi": "^0.0.87",
     "@types/hapi": "^17.0.12",
     "@types/node": "^10.3.4",
     "typescript": "^2.7.1"

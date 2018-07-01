@@ -1,1 +1,1 @@
-export * from './gapi-type-injector';
+export * from './type-injector';

@@ -1,6 +1,7 @@
 export * from './query/index';
 export * from './object-type/index';
 export * from './of-type/index';
+export * from './type-injector/index';
 export * from './type/index';
 export * from './public/index';
 export * from './query/index';

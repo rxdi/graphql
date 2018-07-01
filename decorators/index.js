@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./query/index"));
 __export(require("./object-type/index"));
 __export(require("./of-type/index"));
+__export(require("./type-injector/index"));
 __export(require("./type/index"));
 __export(require("./public/index"));
 __export(require("./query/index"));

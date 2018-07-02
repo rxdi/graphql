@@ -1,4 +1,4 @@
-import { Plugin, Service, Inject, PluginInterface } from "@rxdi/core";
+import { Plugin, Service, Inject, PluginInterface, Container } from "@rxdi/core";
 import * as Boom from 'boom';
 import { Server, Request } from 'hapi';
 import * as GraphiQL from 'apollo-server-module-graphiql';
@@ -54,10 +54,10 @@ export class ApolloService implements PluginInterface {
 
     async handler(request, h) {
         try {
-            if (request.headers.authorization && request.headers.authorization !== 'undefined') {
+            if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                 try {
-                    //   const serviceUtilsService: AuthService = Container.get(AuthService);
-                    //   options.graphqlOptions.context = await serviceUtilsService.modifyFunctions.validateToken(request.headers.authorization);
+                      const serviceUtilsService: any = Container.get(<any>this.config.authentication);
+                      this.config.graphqlOptions.context = await serviceUtilsService.validateToken(request.headers.authorization);
                 } catch (e) {
                     return Boom.unauthorized();
                 }

@@ -8,6 +8,7 @@ import { StartService } from './services/start.service';
 
 @Module({
     services: [
+        HookService,
         BootstrapService,
         ApolloService,
         GraphiQLService,

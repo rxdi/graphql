@@ -55,10 +55,10 @@ let ApolloService = class ApolloService {
     handler(request, h) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (request.headers.authorization && request.headers.authorization !== 'undefined') {
+                if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                     try {
-                        //   const serviceUtilsService: AuthService = Container.get(AuthService);
-                        //   options.graphqlOptions.context = await serviceUtilsService.modifyFunctions.validateToken(request.headers.authorization);
+                        const serviceUtilsService = core_1.Container.get(this.config.authentication);
+                        this.config.graphqlOptions.context = yield serviceUtilsService.validateToken(request.headers.authorization);
                     }
                     catch (e) {
                         return Boom.unauthorized();

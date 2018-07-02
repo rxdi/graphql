@@ -35,6 +35,7 @@ let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
 GraphQLModule = GraphQLModule_1 = __decorate([
     core_1.Module({
         services: [
+            services_1.HookService,
             bootstrap_service_1.BootstrapService,
             apollo_service_1.ApolloService,
             graphiql_service_1.GraphiQLService,

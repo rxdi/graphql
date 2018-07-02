@@ -5,6 +5,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -16,10 +22,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const error_service_1 = require("./error.service");
 const core_1 = require("@rxdi/core");
+const config_tokens_1 = require("../config.tokens");
 function MakeError() {
     throw new error_service_1.createError('unauthorized', 'You are unable to fetch data');
 }
 let HookService = class HookService {
+    constructor(config) {
+        this.config = config;
+    }
     AttachHooks(graphQLFields) {
         graphQLFields.forEach(type => {
             if (!type) {
@@ -44,16 +54,18 @@ let HookService = class HookService {
         this.AuthenticationHooks(resolver, root, args, context, info);
     }
     AddHooks(resolver) {
-        // if (Container.get(ConfigService).cert) {
-        const resolve = resolver.resolve;
-        resolver.resolve = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
-            this.ResolverHooks(resolver, root, args, context, info);
-            return yield resolve(root, args, context, info);
-        });
-        // }
+        if (this.config.authentication) {
+            const resolve = resolver.resolve;
+            resolver.resolve = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+                this.ResolverHooks(resolver, root, args, context, info);
+                return yield resolve(root, args, context, info);
+            });
+        }
     }
 };
 HookService = __decorate([
-    core_1.Service()
+    core_1.Service(),
+    __param(0, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
+    __metadata("design:paramtypes", [Object])
 ], HookService);
 exports.HookService = HookService;

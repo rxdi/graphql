@@ -17,11 +17,17 @@ export interface GRAPHQL_PLUGIN_CONFIG {
     graphiQlPath?: string;
     writeEffects?: boolean;
     openBrowser?: boolean;
+    authentication?: Function | InjectionToken<any>;
     vhost?: string;
     route?: {
         cors?: boolean;
     };
     graphqlOptions: GraphQLOptions;
     graphiqlOptions: GraphiQL.GraphiQLData;
+}
+export interface GRAPHQL_AUTHENTICATION_FAKE {
+    validateToken(authorization: string): any;
+    onSubConnection(connectionParams: any): any;
+    onSubOperation(connectionParams: any, params: any, webSocket: any): any;
 }
 export declare const GRAPHQL_PLUGIN_CONFIG: InjectionToken<GRAPHQL_PLUGIN_CONFIG>;

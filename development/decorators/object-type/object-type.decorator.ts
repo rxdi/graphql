@@ -1,6 +1,6 @@
 import { GraphQLObjectType, GraphQLInputObjectType } from 'graphql';
 
-export function ObjectType<T>(options?: { input: boolean, raw: boolean }): Function {
+export function GapiObjectType<T>(options?: { input: boolean, raw: boolean }): Function {
     return function (target: any, propertyName: string, index?: number) {
         const userTypes = new target();
         const type = Object.create({ fields: {}, name: target.name });

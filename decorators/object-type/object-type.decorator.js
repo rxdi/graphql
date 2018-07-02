@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const graphql_1 = require("graphql");
-function ObjectType(options) {
+function GapiObjectType(options) {
     return function (target, propertyName, index) {
         const userTypes = new target();
         const type = Object.create({ fields: {}, name: target.name });
@@ -19,4 +19,4 @@ function ObjectType(options) {
         }
     };
 }
-exports.ObjectType = ObjectType;
+exports.GapiObjectType = GapiObjectType;

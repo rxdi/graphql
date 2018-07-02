@@ -33,7 +33,11 @@ export class ApolloService implements PluginInterface {
     ) { }
 
     OnInit() {
-        this.config.graphqlOptions.schema = this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        let proxySchema;
+        try {
+            proxySchema = Container.get('gapi-custom-schema-definition');
+        } catch (e) {}
+        this.config.graphqlOptions.schema = proxySchema || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
         this.register();
     }
 

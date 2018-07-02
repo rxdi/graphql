@@ -36,7 +36,12 @@ let ApolloService = class ApolloService {
         this.bootstrapService = bootstrapService;
     }
     OnInit() {
-        this.config.graphqlOptions.schema = this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        let proxySchema;
+        try {
+            proxySchema = core_1.Container.get('gapi-custom-schema-definition');
+        }
+        catch (e) { }
+        this.config.graphqlOptions.schema = proxySchema || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
         this.register();
     }
     register() {

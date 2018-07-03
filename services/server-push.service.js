@@ -44,8 +44,12 @@ let ServerPushPlugin = class ServerPushPlugin {
         this.server.events.on('response', (request) => {
             this.sendToClient.next({ query: request.payload, response: request.response['source'] });
         });
-        this.waitXSeconds(3)
-            .pipe(operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
+        // this.waitXSeconds(3)
+        //     .pipe(
+        //         filter(() => !this.connected),
+        //         filter(() => this.config.openBrowser),
+        //         tap(() => this.startService.startBrowser())
+        //     ).subscribe();
         // this.afterStarterService.appStarted
         //     .pipe(
         //         switchMapTo(this.clientConnected),
@@ -53,6 +57,8 @@ let ServerPushPlugin = class ServerPushPlugin {
         //         filter(() => !!this.config.openBrowser),
         //         tap(() => this.startService.startBrowser())
         //     ).subscribe()
+        this.afterStarterService.appStarted
+            .pipe(operators_1.switchMapTo(this.waitXSeconds(3)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
     }
     waitXSeconds(sec) {
         return rxjs_1.Observable.create((o) => {

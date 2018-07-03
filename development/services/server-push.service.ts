@@ -29,12 +29,12 @@ export class ServerPushPlugin implements PluginInterface {
             this.sendToClient.next({ query: request.payload, response: request.response['source'] });
         });
 
-        this.waitXSeconds(3)
-            .pipe(
-                filter(() => !this.connected),
-                filter(() => this.config.openBrowser),
-                tap(() => this.startService.startBrowser())
-            ).subscribe();
+        // this.waitXSeconds(3)
+        //     .pipe(
+        //         filter(() => !this.connected),
+        //         filter(() => this.config.openBrowser),
+        //         tap(() => this.startService.startBrowser())
+        //     ).subscribe();
         // this.afterStarterService.appStarted
         //     .pipe(
         //         switchMapTo(this.clientConnected),
@@ -42,6 +42,15 @@ export class ServerPushPlugin implements PluginInterface {
         //         filter(() => !!this.config.openBrowser),
         //         tap(() => this.startService.startBrowser())
         //     ).subscribe()
+
+        this.afterStarterService.appStarted
+            .pipe(
+                switchMapTo(this.waitXSeconds(3)),
+                take(1),
+                filter(() => !this.connected),
+                filter(() => this.config.openBrowser),
+                tap(() => this.startService.startBrowser())
+            ).subscribe()
     }
 
     waitXSeconds(sec): Observable<any> {

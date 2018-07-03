@@ -68,7 +68,9 @@ let ServerPushPlugin = class ServerPushPlugin {
     }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.createServerWatcher();
+            if (this.config.openBrowser) {
+                this.createServerWatcher();
+            }
         });
     }
     stopServerWatcher() {
@@ -78,7 +80,7 @@ let ServerPushPlugin = class ServerPushPlugin {
     }
     createServerWatcher() {
         this.serverWatcher = http_1.createServer(this.OnRequest.bind(this));
-        this.serverWatcher.listen(8967);
+        this.serverWatcher.listen(this.config.watcherPort || 8967);
     }
     OnRequest(req, res) {
         if (req.url === '/status') {

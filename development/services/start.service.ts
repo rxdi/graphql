@@ -14,8 +14,8 @@ export class StartService {
     ) { }
 
     startBrowser() {
-        // this.openService.openPage('http://localhost:8967/status');
-        this.openService.openPage('http://localhost:4200');
+        // this.openService.openPage('http://localhost:${this.config.watcherPort}/status');
+        // this.openService.openPage('http://localhost:4200');
         this.openService.openGraphQLPage();
         this.logger.log('Browser started!');
     }

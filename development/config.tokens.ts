@@ -26,6 +26,7 @@ export interface GRAPHQL_PLUGIN_CONFIG {
     graphiQlPath?: string;
     writeEffects?: boolean;
     openBrowser?: boolean;
+    watcherPort: string | boolean;
     authentication?: Function | InjectionToken<any>;
     vhost?: string;
     route?: {

@@ -61,7 +61,9 @@ export class ServerPushPlugin implements PluginInterface {
     }
 
     async register() {
-        this.createServerWatcher();
+        if (this.config.openBrowser) {
+            this.createServerWatcher();
+        }
     }
 
     async stopServerWatcher() {
@@ -70,7 +72,7 @@ export class ServerPushPlugin implements PluginInterface {
 
     createServerWatcher() {
         this.serverWatcher = createServer(this.OnRequest.bind(this));
-        this.serverWatcher.listen(8967);
+        this.serverWatcher.listen(this.config.watcherPort || 8967);
     }
 
     OnRequest(req: IncomingMessage, res: ServerResponse) {

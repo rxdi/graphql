@@ -40,7 +40,8 @@ GraphQLModule = GraphQLModule_1 = __decorate([
             apollo_service_1.ApolloService,
             graphiql_service_1.GraphiQLService,
             start_service_1.StartService
-        ]
+        ],
+        plugins: [services_1.ServerPushPlugin]
     })
 ], GraphQLModule);
 exports.GraphQLModule = GraphQLModule;

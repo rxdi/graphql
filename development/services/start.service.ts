@@ -10,17 +10,14 @@ export class StartService {
         @Inject(HAPI_SERVER) private server: Server,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
         private logger: BootstrapLogger,
-        private afterStarterService: AfterStarterService,
-        private openService: OpenService
+        private openService: OpenService,
     ) { }
 
-    OnInit() {
-        this.afterStarterService.appStarted.subscribe(() => {
-            if (this.config.openBrowser) {
-                this.openService.openGraphQLPage();
-                this.logger.log('Browser started!');
-            }
-        })
+    startBrowser() {
+        // this.openService.openPage('http://localhost:8967/status');
+        this.openService.openPage('http://localhost:4200');
+        this.openService.openGraphQLPage();
+        this.logger.log('Browser started!');
     }
 
 }

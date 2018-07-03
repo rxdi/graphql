@@ -17,20 +17,17 @@ const hapi_1 = require("@rxdi/hapi");
 const hapi_2 = require("hapi");
 const config_tokens_1 = require("../config.tokens");
 let StartService = class StartService {
-    constructor(server, config, logger, afterStarterService, openService) {
+    constructor(server, config, logger, openService) {
         this.server = server;
         this.config = config;
         this.logger = logger;
-        this.afterStarterService = afterStarterService;
         this.openService = openService;
     }
-    OnInit() {
-        this.afterStarterService.appStarted.subscribe(() => {
-            if (this.config.openBrowser) {
-                this.openService.openGraphQLPage();
-                this.logger.log('Browser started!');
-            }
-        });
+    startBrowser() {
+        // this.openService.openPage('http://localhost:8967/status');
+        this.openService.openPage('http://localhost:4200');
+        this.openService.openGraphQLPage();
+        this.logger.log('Browser started!');
     }
 };
 StartService = __decorate([
@@ -38,7 +35,6 @@ StartService = __decorate([
     __param(0, core_1.Inject(hapi_1.HAPI_SERVER)),
     __param(1, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
     __metadata("design:paramtypes", [hapi_2.Server, Object, core_1.BootstrapLogger,
-        core_1.AfterStarterService,
         hapi_1.OpenService])
 ], StartService);
 exports.StartService = StartService;

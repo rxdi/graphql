@@ -1,5 +1,5 @@
 import { Module, ModuleWithServices } from "@rxdi/core";
-import { HookService, SchemaService, EffectService } from './services';
+import { HookService, SchemaService, EffectService, ServerPushPlugin } from './services';
 import { ApolloService } from './services/apollo.service';
 import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
 import { BootstrapService } from "./services/bootstrap.service";
@@ -13,7 +13,8 @@ import { StartService } from './services/start.service';
         ApolloService,
         GraphiQLService,
         StartService
-    ]
+    ],
+    plugins: [ServerPushPlugin]
 })
 export class GraphQLModule {
     public static forRoot(config: GRAPHQL_PLUGIN_CONFIG): ModuleWithServices {

@@ -11,3 +11,4 @@ __export(require("./graphiql.service"));
 __export(require("./hooks.service"));
 __export(require("./schema.service"));
 __export(require("./effect.service"));
+__export(require("./server-push.service"));

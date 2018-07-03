@@ -22,7 +22,9 @@ export interface HapiGraphiQLPluginOptions {
 }
 
 export interface GRAPHQL_PLUGIN_CONFIG {
-    path: string;
+    path?: string;
+    graphiQlPlayground?: boolean;
+    graphiql?: boolean;
     graphiQlPath?: string;
     writeEffects?: boolean;
     openBrowser?: boolean;
@@ -32,8 +34,8 @@ export interface GRAPHQL_PLUGIN_CONFIG {
     route?: {
         cors?: boolean
     };
-    graphqlOptions: GraphQLOptions;
-    graphiqlOptions: GraphiQL.GraphiQLData;
+    graphqlOptions?: GraphQLOptions;
+    graphiqlOptions?: GraphiQL.GraphiQLData;
 }
 export interface GRAPHQL_AUTHENTICATION_FAKE {
     validateToken(authorization: string): any;

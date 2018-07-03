@@ -38,12 +38,14 @@ let GraphiQLService = class GraphiQLService {
     }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.server.route({
-                method: 'GET',
-                path: this.config.graphiQlPath || '/graphiql',
-                config: this.config.route || {},
-                handler: this.handler.bind(this)
-            });
+            if (this.config.graphiql) {
+                this.server.route({
+                    method: 'GET',
+                    path: this.config.graphiQlPath || '/graphiql',
+                    config: this.config.route || {},
+                    handler: this.handler.bind(this)
+                });
+            }
         });
     }
     handler(request, h) {

@@ -20,13 +20,14 @@ export class GraphiQLService implements PluginInterface {
     }
 
     async register() {
-
-        this.server.route(<any>{
-            method: 'GET',
-            path: this.config.graphiQlPath || '/graphiql',
-            config: this.config.route || {},
-            handler: this.handler.bind(this)
-        });
+        if (this.config.graphiql) {
+            this.server.route(<any>{
+                method: 'GET',
+                path: this.config.graphiQlPath || '/graphiql',
+                config: this.config.route || {},
+                handler: this.handler.bind(this)
+            });
+        }
     }
 
     async handler(request, h) {

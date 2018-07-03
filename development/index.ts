@@ -5,6 +5,7 @@ import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
 import { BootstrapService } from "./services/bootstrap.service";
 import { GraphiQLService } from './services/graphiql.service';
 import { StartService } from './services/start.service';
+import { PlaygroundModule } from '@gapi/playground';
 
 @Module({
     services: [
@@ -28,6 +29,14 @@ export class GraphQLModule {
                 },
                 HookService,
                 SchemaService
+            ],
+            frameworkImports: [
+                PlaygroundModule.forRoot({
+                    path: config.graphiQlPath || '/graphiql',
+                    endpoint: config.path || '/graphql',
+                    version: '1.7.1',
+                    graphiqlPlayground: config.graphiQlPlayground
+                }),
             ]
         }
     }

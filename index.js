@@ -16,6 +16,7 @@ const config_tokens_1 = require("./config.tokens");
 const bootstrap_service_1 = require("./services/bootstrap.service");
 const graphiql_service_1 = require("./services/graphiql.service");
 const start_service_1 = require("./services/start.service");
+const playground_1 = require("@gapi/playground");
 let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
     static forRoot(config) {
         return {
@@ -28,6 +29,14 @@ let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
                 },
                 services_1.HookService,
                 services_1.SchemaService
+            ],
+            frameworkImports: [
+                playground_1.PlaygroundModule.forRoot({
+                    path: config.graphiQlPath || '/graphiql',
+                    endpoint: config.path || '/graphql',
+                    version: '1.7.1',
+                    graphiqlPlayground: config.graphiQlPlayground
+                }),
             ]
         };
     }

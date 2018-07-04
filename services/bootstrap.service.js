@@ -88,7 +88,7 @@ let BootstrapService = class BootstrapService {
         return schema;
     }
     writeEffectTypes(effects) {
-        if (this.config.writeEffects) {
+        if (!this.config.writeEffects) {
             return;
         }
         const types = `

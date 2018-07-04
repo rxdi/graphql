@@ -85,7 +85,7 @@ export class BootstrapService {
     }
 
     writeEffectTypes(effects: Array<any>) {
-        if (this.config.writeEffects) {
+        if (!this.config.writeEffects) {
             return;
         }
         const types = `

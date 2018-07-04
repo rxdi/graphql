@@ -29,9 +29,10 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const start_service_1 = require("./start.service");
 let ServerPushPlugin = class ServerPushPlugin {
-    constructor(config, server, exitHandler, afterStarterService, startService) {
+    constructor(config, server, hapiPluginConfig, exitHandler, afterStarterService, startService) {
         this.config = config;
         this.server = server;
+        this.hapiPluginConfig = hapiPluginConfig;
         this.exitHandler = exitHandler;
         this.afterStarterService = afterStarterService;
         this.startService = startService;
@@ -99,6 +100,9 @@ let ServerPushPlugin = class ServerPushPlugin {
             this.sendTime.subscribe((data) => {
                 res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n');
             });
+            this.sendTime.subscribe((data) => {
+                res.write('data: ' + JSON.stringify({ config: { graphql: this.config, hapi: this.server.info } }) + '\n\n');
+            });
             req.on('end', () => {
                 this.connected = false;
                 req.destroy();
@@ -113,7 +117,9 @@ ServerPushPlugin = __decorate([
     core_1.Plugin(),
     __param(0, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
     __param(1, core_1.Inject(hapi_2.HAPI_SERVER)),
+    __param(2, core_1.Inject(hapi_2.HAPI_CONFIG)),
     __metadata("design:paramtypes", [Object, hapi_1.Server,
+        hapi_1.Server,
         core_1.ExitHandlerService,
         core_1.AfterStarterService,
         start_service_1.StartService])

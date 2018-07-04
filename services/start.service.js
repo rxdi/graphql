@@ -25,7 +25,7 @@ let StartService = class StartService {
     }
     startBrowser() {
         this.openService.openPage(`http://${this.server.info.address}:${this.server.info.port}/devtools`);
-        this.openService.openPage(`http://${this.server.info.address}:${this.server.info.port}/graphiql`);
+        // this.openService.openPage(`http://${this.server.info.address}:${this.server.info.port}/graphiql`);
         // this.openService.openPage('http://localhost:4200');
         // this.openService.openGraphQLPage();
         this.logger.log('Browser started!');

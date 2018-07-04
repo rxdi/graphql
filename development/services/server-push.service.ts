@@ -2,7 +2,7 @@ import { Plugin, PluginInterface, BootstrapLogger, Inject, ExitHandlerService, A
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { createServer, Server, IncomingMessage, ServerResponse } from 'http';
 import { Server as HapiServer } from 'hapi';
-import { HAPI_SERVER } from '@rxdi/hapi';
+import { HAPI_SERVER, HAPI_CONFIG } from '@rxdi/hapi';
 import { Subject, Observable, timer } from 'rxjs';
 import { tap, filter, take, switchMapTo } from 'rxjs/operators';
 import { StartService } from './start.service';
@@ -19,6 +19,7 @@ export class ServerPushPlugin implements PluginInterface {
     constructor(
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
         @Inject(HAPI_SERVER) private server: HapiServer,
+        @Inject(HAPI_CONFIG) private hapiPluginConfig: HapiServer,
         private exitHandler: ExitHandlerService,
         private afterStarterService: AfterStarterService,
         private startService: StartService
@@ -96,6 +97,10 @@ export class ServerPushPlugin implements PluginInterface {
 
             this.sendTime.subscribe((data) => {
                 res.write('data: ' + JSON.stringify({time: new Date().toLocaleTimeString()}) + '\n\n');
+            });
+
+            this.sendTime.subscribe((data) => {
+                res.write('data: ' + JSON.stringify({config: {graphql: this.config, hapi: this.server.info}}) + '\n\n');
             });
             req.on('end', () => {
                 this.connected = false;

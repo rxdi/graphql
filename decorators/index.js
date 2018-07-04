@@ -13,3 +13,4 @@ __export(require("./query/index"));
 __export(require("./resolver/index"));
 __export(require("./scope/index"));
 __export(require("./mutation/index"));
+__export(require("./effect-name/index"));

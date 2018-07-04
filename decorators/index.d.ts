@@ -8,3 +8,4 @@ export * from './query/index';
 export * from './resolver/index';
 export * from './scope/index';
 export * from './mutation/index';
+export * from './effect-name/index';

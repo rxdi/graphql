@@ -1,4 +1,4 @@
-import { ModuleWithServices } from "@rxdi/core";
+import { ModuleWithServices } from '@rxdi/core';
 import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
 export declare class GraphQLModule {
     static forRoot(config: GRAPHQL_PLUGIN_CONFIG): ModuleWithServices;

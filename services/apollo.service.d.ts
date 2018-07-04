@@ -1,6 +1,6 @@
-import { PluginInterface } from "@rxdi/core";
+import { PluginInterface } from '@rxdi/core';
 import { Server } from 'hapi';
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { BootstrapService } from '../services/bootstrap.service';
 export interface IRegister {
     (server: Server, options: any): void;

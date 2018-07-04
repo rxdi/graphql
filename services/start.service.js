@@ -24,9 +24,10 @@ let StartService = class StartService {
         this.openService = openService;
     }
     startBrowser() {
-        // this.openService.openPage('http://localhost:${this.config.watcherPort}/status');
+        this.openService.openPage(`http://${this.server.info.address}:${this.server.info.port}/devtools`);
+        this.openService.openPage(`http://${this.server.info.address}:${this.server.info.port}/graphiql`);
         // this.openService.openPage('http://localhost:4200');
-        this.openService.openGraphQLPage();
+        // this.openService.openGraphQLPage();
         this.logger.log('Browser started!');
     }
 };

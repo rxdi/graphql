@@ -1,4 +1,4 @@
-import { InjectionToken } from "@rxdi/core";
+import { InjectionToken } from '@rxdi/core';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLOptions } from 'apollo-server-core';
 export interface HapiOptionsFunction {

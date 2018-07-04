@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-;
 function Query(options) {
     return (t, propKey, descriptor) => {
         const originalMethod = descriptor.value;

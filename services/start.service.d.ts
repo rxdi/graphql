@@ -1,7 +1,7 @@
-import { BootstrapLogger } from "@rxdi/core";
-import { OpenService } from "@rxdi/hapi";
-import { Server } from "hapi";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
+import { BootstrapLogger } from '@rxdi/core';
+import { OpenService } from '@rxdi/hapi';
+import { Server } from 'hapi';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 export declare class StartService {
     private server;
     private config;

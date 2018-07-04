@@ -44,7 +44,7 @@ let ServerPushPlugin = class ServerPushPlugin {
             this.sendToClient.next({ query: request.payload, response: request.response['source'] });
         });
         this.afterStarterService.appStarted
-            .pipe(operators_1.switchMapTo(this.waitXSeconds(3)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
+            .pipe(operators_1.switchMapTo(this.waitXSeconds(5)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
     }
     waitXSeconds(sec) {
         return rxjs_1.Observable.create((o) => {
@@ -58,10 +58,10 @@ let ServerPushPlugin = class ServerPushPlugin {
                 this.createServerWatcher();
                 this.server.route({
                     method: 'GET',
-                    path: '/public/{param*}',
+                    path: '/devtools/{param*}',
                     handler: {
                         directory: {
-                            path: `${__dirname}/public`,
+                            path: `${__dirname.replace('services', '')}/public`,
                             index: ['index.html', 'default.html']
                         }
                     }
@@ -82,7 +82,7 @@ let ServerPushPlugin = class ServerPushPlugin {
         if (req.url === '/status') {
             if (!this.connected) {
                 this.clientConnected.next(true);
-                res.write("data: " + JSON.stringify({ response: { init: true } }) + "\n\n");
+                res.write('data: ' + JSON.stringify({ response: { init: true } }) + '\n\n');
             }
             this.connected = true;
             res.writeHead(200, {
@@ -92,7 +92,7 @@ let ServerPushPlugin = class ServerPushPlugin {
                 'Connection': 'keep-alive'
             });
             this.sendToClient.subscribe((data) => {
-                res.write("data: " + JSON.stringify(data) + "\n\n");
+                res.write('data: ' + JSON.stringify(data) + '\n\n');
                 this.connected = true;
             });
             req.on('end', () => {

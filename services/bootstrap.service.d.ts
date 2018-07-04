@@ -1,9 +1,10 @@
-import { ModuleService } from "@rxdi/core";
-import { HookService } from "../services/hooks.service";
-import { SchemaService } from "../services/schema.service";
-import { EffectService } from "./effect.service";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
-import { GenericGapiResolversType } from "../decorators/query/query.decorator";
+import { ModuleService } from '@rxdi/core';
+import { GraphQLObjectType, GraphQLSchema } from 'graphql';
+import { HookService } from '../services/hooks.service';
+import { SchemaService } from '../services/schema.service';
+import { EffectService } from './effect.service';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 export declare class FieldsModule {
     query: {};
     mutation: {};
@@ -20,8 +21,8 @@ export declare class BootstrapService {
     private effectService;
     private config;
     constructor(moduleService: ModuleService, hookService: HookService, schemaService: SchemaService, effectService: EffectService, config: GRAPHQL_PLUGIN_CONFIG);
-    generateSchema(): any;
+    generateSchema(): GraphQLSchema;
     writeEffectTypes(effects: Array<any>): void;
-    generateType(query: any, name: any, description: any): any;
+    generateType(query: any, name: any, description: any): GraphQLObjectType;
     getMetaDescriptors(): MetaDescriptor[];
 }

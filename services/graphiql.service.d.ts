@@ -1,6 +1,6 @@
-import { PluginInterface } from "@rxdi/core";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
-import { Server } from "hapi";
+import { PluginInterface } from '@rxdi/core';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { Server } from 'hapi';
 export declare class GraphiQLService implements PluginInterface {
     private server;
     private config;

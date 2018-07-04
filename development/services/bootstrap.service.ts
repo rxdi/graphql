@@ -1,5 +1,5 @@
 import { ModuleService, Service, Injector, Inject } from '@rxdi/core';
-import { GraphQLObjectType } from 'graphql';
+import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { HookService } from '../services/hooks.service';
 import { SchemaService } from '../services/schema.service';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
@@ -21,7 +21,7 @@ export class BootstrapService {
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
     ) { }
 
-    generateSchema() {
+    generateSchema(): GraphQLSchema {
         const methodBasedEffects = [];
         const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;

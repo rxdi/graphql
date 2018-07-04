@@ -32,7 +32,7 @@ export class ServerPushPlugin implements PluginInterface {
 
         this.afterStarterService.appStarted
             .pipe(
-                switchMapTo(this.waitXSeconds(3)),
+                switchMapTo(this.waitXSeconds(5)),
                 take(1),
                 filter(() => !this.connected),
                 filter(() => this.config.openBrowser),
@@ -52,10 +52,10 @@ export class ServerPushPlugin implements PluginInterface {
             this.createServerWatcher();
             this.server.route({
                 method: 'GET',
-                path: '/public/{param*}',
+                path: '/devtools/{param*}',
                 handler: {
                     directory: {
-                        path: `${__dirname}/public`,
+                        path: `${__dirname.replace('services', '')}/public`,
                         index: ['index.html', 'default.html']
                     }
                 }

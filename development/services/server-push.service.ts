@@ -3,7 +3,7 @@ import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { createServer, Server, IncomingMessage, ServerResponse } from 'http';
 import { Server as HapiServer } from 'hapi';
 import { HAPI_SERVER } from '@rxdi/hapi';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Observable, timer } from 'rxjs';
 import { tap, filter, take, switchMapTo } from 'rxjs/operators';
 import { StartService } from './start.service';
 
@@ -13,6 +13,7 @@ export class ServerPushPlugin implements PluginInterface {
     serverWatcher: Server;
     connected: boolean;
     sendToClient: Subject<any> = new Subject();
+    sendTime: Subject<boolean> = new Subject();
     clientConnected: Subject<boolean> = new Subject();
 
     constructor(
@@ -29,6 +30,8 @@ export class ServerPushPlugin implements PluginInterface {
         this.server.events.on('response', (request) => {
             this.sendToClient.next({ query: request.payload, response: request.response['source'] });
         });
+
+        timer(0, 1000).pipe(tap(() => this.sendTime.next(true))).subscribe();
 
         this.afterStarterService.appStarted
             .pipe(
@@ -89,7 +92,10 @@ export class ServerPushPlugin implements PluginInterface {
 
             this.sendToClient.subscribe((data) => {
                 res.write('data: ' + JSON.stringify(data) + '\n\n');
-                this.connected = true;
+            });
+
+            this.sendTime.subscribe((data) => {
+                res.write('data: ' + JSON.stringify({time: new Date().toLocaleTimeString()}) + '\n\n');
             });
             req.on('end', () => {
                 this.connected = false;

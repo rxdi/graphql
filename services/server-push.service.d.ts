@@ -14,6 +14,7 @@ export declare class ServerPushPlugin implements PluginInterface {
     serverWatcher: Server;
     connected: boolean;
     sendToClient: Subject<any>;
+    sendTime: Subject<boolean>;
     clientConnected: Subject<boolean>;
     constructor(config: GRAPHQL_PLUGIN_CONFIG, server: HapiServer, exitHandler: ExitHandlerService, afterStarterService: AfterStarterService, startService: StartService);
     waitXSeconds(sec: any): Observable<any>;

@@ -1,7 +1,7 @@
-import { Service, BootstrapLogger, Inject, AfterStarterService } from "@rxdi/core";
-import { HAPI_SERVER, OpenService } from "@rxdi/hapi";
-import { Server } from "hapi";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
+import { Service, BootstrapLogger, Inject, AfterStarterService } from '@rxdi/core';
+import { HAPI_SERVER, OpenService } from '@rxdi/hapi';
+import { Server } from 'hapi';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 
 @Service()
 export class StartService {

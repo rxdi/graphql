@@ -6,7 +6,10 @@
     "url": "https://github.com/rxdi/graphql.git"
   },
   "scripts": {
-    "postpublish": "git push -f ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git && git push --tags && git push ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git --tags"
+    "postpublish": "git push -f ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git && git push --tags && git push ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git --tags",
+    "lint": "tslint -c tslint.json 'development/**/*.{ts,tsx}'",
+    "pretest": "npm run lint",
+    "test": "jest"
   },
   "author": {
     "name": "Kristian Tachev(Stradivario)",
@@ -39,8 +42,39 @@
   "devDependencies": {
     "@rxdi/core": "^0.0.150",
     "@rxdi/hapi": "^0.0.150",
+    "@types/graphql": "^0.13.1",
     "@types/hapi": "^17.0.12",
+    "@types/jest": "^23.1.4",
     "@types/node": "^10.3.4",
+    "jest": "^22.4.2",
+    "jest-cli": "^22.4.2",
+    "ts-jest": "^22.4.0",
+    "tslint": "^5.8.0",
+    "tslint-language-service": "^0.9.8",
     "typescript": "^2.7.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": [
+      "/node_modules/"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "html"
+    ],
+    "rootDir": "./",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json",
+      "node"
+    ],
+    "transform": {
+      "\\.(ts|tsx)$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "/development/.*\\.spec.(ts|tsx|js)$",
+    "verbose": true,
+    "collectCoverage": true
   }
 }

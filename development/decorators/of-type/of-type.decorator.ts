@@ -8,7 +8,7 @@ export function OfType<T>(type: T) {
     cacheService.getLayer<Array<any>>(<any>type)
       .getItemObservable(<any>type)
       .subscribe(async item => {
-        const currentConstructor = moduleService.watcherService.getConstructor(self.constructor.name)
+        const currentConstructor = moduleService.watcherService.getConstructor(self.constructor.name);
         const originalDesc = descriptor.value.bind(currentConstructor['value']);
         await originalDesc(...item.data);
       });

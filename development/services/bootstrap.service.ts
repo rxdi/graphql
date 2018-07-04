@@ -1,14 +1,14 @@
-import { ModuleService, Service, Injector, Inject } from "@rxdi/core";
-import { GraphQLObjectType } from "graphql";
-import { HookService } from "../services/hooks.service";
-import { SchemaService } from "../services/schema.service";
-import { ensureDirSync, writeFileSync } from "fs-extra";
-import { EffectService } from "./effect.service";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
-import { GenericGapiResolversType } from "../decorators/query/query.decorator";
+import { ModuleService, Service, Injector, Inject } from '@rxdi/core';
+import { GraphQLObjectType } from 'graphql';
+import { HookService } from '../services/hooks.service';
+import { SchemaService } from '../services/schema.service';
+import { ensureDirSync, writeFileSync } from 'fs-extra';
+import { EffectService } from './effect.service';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 
-export class FieldsModule { query: {}; mutation: {}; subscription: {} }
-export class MetaDescriptor { descriptor: () => GenericGapiResolversType; self: any }
+export class FieldsModule { query: {}; mutation: {}; subscription: {}; }
+export class MetaDescriptor { descriptor: () => GenericGapiResolversType; self: any; }
 
 @Service()
 export class BootstrapService {
@@ -37,7 +37,7 @@ export class BootstrapService {
                     const originalSubscribe = desc.subscribe;
                     desc.subscribe = function subscribe(...args: any[]) {
                         return originalSubscribe.bind(self)(self, ...args);
-                    }
+                    };
                 }
 
                 desc.resolve = async function resolve(...args: any[]) {
@@ -95,7 +95,7 @@ function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
         return res;
     }, Object.create(null));
 }
-export const EffectTypes = strEnum(${JSON.stringify(effects).replace(/"/g, `'`).replace(/,/g, ',\n')});
+export const EffectTypes = strEnum(${JSON.stringify(effects).replace(/'/g, `'`).replace(/,/g, ',\n')});
 export type EffectTypes = keyof typeof EffectTypes;
 `;
         const folder = process.env.INTROSPECTION_FOLDER || `./src/app/core/api-introspection/`;

@@ -19,7 +19,12 @@
       "esnext.asynciterable"
     ],
     "skipLibCheck": true,
-    "types": []
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "files": [
     "./development/index.ts"

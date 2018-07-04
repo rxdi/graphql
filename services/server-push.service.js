@@ -29,8 +29,7 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const start_service_1 = require("./start.service");
 let ServerPushPlugin = class ServerPushPlugin {
-    constructor(logger, config, server, exitHandler, afterStarterService, startService) {
-        this.logger = logger;
+    constructor(config, server, exitHandler, afterStarterService, startService) {
         this.config = config;
         this.server = server;
         this.exitHandler = exitHandler;
@@ -44,19 +43,6 @@ let ServerPushPlugin = class ServerPushPlugin {
         this.server.events.on('response', (request) => {
             this.sendToClient.next({ query: request.payload, response: request.response['source'] });
         });
-        // this.waitXSeconds(3)
-        //     .pipe(
-        //         filter(() => !this.connected),
-        //         filter(() => this.config.openBrowser),
-        //         tap(() => this.startService.startBrowser())
-        //     ).subscribe();
-        // this.afterStarterService.appStarted
-        //     .pipe(
-        //         switchMapTo(this.clientConnected),
-        //         take(1),
-        //         filter(() => !!this.config.openBrowser),
-        //         tap(() => this.startService.startBrowser())
-        //     ).subscribe()
         this.afterStarterService.appStarted
             .pipe(operators_1.switchMapTo(this.waitXSeconds(3)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
     }
@@ -70,6 +56,16 @@ let ServerPushPlugin = class ServerPushPlugin {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.config.openBrowser) {
                 this.createServerWatcher();
+                this.server.route({
+                    method: 'GET',
+                    path: '/public/{param*}',
+                    handler: {
+                        directory: {
+                            path: `${__dirname}/public`,
+                            index: ['index.html', 'default.html']
+                        }
+                    }
+                });
             }
         });
     }
@@ -111,9 +107,9 @@ let ServerPushPlugin = class ServerPushPlugin {
 };
 ServerPushPlugin = __decorate([
     core_1.Plugin(),
-    __param(1, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
-    __param(2, core_1.Inject(hapi_2.HAPI_SERVER)),
-    __metadata("design:paramtypes", [core_1.BootstrapLogger, Object, hapi_1.Server,
+    __param(0, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
+    __param(1, core_1.Inject(hapi_2.HAPI_SERVER)),
+    __metadata("design:paramtypes", [Object, hapi_1.Server,
         core_1.ExitHandlerService,
         core_1.AfterStarterService,
         start_service_1.StartService])

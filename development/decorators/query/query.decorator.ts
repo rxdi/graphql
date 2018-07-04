@@ -20,8 +20,8 @@ interface TargetConstructor {
     constructor: {
         name: string;
         _descriptors: Map<string, TypedPropertyDescriptor<() => GenericGapiResolversType>>
-    }
-};
+    };
+}
 
 export function Query<T>(options?: any) {
     return (t, propKey: string, descriptor: TypedPropertyDescriptor<any>) => {

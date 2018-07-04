@@ -1,4 +1,4 @@
-import { InjectionToken } from "@rxdi/core";
+import { InjectionToken } from '@rxdi/core';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 
 import {
@@ -40,8 +40,8 @@ export interface GRAPHQL_PLUGIN_CONFIG {
 export interface GRAPHQL_AUTHENTICATION_FAKE {
     validateToken(authorization: string): any;
     onSubConnection(connectionParams): any;
-    onSubOperation(connectionParams, params, webSocket): any
-};
+    onSubOperation(connectionParams, params, webSocket): any;
+}
 
 
 export const GRAPHQL_PLUGIN_CONFIG = new InjectionToken<GRAPHQL_PLUGIN_CONFIG>('graphql-configuration-injection-token');

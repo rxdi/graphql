@@ -1,4 +1,4 @@
-import { Plugin, Service, Inject, PluginInterface, Container } from "@rxdi/core";
+import { Plugin, Service, Inject, PluginInterface, Container } from '@rxdi/core';
 import * as Boom from 'boom';
 import { Server, Request } from 'hapi';
 import * as GraphiQL from 'apollo-server-module-graphiql';
@@ -7,8 +7,8 @@ import {
     runHttpQuery,
     HttpQueryError,
 } from 'apollo-server-core';
-import { HAPI_SERVER } from "@rxdi/hapi";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
+import { HAPI_SERVER } from '@rxdi/hapi';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 // import { AuthService } from '../auth/auth.service';
 // import { Container } from '../../container';
 import { BootstrapService } from '../services/bootstrap.service';

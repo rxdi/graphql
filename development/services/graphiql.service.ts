@@ -1,7 +1,7 @@
-import { Plugin, PluginInterface, Inject, Service } from "@rxdi/core";
-import { HAPI_SERVER } from "@rxdi/hapi";
-import { GRAPHQL_PLUGIN_CONFIG } from "../config.tokens";
-import { Server } from "hapi";
+import { Plugin, PluginInterface, Inject, Service } from '@rxdi/core';
+import { HAPI_SERVER } from '@rxdi/hapi';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { Server } from 'hapi';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 
 @Service()

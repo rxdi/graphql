@@ -1,8 +1,8 @@
-import { Module, ModuleWithServices } from "@rxdi/core";
+import { Module, ModuleWithServices } from '@rxdi/core';
 import { HookService, SchemaService, EffectService, ServerPushPlugin } from './services';
 import { ApolloService } from './services/apollo.service';
 import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
-import { BootstrapService } from "./services/bootstrap.service";
+import { BootstrapService } from './services/bootstrap.service';
 import { GraphiQLService } from './services/graphiql.service';
 import { StartService } from './services/start.service';
 import { PlaygroundModule } from '@gapi/playground';
@@ -23,7 +23,7 @@ export class GraphQLModule {
             module: GraphQLModule,
             services: [
                 EffectService,
-                { 
+                {
                     provide: GRAPHQL_PLUGIN_CONFIG,
                     useValue: config
                 },
@@ -38,7 +38,7 @@ export class GraphQLModule {
                     graphiqlPlayground: config.graphiQlPlayground
                 }),
             ]
-        }
+        };
     }
 }
 

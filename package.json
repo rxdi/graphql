@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/graphql",
-  "version": "0.0.216",
+  "version": "0.0.217",
   "repository": {
     "type": "git",
     "url": "https://github.com/rxdi/graphql.git"
@@ -27,10 +27,6 @@
   "homepage": "https://github.com/rxdi/graphql#readme",
   "module": "index.js",
   "typings": "index.d.ts",
-  "peerDependencies": {
-    "@rxdi/core": "^0.0.216",
-    "@rxdi/hapi": "^0.0.216"
-  },
   "dependencies": {
     "@gapi/playground": "^1.0.11",
     "apollo-errors": "^1.9.0",

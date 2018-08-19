@@ -1,11 +1,19 @@
 import { Container } from '@rxdi/core';
+import { GraphQLObjectType } from 'graphql';
 
 export function Type<T>(type): Function {
-    const currentType = new type();
-    if (!Container.has(currentType.name)) {
-        Container.set(currentType.name, currentType);
+    let currentType;
+    if (type.constructor === GraphQLObjectType) {
+        currentType = type;
+        type = { type: currentType };
+    } else {
+        currentType = new type();
+        if (!Container.has(currentType.name)) {
+            Container.set(currentType.name, currentType);
+        }
+        type = { type:  Container.get(currentType.name) };
     }
-    type = { type:  Container.get(currentType.name) };
+
     return (t: any, propKey: string, descriptor: TypedPropertyDescriptor<any>) => {
         const self = t;
         const originalMethod = descriptor.value;

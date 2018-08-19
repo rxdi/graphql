@@ -1,12 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@rxdi/core");
+const graphql_1 = require("graphql");
 function Type(type) {
-    const currentType = new type();
-    if (!core_1.Container.has(currentType.name)) {
-        core_1.Container.set(currentType.name, currentType);
+    let currentType;
+    if (type.constructor === graphql_1.GraphQLObjectType) {
+        currentType = type;
+        type = { type: currentType };
     }
-    type = { type: core_1.Container.get(currentType.name) };
+    else {
+        currentType = new type();
+        if (!core_1.Container.has(currentType.name)) {
+            core_1.Container.set(currentType.name, currentType);
+        }
+        type = { type: core_1.Container.get(currentType.name) };
+    }
     return (t, propKey, descriptor) => {
         const self = t;
         const originalMethod = descriptor.value;

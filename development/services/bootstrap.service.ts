@@ -35,16 +35,20 @@ export class BootstrapService {
         }
     }
 
-    async applyGuards(desc, args) {
+    async applyGuards(desc, a) {
+        const args = a;
         await Promise.all(desc.guards.map(async (guard) => {
             const currentGuard = Container.get<CanActivateResolver>(guard);
             const originalResolve = currentGuard.canActivate;
-            currentGuard.canActivate = function (args) {
-                return originalResolve.bind(currentGuard)(args[2]);
+            currentGuard.canActivate = function () {
+                let tempArgs;
+                if (args.length && args[2]) {
+                    tempArgs = args[2];
+                }
+                return originalResolve.bind(currentGuard)(tempArgs);
             };
             // binding here is when we want to use custom decorated metods inside canResolve override
-            const res = currentGuard.canActivate.bind(currentGuard)(args);
-            await this.validateGuard(res);
+            await this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
         }));
     }
 
@@ -53,6 +57,8 @@ export class BootstrapService {
         const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;
         const currentConstructor = this;
+        this.applyGlobalGuards();
+        this.applyGlobalType();
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
                 const desc = descriptor();
@@ -145,6 +151,49 @@ export type EffectTypes = keyof typeof EffectTypes;
             fields: query
         });
     }
+
+    applyGlobalGuards() {
+        Array.from(this.moduleService.watcherService._constructors.keys())
+            .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
+            .map(key => {
+                const currentConstructor: { value: any; type: { _descriptors: Map<any, any> } } = <any>this.moduleService.watcherService.getConstructor(key);
+                const options = currentConstructor.type['metadata'].options;
+                Array.from(currentConstructor.type._descriptors.keys()).map((k => {
+                    const orig = currentConstructor.type._descriptors.get(k);
+                    const descriptor = orig.value();
+                    if (options && options.guards && options.guards.length) {
+                        let descriptorGuards = [];
+                        if (descriptor.guards && descriptor.guards.length) {
+                            descriptorGuards = descriptor.guards;
+                        }
+                        descriptor.guards = [...descriptorGuards, ...options.guards];
+                        orig.value = () => descriptor;
+                        currentConstructor.type._descriptors.set(k, orig);
+                    }
+                }))
+                return key;
+            })
+    }
+
+    applyGlobalType() {
+        Array.from(this.moduleService.watcherService._constructors.keys())
+            .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
+            .map(key => {
+                const currentConstructor: { value: any; type: { _descriptors: Map<any, any> } } = <any>this.moduleService.watcherService.getConstructor(key);
+                const options = currentConstructor.type['metadata'].options;
+                Array.from(currentConstructor.type._descriptors.keys()).map((k => {
+                    const orig = currentConstructor.type._descriptors.get(k);
+                    const descriptor = orig.value();
+                    if (options && options.type) {
+                        descriptor.type = descriptor.type || options.type;
+                        orig.value = () => descriptor;
+                        currentConstructor.type._descriptors.set(k, orig);
+                    }
+                }))
+                return key;
+            })
+    }
+
 
     getMetaDescriptors(): MetaDescriptor[] {
         const descriptors: MetaDescriptor[] = [];

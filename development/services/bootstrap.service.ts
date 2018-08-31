@@ -1,4 +1,4 @@
-import { ModuleService, Service, Injector, Inject } from '@rxdi/core';
+import { ModuleService, Service, Injector, Inject, Container } from '@rxdi/core';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { HookService } from '../services/hooks.service';
 import { SchemaService } from '../services/schema.service';
@@ -6,6 +6,8 @@ import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
+import { CanActivateResolver } from '../decorators/guard/guard.interface';
+import { Observable } from 'rxjs';
 
 export class FieldsModule { query: {}; mutation: {}; subscription: {}; }
 export class MetaDescriptor { descriptor: () => GenericGapiResolversType; self: any; }
@@ -21,10 +23,38 @@ export class BootstrapService {
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
     ) { }
 
+    async validateGuard(res) {
+        if (res.constructor === Boolean) {
+            if (!res) {
+                throw new Error('unauthorized');
+            }
+        } else if (res.constructor === Promise) {
+            await this.validateGuard(await res);
+        } else if (res.constructor === Observable) {
+            await this.validateGuard((await res['toPromise']()));
+        }
+    }
+
+    async applyGuards(desc, args) {
+        if (desc.guards && desc.guards.length && this.config.authentication) {
+            await Promise.all(desc.guards.map(async (guard) => {
+                const currentGuard = Container.get<CanActivateResolver>(guard);
+                const originalResolve = currentGuard.canActivate;
+                currentGuard.canActivate = function (args) {
+                    return originalResolve.bind(currentGuard)(args[2]);
+                };
+                // binding here is when we want to use custom decorated metods inside canResolve override
+                const res = currentGuard.canActivate.bind(currentGuard)(args);
+                await this.validateGuard(res);
+            }));
+        }
+    }
+
     generateSchema(): GraphQLSchema {
         const methodBasedEffects = [];
         const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;
+        const currentConstructor = this;
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
                 const desc = descriptor();
@@ -43,6 +73,7 @@ export class BootstrapService {
                 desc.resolve = async function resolve(...args: any[]) {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
+                    await currentConstructor.applyGuards(desc, args);
                     const result = await originalResolve.apply(self, args);
                     if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];

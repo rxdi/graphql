@@ -3,6 +3,7 @@ export interface GenericGapiResolversType {
     scope?: string[];
     target?: any;
     effect?: string;
+    guards?: Function[];
     method_name?: string;
     subscribe?: () => {};
     method_type?: 'query' | 'subscription' | 'mutation' | 'event';

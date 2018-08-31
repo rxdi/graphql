@@ -9,3 +9,4 @@ export * from './resolver/index';
 export * from './scope/index';
 export * from './mutation/index';
 export * from './effect-name/index';
+export * from './guard/index';

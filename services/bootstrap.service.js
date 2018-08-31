@@ -27,6 +27,7 @@ const schema_service_1 = require("../services/schema.service");
 const fs_extra_1 = require("fs-extra");
 const effect_service_1 = require("./effect.service");
 const config_tokens_1 = require("../config.tokens");
+const rxjs_1 = require("rxjs");
 class FieldsModule {
 }
 exports.FieldsModule = FieldsModule;
@@ -41,10 +42,42 @@ let BootstrapService = class BootstrapService {
         this.effectService = effectService;
         this.config = config;
     }
+    validateGuard(res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (res.constructor === Boolean) {
+                if (!res) {
+                    throw new Error('unauthorized');
+                }
+            }
+            else if (res.constructor === Promise) {
+                yield this.validateGuard(yield res);
+            }
+            else if (res.constructor === rxjs_1.Observable) {
+                yield this.validateGuard((yield res['toPromise']()));
+            }
+        });
+    }
+    applyGuards(desc, args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (desc.guards && desc.guards.length && this.config.authentication) {
+                yield Promise.all(desc.guards.map((guard) => __awaiter(this, void 0, void 0, function* () {
+                    const currentGuard = core_1.Container.get(guard);
+                    const originalResolve = currentGuard.canActivate;
+                    currentGuard.canActivate = function (args) {
+                        return originalResolve.bind(currentGuard)(args[2]);
+                    };
+                    // binding here is when we want to use custom decorated metods inside canResolve override
+                    const res = currentGuard.canActivate.bind(currentGuard)(args);
+                    yield this.validateGuard(res);
+                })));
+            }
+        });
+    }
     generateSchema() {
         const methodBasedEffects = [];
         const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;
+        const currentConstructor = this;
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
             const desc = descriptor();
@@ -62,6 +95,7 @@ let BootstrapService = class BootstrapService {
                 return __awaiter(this, void 0, void 0, function* () {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
+                    yield currentConstructor.applyGuards(desc, args);
                     const result = yield originalResolve.apply(self, args);
                     if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];

@@ -26,7 +26,6 @@ export declare class BootstrapService {
     generateSchema(): GraphQLSchema;
     writeEffectTypes(effects: Array<any>): void;
     generateType(query: any, name: any, description: any): GraphQLObjectType;
-    applyGlobalGuards(): void;
-    applyGlobalType(): void;
+    applyGlobalControllerOptions(): void;
     getMetaDescriptors(): MetaDescriptor[];
 }

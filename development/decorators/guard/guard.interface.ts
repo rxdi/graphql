@@ -8,6 +8,7 @@ export interface CanActivateResolver {
 
 
 export interface GraphQLControllerOptions {
-    guards: Function[];
-    type: any;
+    guards?: Function[];
+    type?: any;
+    scope?: string[];
 }

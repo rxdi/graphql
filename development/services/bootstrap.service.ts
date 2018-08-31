@@ -57,8 +57,7 @@ export class BootstrapService {
         const Fields = { query: {}, mutation: {}, subscription: {} };
         const events = this.effectService;
         const currentConstructor = this;
-        this.applyGlobalGuards();
-        this.applyGlobalType();
+        this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
                 const desc = descriptor();
@@ -77,7 +76,7 @@ export class BootstrapService {
                 desc.resolve = async function resolve(...args: any[]) {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
-                    if (desc.guards && desc.guards.length && currentConstructor.config.authentication) {
+                    if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         await currentConstructor.applyGuards(desc, args);
                     }
                     const result = await from(originalResolve.apply(self, args)).toPromise();
@@ -152,48 +151,39 @@ export type EffectTypes = keyof typeof EffectTypes;
         });
     }
 
-    applyGlobalGuards() {
+    applyGlobalControllerOptions() {
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map(key => {
                 const currentConstructor: { value: any; type: { _descriptors: Map<any, any> } } = <any>this.moduleService.watcherService.getConstructor(key);
                 const options = currentConstructor.type['metadata'].options;
                 Array.from(currentConstructor.type._descriptors.keys()).map((k => {
-                    const orig = currentConstructor.type._descriptors.get(k);
-                    const descriptor = orig.value();
-                    if (options && options.guards && options.guards.length) {
-                        let descriptorGuards = [];
-                        if (descriptor.guards && descriptor.guards.length) {
-                            descriptorGuards = descriptor.guards;
+                    if (options) {
+                        const orig = currentConstructor.type._descriptors.get(k);
+                        const descriptor = orig.value();
+                        if (options.scope) {
+                            descriptor.scope = descriptor.scope || options.scope;
                         }
-                        descriptor.guards = [...descriptorGuards, ...options.guards];
+                        if (options.guards && options.guards.length && !descriptor.public) {
+                            let descriptorGuards = [];
+                            if (descriptor.guards && descriptor.guards.length) {
+                                descriptorGuards = descriptor.guards;
+                            }
+                            descriptor.guards = [...descriptorGuards, ...options.guards];
+                        }
+                        if (options.type) {
+                            descriptor.type = descriptor.type || options.type;
+                        }
+
                         orig.value = () => descriptor;
                         currentConstructor.type._descriptors.set(k, orig);
                     }
+
                 }))
                 return key;
             })
-    }
 
-    applyGlobalType() {
-        Array.from(this.moduleService.watcherService._constructors.keys())
-            .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
-            .map(key => {
-                const currentConstructor: { value: any; type: { _descriptors: Map<any, any> } } = <any>this.moduleService.watcherService.getConstructor(key);
-                const options = currentConstructor.type['metadata'].options;
-                Array.from(currentConstructor.type._descriptors.keys()).map((k => {
-                    const orig = currentConstructor.type._descriptors.get(k);
-                    const descriptor = orig.value();
-                    if (options && options.type) {
-                        descriptor.type = descriptor.type || options.type;
-                        orig.value = () => descriptor;
-                        currentConstructor.type._descriptors.set(k, orig);
-                    }
-                }))
-                return key;
-            })
     }
-
 
     getMetaDescriptors(): MetaDescriptor[] {
         const descriptors: MetaDescriptor[] = [];

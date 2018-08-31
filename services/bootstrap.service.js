@@ -59,18 +59,16 @@ let BootstrapService = class BootstrapService {
     }
     applyGuards(desc, args) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (desc.guards && desc.guards.length && this.config.authentication) {
-                yield Promise.all(desc.guards.map((guard) => __awaiter(this, void 0, void 0, function* () {
-                    const currentGuard = core_1.Container.get(guard);
-                    const originalResolve = currentGuard.canActivate;
-                    currentGuard.canActivate = function (args) {
-                        return originalResolve.bind(currentGuard)(args[2]);
-                    };
-                    // binding here is when we want to use custom decorated metods inside canResolve override
-                    const res = currentGuard.canActivate.bind(currentGuard)(args);
-                    yield this.validateGuard(res);
-                })));
-            }
+            yield Promise.all(desc.guards.map((guard) => __awaiter(this, void 0, void 0, function* () {
+                const currentGuard = core_1.Container.get(guard);
+                const originalResolve = currentGuard.canActivate;
+                currentGuard.canActivate = function (args) {
+                    return originalResolve.bind(currentGuard)(args[2]);
+                };
+                // binding here is when we want to use custom decorated metods inside canResolve override
+                const res = currentGuard.canActivate.bind(currentGuard)(args);
+                yield this.validateGuard(res);
+            })));
         });
     }
     generateSchema() {
@@ -95,8 +93,10 @@ let BootstrapService = class BootstrapService {
                 return __awaiter(this, void 0, void 0, function* () {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
-                    yield currentConstructor.applyGuards(desc, args);
-                    const result = yield originalResolve.apply(self, args);
+                    if (desc.guards && desc.guards.length && currentConstructor.config.authentication) {
+                        yield currentConstructor.applyGuards(desc, args);
+                    }
+                    const result = yield rxjs_1.from(originalResolve.apply(self, args)).toPromise();
                     if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];
                         tempArgs = tempArgs.filter(i => i && i !== 'undefined');

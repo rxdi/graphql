@@ -1,4 +1,7 @@
 import { GraphQLObjectType, GraphQLNonNull } from 'graphql';
+import { InterceptResolver } from '../intercept/intercept.interface';
+import { InjectionToken } from '@rxdi/core';
+
 
 export interface GenericGapiResolversType {
     scope?: string[];
@@ -6,6 +9,7 @@ export interface GenericGapiResolversType {
     effect?: string;
     guards?: Function[];
     public?: boolean;
+    interceptor?: any;
     method_name?: string;
     subscribe?: () => {};
     method_type?: 'query' | 'subscription' | 'mutation' | 'event';

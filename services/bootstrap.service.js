@@ -101,7 +101,16 @@ let BootstrapService = class BootstrapService {
                     if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         yield currentConstructor.applyGuards(desc, args);
                     }
-                    const result = yield rxjs_1.from(originalResolve.apply(self, args)).toPromise();
+                    let observable = rxjs_1.from(originalResolve.apply(self, args));
+                    if (desc.interceptor) {
+                        const interceptor = core_1.Container.get(desc.interceptor);
+                        const originalIntercept = interceptor.intercept;
+                        interceptor.intercept = function () {
+                            return originalIntercept(observable, args[1], args[2], desc);
+                        };
+                        observable = interceptor.intercept.bind(interceptor)();
+                    }
+                    const result = yield observable.toPromise();
                     if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];
                         tempArgs = tempArgs.filter(i => i && i !== 'undefined');
@@ -177,6 +186,9 @@ export type EffectTypes = keyof typeof EffectTypes;
                     }
                     if (options.type) {
                         descriptor.type = descriptor.type || options.type;
+                    }
+                    if (options.interceptor && !descriptor.interceptor) {
+                        descriptor.interceptor = options.interceptor;
                     }
                     orig.value = () => descriptor;
                     currentConstructor.type._descriptors.set(k, orig);

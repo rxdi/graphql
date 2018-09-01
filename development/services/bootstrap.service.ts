@@ -8,6 +8,7 @@ import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 import { CanActivateResolver } from '../decorators/guard/guard.interface';
 import { Observable, from } from 'rxjs';
+import { InterceptResolver } from '../decorators/intercept/intercept.interface';
 
 export class FieldsModule { query: {}; mutation: {}; subscription: {}; }
 export class MetaDescriptor { descriptor: () => GenericGapiResolversType; self: any; }
@@ -79,7 +80,18 @@ export class BootstrapService {
                     if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         await currentConstructor.applyGuards(desc, args);
                     }
-                    const result = await from(originalResolve.apply(self, args)).toPromise();
+                    let observable = from(originalResolve.apply(self, args));
+
+                    if (desc.interceptor) {
+                        const interceptor = Container.get<InterceptResolver>(desc.interceptor);
+                        const originalIntercept = interceptor.intercept;
+                        interceptor.intercept = function () {
+                            return originalIntercept(observable, args[1], args[2], desc);
+                        }
+                        observable = interceptor.intercept.bind(interceptor)();
+                    }
+
+                    const result = await observable.toPromise();
                     if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];
                         tempArgs = tempArgs.filter(i => i && i !== 'undefined');
@@ -173,6 +185,10 @@ export type EffectTypes = keyof typeof EffectTypes;
                         }
                         if (options.type) {
                             descriptor.type = descriptor.type || options.type;
+                        }
+
+                        if (options.interceptor && !descriptor.interceptor) {
+                            descriptor.interceptor = options.interceptor;
                         }
 
                         orig.value = () => descriptor;

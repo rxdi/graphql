@@ -15,3 +15,4 @@ __export(require("./scope/index"));
 __export(require("./mutation/index"));
 __export(require("./effect-name/index"));
 __export(require("./guard/index"));
+__export(require("./intercept/index"));

@@ -5,6 +5,7 @@ export interface GenericGapiResolversType {
     effect?: string;
     guards?: Function[];
     public?: boolean;
+    interceptor?: any;
     method_name?: string;
     subscribe?: () => {};
     method_type?: 'query' | 'subscription' | 'mutation' | 'event';

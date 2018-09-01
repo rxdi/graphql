@@ -70,7 +70,7 @@ let BootstrapService = class BootstrapService {
                     if (args.length && args[2]) {
                         tempArgs = args[2];
                     }
-                    return originalResolve.bind(currentGuard)(tempArgs);
+                    return originalResolve.bind(currentGuard)(tempArgs, desc);
                 };
                 // binding here is when we want to use custom decorated metods inside canResolve override
                 yield this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
@@ -100,11 +100,16 @@ let BootstrapService = class BootstrapService {
                 return __awaiter(this, void 0, void 0, function* () {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
-                    if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
+                    if (!desc.public
+                        && desc.guards && desc.guards.length
+                        && currentConstructor.config.authentication) {
                         yield currentConstructor.applyGuards(desc, args);
                     }
                     let val = originalResolve.apply(self, args);
-                    if (val.constructor === Object || val.constructor === Array || val.constructor === String || val.constructor === Number) {
+                    if (val.constructor === Object
+                        || val.constructor === Array
+                        || val.constructor === String
+                        || val.constructor === Number) {
                         val = rxjs_1.of(val);
                     }
                     let observable = rxjs_1.from(val);

@@ -38,7 +38,7 @@ export class BootstrapService {
         }
     }
 
-    async applyGuards(desc, a) {
+    async applyGuards(desc: GenericGapiResolversType, a) {
         const args = a;
         await Promise.all(desc.guards.map(async (guard) => {
             const currentGuard = Container.get<CanActivateResolver>(guard);
@@ -48,7 +48,7 @@ export class BootstrapService {
                 if (args.length && args[2]) {
                     tempArgs = args[2];
                 }
-                return originalResolve.bind(currentGuard)(tempArgs);
+                return originalResolve.bind(currentGuard)(tempArgs, desc);
             };
             // binding here is when we want to use custom decorated metods inside canResolve override
             await this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
@@ -80,13 +80,22 @@ export class BootstrapService {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
 
-                    if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
+                    if (
+                        !desc.public
+                        && desc.guards && desc.guards.length
+                        && currentConstructor.config.authentication
+                    ) {
                         await currentConstructor.applyGuards(desc, args);
                     }
 
                     let val = originalResolve.apply(self, args);
 
-                    if (val.constructor === Object || val.constructor === Array || val.constructor === String || val.constructor === Number) {
+                    if (
+                        val.constructor === Object
+                        || val.constructor === Array
+                        || val.constructor === String
+                        || val.constructor === Number
+                    ) {
                         val = of(val);
                     }
 
@@ -99,6 +108,7 @@ export class BootstrapService {
                     }
 
                     const result = await observable.toPromise();
+
                     if (methodEffect || customEffect) {
                         let tempArgs = [result, ...args];
                         tempArgs = tempArgs.filter(i => i && i !== 'undefined');

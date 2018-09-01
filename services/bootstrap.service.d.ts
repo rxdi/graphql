@@ -23,7 +23,7 @@ export declare class BootstrapService {
     private config;
     constructor(moduleService: ModuleService, hookService: HookService, schemaService: SchemaService, effectService: EffectService, logger: BootstrapLogger, config: GRAPHQL_PLUGIN_CONFIG);
     validateGuard(res: any): Promise<void>;
-    applyGuards(desc: any, a: any): Promise<void>;
+    applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
     generateSchema(): GraphQLSchema;
     writeEffectTypes(effects: Array<any>): void;
     generateType(query: any, name: any, description: any): GraphQLObjectType;

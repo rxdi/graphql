@@ -103,7 +103,11 @@ let BootstrapService = class BootstrapService {
                     if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         yield currentConstructor.applyGuards(desc, args);
                     }
-                    let observable = rxjs_1.from(originalResolve.apply(self, args));
+                    let val = originalResolve.apply(self, args);
+                    if (val.constructor !== rxjs_1.Observable || val.constructor !== Promise) {
+                        val = rxjs_1.of(val);
+                    }
+                    let observable = rxjs_1.from(val);
                     if (desc.interceptor) {
                         observable = core_1.Container
                             .get(desc.interceptor)

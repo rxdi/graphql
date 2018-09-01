@@ -7,7 +7,7 @@ import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 import { CanActivateResolver } from '../decorators/guard/guard.interface';
-import { Observable, from } from 'rxjs';
+import { Observable, from, of } from 'rxjs';
 import { InterceptResolver } from '../decorators/intercept/intercept.interface';
 
 export class FieldsModule { query: {}; mutation: {}; subscription: {}; }
@@ -83,8 +83,13 @@ export class BootstrapService {
                     if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         await currentConstructor.applyGuards(desc, args);
                     }
+                    let val = originalResolve.apply(self, args);
 
-                    let observable = from(originalResolve.apply(self, args));
+                    if (val.constructor !== Observable || val.constructor !== Promise) {
+                        val = of(val);
+                    }
+
+                    let observable = from(val);
 
                     if (desc.interceptor) {
                         observable = Container

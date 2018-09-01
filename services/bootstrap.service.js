@@ -63,14 +63,10 @@ let BootstrapService = class BootstrapService {
         return __awaiter(this, void 0, void 0, function* () {
             const args = a;
             yield Promise.all(desc.guards.map((guard) => __awaiter(this, void 0, void 0, function* () {
-                const currentGuard = core_1.Container.get(guard);
+                const currentGuard = core_1.Container.of(args).get(guard);
                 const originalResolve = currentGuard.canActivate;
                 currentGuard.canActivate = function () {
-                    let tempArgs = null;
-                    if (args.length && args[2]) {
-                        tempArgs = args[2];
-                    }
-                    return originalResolve.bind(currentGuard)(tempArgs, desc);
+                    return originalResolve.bind(currentGuard)(args[2], args[1], desc);
                 };
                 // binding here is when we want to use custom decorated metods inside canResolve override
                 yield this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
@@ -115,8 +111,9 @@ let BootstrapService = class BootstrapService {
                     let observable = rxjs_1.from(val);
                     if (desc.interceptor) {
                         observable = core_1.Container
+                            .of(args)
                             .get(desc.interceptor)
-                            .intercept(observable, args[1], args[2], desc);
+                            .intercept(observable, args[2], args[1], desc);
                     }
                     const result = yield observable.toPromise();
                     if (methodEffect || customEffect) {

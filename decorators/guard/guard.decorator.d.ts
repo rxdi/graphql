@@ -1,1 +1,1 @@
-export declare function Guard<T>(...arg: Function[]): Function;
+export declare function Guard<T>(...arg: any[]): Function;

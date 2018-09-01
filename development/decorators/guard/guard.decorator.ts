@@ -1,5 +1,5 @@
 
-export function Guard<T>(...arg: Function[]): Function {
+export function Guard<T>(...arg: any[]): Function {
     const guards = {guards: arg};
     return (t: any, propKey: string, desc: TypedPropertyDescriptor<any>) => {
         const descriptor = desc;

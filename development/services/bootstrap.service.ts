@@ -41,14 +41,10 @@ export class BootstrapService {
     async applyGuards(desc: GenericGapiResolversType, a) {
         const args = a;
         await Promise.all(desc.guards.map(async (guard) => {
-            const currentGuard = Container.get<CanActivateResolver>(guard);
+            const currentGuard = Container.of(args).get<CanActivateResolver>(guard);
             const originalResolve = currentGuard.canActivate;
             currentGuard.canActivate = function () {
-                let tempArgs = null;
-                if (args.length && args[2]) {
-                    tempArgs = args[2];
-                }
-                return originalResolve.bind(currentGuard)(tempArgs, desc);
+                return originalResolve.bind(currentGuard)(args[2], args[1], desc);
             };
             // binding here is when we want to use custom decorated metods inside canResolve override
             await this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
@@ -99,12 +95,13 @@ export class BootstrapService {
                         val = of(val);
                     }
 
-                    let observable = from(val);
+                    let observable = from<any>(val);
 
                     if (desc.interceptor) {
                         observable = Container
+                            .of(args)
                             .get<InterceptResolver>(desc.interceptor)
-                            .intercept(observable, args[1], args[2], desc);
+                            .intercept(observable, args[2], args[1], desc);
                     }
 
                     const result = await observable.toPromise();

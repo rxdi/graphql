@@ -104,7 +104,7 @@ let BootstrapService = class BootstrapService {
                         yield currentConstructor.applyGuards(desc, args);
                     }
                     let val = originalResolve.apply(self, args);
-                    if (val.constructor !== rxjs_1.Observable || val.constructor !== Promise) {
+                    if (val.constructor === Object || val.constructor === Array || val.constructor === String || val.constructor === Number) {
                         val = rxjs_1.of(val);
                     }
                     let observable = rxjs_1.from(val);

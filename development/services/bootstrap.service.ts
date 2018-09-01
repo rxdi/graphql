@@ -83,9 +83,10 @@ export class BootstrapService {
                     if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         await currentConstructor.applyGuards(desc, args);
                     }
+
                     let val = originalResolve.apply(self, args);
 
-                    if (val.constructor !== Observable || val.constructor !== Promise) {
+                    if (val.constructor === Object || val.constructor === Array || val.constructor === String || val.constructor === Number) {
                         val = of(val);
                     }
 

@@ -1,4 +1,4 @@
-import { ModuleService } from '@rxdi/core';
+import { ModuleService, BootstrapLogger } from '@rxdi/core';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { HookService } from '../services/hooks.service';
 import { SchemaService } from '../services/schema.service';
@@ -19,8 +19,9 @@ export declare class BootstrapService {
     private hookService;
     private schemaService;
     private effectService;
+    private logger;
     private config;
-    constructor(moduleService: ModuleService, hookService: HookService, schemaService: SchemaService, effectService: EffectService, config: GRAPHQL_PLUGIN_CONFIG);
+    constructor(moduleService: ModuleService, hookService: HookService, schemaService: SchemaService, effectService: EffectService, logger: BootstrapLogger, config: GRAPHQL_PLUGIN_CONFIG);
     validateGuard(res: any): Promise<void>;
     applyGuards(desc: any, a: any): Promise<void>;
     generateSchema(): GraphQLSchema;

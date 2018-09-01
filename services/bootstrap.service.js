@@ -35,17 +35,19 @@ class MetaDescriptor {
 }
 exports.MetaDescriptor = MetaDescriptor;
 let BootstrapService = class BootstrapService {
-    constructor(moduleService, hookService, schemaService, effectService, config) {
+    constructor(moduleService, hookService, schemaService, effectService, logger, config) {
         this.moduleService = moduleService;
         this.hookService = hookService;
         this.schemaService = schemaService;
         this.effectService = effectService;
+        this.logger = logger;
         this.config = config;
     }
     validateGuard(res) {
         return __awaiter(this, void 0, void 0, function* () {
             if (res.constructor === Boolean) {
                 if (!res) {
+                    this.logger.error(`Guard activated!`);
                     throw new Error('unauthorized');
                 }
             }
@@ -64,7 +66,7 @@ let BootstrapService = class BootstrapService {
                 const currentGuard = core_1.Container.get(guard);
                 const originalResolve = currentGuard.canActivate;
                 currentGuard.canActivate = function () {
-                    let tempArgs;
+                    let tempArgs = null;
                     if (args.length && args[2]) {
                         tempArgs = args[2];
                     }
@@ -103,12 +105,9 @@ let BootstrapService = class BootstrapService {
                     }
                     let observable = rxjs_1.from(originalResolve.apply(self, args));
                     if (desc.interceptor) {
-                        const interceptor = core_1.Container.get(desc.interceptor);
-                        const originalIntercept = interceptor.intercept;
-                        interceptor.intercept = function () {
-                            return originalIntercept(observable, args[1], args[2], desc);
-                        };
-                        observable = interceptor.intercept.bind(interceptor)();
+                        observable = core_1.Container
+                            .get(desc.interceptor)
+                            .intercept(observable, args[1], args[2], desc);
                     }
                     const result = yield observable.toPromise();
                     if (methodEffect || customEffect) {
@@ -211,10 +210,11 @@ export type EffectTypes = keyof typeof EffectTypes;
 };
 BootstrapService = __decorate([
     core_1.Service(),
-    __param(4, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
+    __param(5, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
     __metadata("design:paramtypes", [core_1.ModuleService,
         hooks_service_1.HookService,
         schema_service_1.SchemaService,
-        effect_service_1.EffectService, Object])
+        effect_service_1.EffectService,
+        core_1.BootstrapLogger, Object])
 ], BootstrapService);
 exports.BootstrapService = BootstrapService;

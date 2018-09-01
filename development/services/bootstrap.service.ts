@@ -1,4 +1,4 @@
-import { ModuleService, Service, Injector, Inject, Container } from '@rxdi/core';
+import { ModuleService, Service, Injector, Inject, Container, BootstrapLogger } from '@rxdi/core';
 import { GraphQLObjectType, GraphQLSchema } from 'graphql';
 import { HookService } from '../services/hooks.service';
 import { SchemaService } from '../services/schema.service';
@@ -21,12 +21,14 @@ export class BootstrapService {
         private hookService: HookService,
         private schemaService: SchemaService,
         private effectService: EffectService,
+        private logger: BootstrapLogger,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
     ) { }
 
     async validateGuard(res) {
         if (res.constructor === Boolean) {
             if (!res) {
+                this.logger.error(`Guard activated!`);
                 throw new Error('unauthorized');
             }
         } else if (res.constructor === Promise) {
@@ -42,7 +44,7 @@ export class BootstrapService {
             const currentGuard = Container.get<CanActivateResolver>(guard);
             const originalResolve = currentGuard.canActivate;
             currentGuard.canActivate = function () {
-                let tempArgs;
+                let tempArgs = null;
                 if (args.length && args[2]) {
                     tempArgs = args[2];
                 }
@@ -77,18 +79,17 @@ export class BootstrapService {
                 desc.resolve = async function resolve(...args: any[]) {
                     const methodEffect = events.map.has(desc.method_name);
                     const customEffect = events.map.has(desc.effect);
+
                     if (!desc.public && desc.guards && desc.guards.length && currentConstructor.config.authentication) {
                         await currentConstructor.applyGuards(desc, args);
                     }
+
                     let observable = from(originalResolve.apply(self, args));
 
                     if (desc.interceptor) {
-                        const interceptor = Container.get<InterceptResolver>(desc.interceptor);
-                        const originalIntercept = interceptor.intercept;
-                        interceptor.intercept = function () {
-                            return originalIntercept(observable, args[1], args[2], desc);
-                        }
-                        observable = interceptor.intercept.bind(interceptor)();
+                        observable = Container
+                            .get<InterceptResolver>(desc.interceptor)
+                            .intercept(observable, args[1], args[2], desc);
                     }
 
                     const result = await observable.toPromise();
@@ -195,9 +196,9 @@ export type EffectTypes = keyof typeof EffectTypes;
                         currentConstructor.type._descriptors.set(k, orig);
                     }
 
-                }))
+                }));
                 return key;
-            })
+            });
 
     }
 

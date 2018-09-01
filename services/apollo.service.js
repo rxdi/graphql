@@ -72,7 +72,8 @@ let ApolloService = class ApolloService {
                 else {
                     this.config.graphqlOptions.context = null;
                 }
-                const gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
+                let gqlResponse;
+                gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
                     method: request.method.toUpperCase(),
                     options: this.config.graphqlOptions,
                     query: request.method === 'post' ? request.payload : request.query,

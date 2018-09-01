@@ -36,7 +36,7 @@ export class ApolloService implements PluginInterface {
         let proxySchema;
         try {
             proxySchema = Container.get('gapi-custom-schema-definition');
-        } catch (e) {}
+        } catch (e) { }
         this.config.graphqlOptions.schema = proxySchema || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
         this.register();
     }
@@ -60,20 +60,20 @@ export class ApolloService implements PluginInterface {
         try {
             if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                 try {
-                      const serviceUtilsService: any = Container.get(<any>this.config.authentication);
-                      this.config.graphqlOptions.context = await serviceUtilsService.validateToken(request.headers.authorization);
+                    const serviceUtilsService: any = Container.get(<any>this.config.authentication);
+                    this.config.graphqlOptions.context = await serviceUtilsService.validateToken(request.headers.authorization);
                 } catch (e) {
                     return Boom.unauthorized();
                 }
             } else {
                 this.config.graphqlOptions.context = null;
             }
-            const gqlResponse = await runHttpQuery([request], <any>{
+            let gqlResponse;
+            gqlResponse = await runHttpQuery([request], <any>{
                 method: request.method.toUpperCase(),
                 options: this.config.graphqlOptions,
                 query: request.method === 'post' ? request.payload : request.query,
             });
-
             const response = h.response(gqlResponse);
             response.type('application/json');
             return response;

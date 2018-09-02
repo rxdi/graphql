@@ -42,11 +42,6 @@ let BootstrapService = class BootstrapService {
         this.effectService = effectService;
         this.logger = logger;
         this.config = config;
-        console.log();
-        Array.from(this.moduleService.watcherService._constructors.keys()).forEach(key => {
-            const currentConst = this.moduleService.watcherService._constructors.get(key);
-            console.log(currentConst['type']['metadata']['moduleName'], Object.keys(currentConst['value']));
-        });
     }
     validateGuard(res) {
         return __awaiter(this, void 0, void 0, function* () {

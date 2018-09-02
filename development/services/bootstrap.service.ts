@@ -23,14 +23,7 @@ export class BootstrapService {
         private effectService: EffectService,
         private logger: BootstrapLogger,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
-    ) {
-        console.log();
-
-        Array.from(this.moduleService.watcherService._constructors.keys()).forEach(key => {
-            const currentConst = this.moduleService.watcherService._constructors.get(key);
-            console.log(currentConst['type']['metadata']['moduleName'], Object.keys(currentConst['value']));
-        })
-    }
+    ) {}
 
     async validateGuard(res) {
         if (res.constructor === Boolean) {

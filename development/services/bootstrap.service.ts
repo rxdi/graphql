@@ -23,7 +23,14 @@ export class BootstrapService {
         private effectService: EffectService,
         private logger: BootstrapLogger,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
-    ) { }
+    ) {
+        console.log();
+
+        Array.from(this.moduleService.watcherService._constructors.keys()).forEach(key => {
+            const currentConst = this.moduleService.watcherService._constructors.get(key);
+            console.log(currentConst['type']['metadata']['moduleName'], Object.keys(currentConst['value']));
+        })
+    }
 
     async validateGuard(res) {
         if (res.constructor === Boolean) {
@@ -41,13 +48,8 @@ export class BootstrapService {
     async applyGuards(desc: GenericGapiResolversType, a) {
         const args = a;
         await Promise.all(desc.guards.map(async (guard) => {
-            const currentGuard = Container.of(args).get<CanActivateResolver>(guard);
-            const originalResolve = currentGuard.canActivate;
-            currentGuard.canActivate = function () {
-                return originalResolve.bind(currentGuard)(args[2], args[1], desc);
-            };
-            // binding here is when we want to use custom decorated metods inside canResolve override
-            await this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
+            const currentGuard = Container.get<CanActivateResolver>(guard);
+            await this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
         }));
     }
 
@@ -99,7 +101,6 @@ export class BootstrapService {
 
                     if (desc.interceptor) {
                         observable = Container
-                            .of(args)
                             .get<InterceptResolver>(desc.interceptor)
                             .intercept(observable, args[2], args[1], desc);
                     }

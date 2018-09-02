@@ -42,6 +42,11 @@ let BootstrapService = class BootstrapService {
         this.effectService = effectService;
         this.logger = logger;
         this.config = config;
+        console.log();
+        Array.from(this.moduleService.watcherService._constructors.keys()).forEach(key => {
+            const currentConst = this.moduleService.watcherService._constructors.get(key);
+            console.log(currentConst['type']['metadata']['moduleName'], Object.keys(currentConst['value']));
+        });
     }
     validateGuard(res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -63,13 +68,8 @@ let BootstrapService = class BootstrapService {
         return __awaiter(this, void 0, void 0, function* () {
             const args = a;
             yield Promise.all(desc.guards.map((guard) => __awaiter(this, void 0, void 0, function* () {
-                const currentGuard = core_1.Container.of(args).get(guard);
-                const originalResolve = currentGuard.canActivate;
-                currentGuard.canActivate = function () {
-                    return originalResolve.bind(currentGuard)(args[2], args[1], desc);
-                };
-                // binding here is when we want to use custom decorated metods inside canResolve override
-                yield this.validateGuard(currentGuard.canActivate.bind(currentGuard)());
+                const currentGuard = core_1.Container.get(guard);
+                yield this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
             })));
         });
     }
@@ -111,7 +111,6 @@ let BootstrapService = class BootstrapService {
                     let observable = rxjs_1.from(val);
                     if (desc.interceptor) {
                         observable = core_1.Container
-                            .of(args)
                             .get(desc.interceptor)
                             .intercept(observable, args[2], args[1], desc);
                     }

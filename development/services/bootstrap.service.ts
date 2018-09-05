@@ -93,9 +93,12 @@ export class BootstrapService {
                             .get<InterceptResolver>(desc.interceptor)
                             .intercept(observable, args[2], args[1], desc);
                     }
-
-                    const result = await observable.toPromise();
-
+                    let result;
+                    if (observable.constructor === Object) {
+                        result = observable;
+                    } else {
+                        result = await observable.toPromise();
+                    }
                     if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
                         events
                             .getLayer<Array<any>>(effectName)

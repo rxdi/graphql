@@ -107,7 +107,13 @@ let BootstrapService = class BootstrapService {
                             .get(desc.interceptor)
                             .intercept(observable, args[2], args[1], desc);
                     }
-                    const result = yield observable.toPromise();
+                    let result;
+                    if (observable.constructor === Object) {
+                        result = observable;
+                    }
+                    else {
+                        result = yield observable.toPromise();
+                    }
                     if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
                         events
                             .getLayer(effectName)

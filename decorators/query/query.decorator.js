@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+class GenericGapiResolversType {
+}
+exports.GenericGapiResolversType = GenericGapiResolversType;
 function Query(options) {
     return (t, propKey, descriptor) => {
         const originalMethod = descriptor.value;

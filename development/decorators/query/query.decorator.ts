@@ -1,15 +1,13 @@
 import { GraphQLObjectType, GraphQLNonNull } from 'graphql';
-import { InterceptResolver } from '../intercept/intercept.interface';
-import { InjectionToken } from '@rxdi/core';
+import { GraphQLControllerOptions } from '../../decorators/guard/guard.interface';
 
-
-export interface GenericGapiResolversType {
+export class GenericGapiResolversType implements GraphQLControllerOptions {
     scope?: string[];
     target?: any;
     effect?: string;
     guards?: Function[];
     public?: boolean;
-    interceptor?: any;
+    interceptor?: Function;
     interceptors?: any[];
     method_name?: string;
     subscribe?: () => {};

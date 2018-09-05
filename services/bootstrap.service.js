@@ -89,8 +89,6 @@ let BootstrapService = class BootstrapService {
             }
             desc.resolve = function resolve(...args) {
                 return __awaiter(this, void 0, void 0, function* () {
-                    const methodEffect = events.map.has(desc.method_name);
-                    const customEffect = events.map.has(desc.effect);
                     if (!desc.public
                         && desc.guards && desc.guards.length
                         && currentConstructor.config.authentication) {
@@ -105,17 +103,15 @@ let BootstrapService = class BootstrapService {
                     }
                     let observable = rxjs_1.from(val);
                     if (desc.interceptor) {
-                        observable = core_1.Container
+                        observable = yield core_1.Container
                             .get(desc.interceptor)
                             .intercept(observable, args[2], args[1], desc);
                     }
                     const result = yield observable.toPromise();
-                    if (methodEffect || customEffect) {
-                        let tempArgs = [result, ...args];
-                        tempArgs = tempArgs.filter(i => i && i !== 'undefined');
+                    if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
                         events
                             .getLayer(effectName)
-                            .putItem({ key: effectName, data: tempArgs });
+                            .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
                     }
                     return result;
                 });
@@ -177,11 +173,7 @@ export type EffectTypes = keyof typeof EffectTypes;
                         descriptor.scope = descriptor.scope || options.scope;
                     }
                     if (options.guards && options.guards.length && !descriptor.public) {
-                        let descriptorGuards = [];
-                        if (descriptor.guards && descriptor.guards.length) {
-                            descriptorGuards = descriptor.guards;
-                        }
-                        descriptor.guards = [...descriptorGuards, ...options.guards];
+                        descriptor.guards = descriptor.guards || options.guards;
                     }
                     if (options.type) {
                         descriptor.type = descriptor.type || options.type;

@@ -1,11 +1,12 @@
 import { GraphQLObjectType, GraphQLNonNull } from 'graphql';
-export interface GenericGapiResolversType {
+import { GraphQLControllerOptions } from '../../decorators/guard/guard.interface';
+export declare class GenericGapiResolversType implements GraphQLControllerOptions {
     scope?: string[];
     target?: any;
     effect?: string;
     guards?: Function[];
     public?: boolean;
-    interceptor?: any;
+    interceptor?: Function;
     interceptors?: any[];
     method_name?: string;
     subscribe?: () => {};

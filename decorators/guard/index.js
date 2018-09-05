@@ -4,3 +4,5 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./guard.decorator"));
+var guard_decorator_1 = require("./guard.decorator");
+exports.Guards = guard_decorator_1.Guard;

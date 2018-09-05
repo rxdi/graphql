@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 import { GenericGapiResolversType } from '../query';
+import { GraphQLObjectType } from 'graphql';
 
 export interface ResolverContext {}
 
@@ -13,7 +14,8 @@ export interface CanActivateResolver {
 
 
 export interface GraphQLControllerOptions {
-    guards?: any[];
-    type?: any;
+    guards?: Function[];
+    type?: GraphQLObjectType;
     scope?: string[];
+    interceptor?: Function
 }

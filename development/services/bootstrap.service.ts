@@ -6,7 +6,7 @@ import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
-import { CanActivateResolver } from '../decorators/guard/guard.interface';
+import { CanActivateResolver, GraphQLControllerOptions } from '../decorators/guard/guard.interface';
 import { Observable, from, of } from 'rxjs';
 import { InterceptResolver } from '../decorators/intercept/intercept.interface';
 
@@ -23,7 +23,7 @@ export class BootstrapService {
         private effectService: EffectService,
         private logger: BootstrapLogger,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
-    ) {}
+    ) { }
 
     async validateGuard(res) {
         if (res.constructor === Boolean) {
@@ -67,12 +67,9 @@ export class BootstrapService {
                     };
                 }
 
-                desc.resolve = async function resolve(...args: any[]) {
-                    const methodEffect = events.map.has(desc.method_name);
-                    const customEffect = events.map.has(desc.effect);
-
-                    if (
-                        !desc.public
+                desc.resolve = async function resolve<T>(...args: any[]) {
+   
+                    if (!desc.public
                         && desc.guards && desc.guards.length
                         && currentConstructor.config.authentication
                     ) {
@@ -81,8 +78,7 @@ export class BootstrapService {
 
                     let val = originalResolve.apply(self, args);
 
-                    if (
-                        val.constructor === Object
+                    if (val.constructor === Object
                         || val.constructor === Array
                         || val.constructor === String
                         || val.constructor === Number
@@ -90,22 +86,20 @@ export class BootstrapService {
                         val = of(val);
                     }
 
-                    let observable = from<any>(val);
+                    let observable = from<T>(val);
 
                     if (desc.interceptor) {
-                        observable = Container
+                        observable = await Container
                             .get<InterceptResolver>(desc.interceptor)
                             .intercept(observable, args[2], args[1], desc);
                     }
 
                     const result = await observable.toPromise();
 
-                    if (methodEffect || customEffect) {
-                        let tempArgs = [result, ...args];
-                        tempArgs = tempArgs.filter(i => i && i !== 'undefined');
+                    if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
                         events
                             .getLayer<Array<any>>(effectName)
-                            .putItem({ key: effectName, data: tempArgs });
+                            .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
                     }
                     return result;
                 };
@@ -140,7 +134,7 @@ export class BootstrapService {
         return schema;
     }
 
-    writeEffectTypes(effects: Array<any>) {
+    writeEffectTypes(effects: Array<any>): void {
         if (!this.config.writeEffects) {
             return;
         }
@@ -160,7 +154,7 @@ export type EffectTypes = keyof typeof EffectTypes;
         writeFileSync(folder + 'EffectTypes.ts', types, 'utf8');
     }
 
-    generateType(query, name, description) {
+    generateType(query, name, description): GraphQLObjectType {
         if (!Object.keys(query).length) {
             return;
         }
@@ -175,22 +169,21 @@ export type EffectTypes = keyof typeof EffectTypes;
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map(key => {
-                const currentConstructor: { value: any; type: { _descriptors: Map<any, any> } } = <any>this.moduleService.watcherService.getConstructor(key);
-                const options = currentConstructor.type['metadata'].options;
+                const currentConstructor: { value: any; type: { _descriptors: Map<string, {value: () => GenericGapiResolversType}> } } = <any>this.moduleService.watcherService.getConstructor(key);
+                const options: GraphQLControllerOptions = currentConstructor.type['metadata'].options;
                 Array.from(currentConstructor.type._descriptors.keys()).map((k => {
                     if (options) {
                         const orig = currentConstructor.type._descriptors.get(k);
-                        const descriptor = orig.value();
+                        const descriptor: GenericGapiResolversType = orig.value();
+
                         if (options.scope) {
                             descriptor.scope = descriptor.scope || options.scope;
                         }
+
                         if (options.guards && options.guards.length && !descriptor.public) {
-                            let descriptorGuards = [];
-                            if (descriptor.guards && descriptor.guards.length) {
-                                descriptorGuards = descriptor.guards;
-                            }
-                            descriptor.guards = [...descriptorGuards, ...options.guards];
+                            descriptor.guards = descriptor.guards || options.guards;
                         }
+
                         if (options.type) {
                             descriptor.type = descriptor.type || options.type;
                         }

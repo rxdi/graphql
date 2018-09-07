@@ -68,7 +68,6 @@ export class BootstrapService {
                 }
 
                 desc.resolve = async function resolve<T>(...args: any[]) {
-   
                     if (!desc.public
                         && desc.guards && desc.guards.length
                         && currentConstructor.config.authentication

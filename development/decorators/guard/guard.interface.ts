@@ -17,5 +17,5 @@ export interface GraphQLControllerOptions {
     guards?: Function[];
     type?: GraphQLObjectType;
     scope?: string[];
-    interceptor?: Function
+    interceptor?: Function;
 }

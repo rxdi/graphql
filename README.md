@@ -1,5 +1,7 @@
 # @rxdi Graphql Module
 
+[![Build Status](https://travis-ci.org/rxdi/graphql.svg?branch=master)](https://travis-ci.org/rxdi/graphql)
+
 ##### More information about Hapi server can be found here [Hapi](https://hapijs.com/)
 ##### For questions/issues you can write ticket [here](http://gitlab.youvolio.com/rxdi/graphql/issues)
 ##### This module is intended to be used with [rxdi](https://github.com/rxdi/core)

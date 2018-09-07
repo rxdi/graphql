@@ -24,13 +24,11 @@ export class ServerPushPlugin implements PluginInterface {
         private afterStarterService: AfterStarterService,
         private startService: StartService
     ) {
-        this.exitHandler.errorHandler.subscribe(async (e) => {
-            await this.stopServerWatcher();
-        });
+        this.exitHandler.errorHandler.subscribe(async (e) => await this.stopServerWatcher());
 
-        this.server.events.on('response', (request) => {
-            this.sendToClient.next({ query: request.payload, response: request.response['source'] });
-        });
+        this.server.events.on('response',
+            (request) => this.sendToClient.next({ query: request.payload, response: request.response['source'] })
+        );
 
         timer(0, 1000).pipe(tap(() => this.sendTime.next(true))).subscribe();
 
@@ -91,17 +89,15 @@ export class ServerPushPlugin implements PluginInterface {
                 'Connection': 'keep-alive'
             });
 
-            this.sendToClient.subscribe((data) => {
-                res.write('data: ' + JSON.stringify(data) + '\n\n');
-            });
+            this.sendToClient.subscribe((data) => res.write('data: ' + JSON.stringify(data) + '\n\n'));
 
-            this.sendTime.subscribe((data) => {
-                res.write('data: ' + JSON.stringify({time: new Date().toLocaleTimeString()}) + '\n\n');
-            });
+            this.sendTime.subscribe(
+                (data) => res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n')
+            );
 
-            this.sendTime.subscribe((data) => {
-                res.write('data: ' + JSON.stringify({config: {graphql: this.config, hapi: this.server.info}}) + '\n\n');
-            });
+            this.sendTime.subscribe(
+                (data) => res.write('data: ' + JSON.stringify({ config: { graphql: this.config, hapi: this.server.info } }) + '\n\n')
+            );
             req.on('end', () => {
                 this.connected = false;
                 req.destroy();

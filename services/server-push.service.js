@@ -39,12 +39,8 @@ let ServerPushPlugin = class ServerPushPlugin {
         this.sendToClient = new rxjs_1.Subject();
         this.sendTime = new rxjs_1.Subject();
         this.clientConnected = new rxjs_1.Subject();
-        this.exitHandler.errorHandler.subscribe((e) => __awaiter(this, void 0, void 0, function* () {
-            yield this.stopServerWatcher();
-        }));
-        this.server.events.on('response', (request) => {
-            this.sendToClient.next({ query: request.payload, response: request.response['source'] });
-        });
+        this.exitHandler.errorHandler.subscribe((e) => __awaiter(this, void 0, void 0, function* () { return yield this.stopServerWatcher(); }));
+        this.server.events.on('response', (request) => this.sendToClient.next({ query: request.payload, response: request.response['source'] }));
         rxjs_1.timer(0, 1000).pipe(operators_1.tap(() => this.sendTime.next(true))).subscribe();
         this.afterStarterService.appStarted
             .pipe(operators_1.switchMapTo(this.waitXSeconds(5)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
@@ -94,15 +90,9 @@ let ServerPushPlugin = class ServerPushPlugin {
                 'Cache-Control': 'no-cache',
                 'Connection': 'keep-alive'
             });
-            this.sendToClient.subscribe((data) => {
-                res.write('data: ' + JSON.stringify(data) + '\n\n');
-            });
-            this.sendTime.subscribe((data) => {
-                res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n');
-            });
-            this.sendTime.subscribe((data) => {
-                res.write('data: ' + JSON.stringify({ config: { graphql: this.config, hapi: this.server.info } }) + '\n\n');
-            });
+            this.sendToClient.subscribe((data) => res.write('data: ' + JSON.stringify(data) + '\n\n'));
+            this.sendTime.subscribe((data) => res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n'));
+            this.sendTime.subscribe((data) => res.write('data: ' + JSON.stringify({ config: { graphql: this.config, hapi: this.server.info } }) + '\n\n'));
             req.on('end', () => {
                 this.connected = false;
                 req.destroy();

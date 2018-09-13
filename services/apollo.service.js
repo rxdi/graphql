@@ -48,7 +48,6 @@ let ApolloService = class ApolloService {
         if (!this.config || !this.config.graphqlOptions) {
             throw new Error('Apollo Server requires options.');
         }
-        console.log('APOLLO PLUGIN REGISTER');
         this.server.route({
             method: ['GET', 'POST'],
             path: this.config.path || '/graphql',
@@ -85,6 +84,10 @@ let ApolloService = class ApolloService {
             catch (error) {
                 if ('HttpQueryError' !== error.name) {
                     throw Boom.boomify(error);
+                }
+                if (error && error.message.constructor === String && error.message.includes('must be Output Type but got')) {
+                    console.log('Maybe you are trying to cross reference Schema Type? Instead of fields: {test: {type: GraphQLString }} try lazy evaluated fields: () => ({test: {type: GraphQLString }})');
+                    console.error(error);
                 }
                 if (true === error.isGraphQLError) {
                     const response = h.response(error.message);

@@ -37,8 +37,8 @@
     "graphql": "^0.13.2"
   },
   "devDependencies": {
-    "@rxdi/core": "^0.0.265",
-    "@rxdi/hapi": "^0.0.265",
+    "@rxdi/core": "^0.0.267",
+    "@rxdi/hapi": "^0.0.267",
     "@types/graphql": "^0.13.1",
     "@types/hapi": "^17.0.12",
     "@types/jest": "^23.1.4",

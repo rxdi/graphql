@@ -80,7 +80,7 @@ export class ApolloService implements PluginInterface {
                 throw Boom.boomify(error);
             }
             if (error && error.message.constructor === String && error.message.includes('must be Output Type but got')) {
-                console.log('Maybe you are trying to cross reference Schema Type? Instead of fields: {test: {type: GraphQLString }} try lazy evaluated fields: () => ({test: {type: GraphQLString }})')
+                console.log('Maybe you are trying to cross reference Schema Type? Instead of fields: {test: {type: GraphQLString }} try lazy evaluated fields: () => ({test: {type: GraphQLString }})');
                 console.error(error);
             }
             if (true === error.isGraphQLError) {

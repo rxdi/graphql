@@ -76,6 +76,12 @@ export class BootstrapService {
                     }
 
                     let val = originalResolve.apply(self, args);
+                    if (!val && !process.env.STRICT_RETURN_TYPE) {
+                        val = {};
+                    }
+                    if (!val && process.env.STRICT_RETURN_TYPE) {
+                        throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
+                    }
 
                     if (val.constructor === Object
                         || val.constructor === Array

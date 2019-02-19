@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { PluginInterface, ExitHandlerService, AfterStarterService } from '@rxdi/core';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { Server, IncomingMessage, ServerResponse } from 'http';

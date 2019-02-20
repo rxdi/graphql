@@ -94,9 +94,13 @@ export class ServerPushPlugin implements PluginInterface {
             this.sendTime.subscribe(
                 (data) => res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n')
             );
-
             this.sendTime.subscribe(
-                (data) => res.write('data: ' + JSON.stringify({ config: { graphql: this.config, hapi: this.server.info } }) + '\n\n')
+                (data) => res.write('data: ' + JSON.stringify({
+                    config: {
+                        graphql: {...this.config, graphqlOptions: null },
+                        hapi: this.server.info
+                    }
+                }) + '\n\n')
             );
             req.on('end', () => {
                 this.connected = false;

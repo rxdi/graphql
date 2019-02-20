@@ -8,10 +8,11 @@ import {
     HttpQueryError,
 } from 'apollo-server-core';
 import { HAPI_SERVER } from '@rxdi/hapi';
-import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG, GRAPHQL_TYPE_DEFINITIONS, Neo4JInjectionInterface } from '../config.tokens';
 // import { AuthService } from '../auth/auth.service';
 // import { Container } from '../../container';
 import { BootstrapService } from '../services/bootstrap.service';
+import { printSchema } from 'graphql';
 
 export interface IRegister {
     (server: Server, options: any): void;
@@ -29,6 +30,7 @@ export class ApolloService implements PluginInterface {
     constructor(
         @Inject(HAPI_SERVER) private server: Server,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
+        @Inject(GRAPHQL_TYPE_DEFINITIONS) private typeDefs: string,
         private bootstrapService: BootstrapService
     ) { }
 
@@ -38,6 +40,11 @@ export class ApolloService implements PluginInterface {
             proxySchema = Container.get('gapi-custom-schema-definition');
         } catch (e) { }
         this.config.graphqlOptions.schema = proxySchema || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        this.typeDefs = printSchema(this.config.graphqlOptions.schema);
+        try {
+            const neo4j: Neo4JInjectionInterface = Container.get('neo4j-graphql-js');
+            this.config.graphqlOptions.schema = neo4j.makeAugmentedSchema({ typeDefs: this.typeDefs });
+        } catch (e) {}
         this.register();
     }
 
@@ -59,12 +66,12 @@ export class ApolloService implements PluginInterface {
             if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                 try {
                     const serviceUtilsService: any = Container.get(<any>this.config.authentication);
-                    this.config.graphqlOptions.context = await serviceUtilsService.validateToken(request.headers.authorization);
+                    this.config.graphqlOptions.context.user = await serviceUtilsService.validateToken(request.headers.authorization);
                 } catch (e) {
                     return Boom.unauthorized();
                 }
             } else {
-                this.config.graphqlOptions.context = null;
+                this.config.graphqlOptions.context.user = null;
             }
             let gqlResponse;
             gqlResponse = await runHttpQuery([request], <any>{

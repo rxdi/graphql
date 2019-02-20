@@ -13,8 +13,9 @@ export interface IPlugin {
 export declare class ApolloService implements PluginInterface {
     private server;
     private config;
+    private typeDefs;
     private bootstrapService;
-    constructor(server: Server, config: GRAPHQL_PLUGIN_CONFIG, bootstrapService: BootstrapService);
+    constructor(server: Server, config: GRAPHQL_PLUGIN_CONFIG, typeDefs: string, bootstrapService: BootstrapService);
     OnInit(): void;
     register(): void;
     handler(request: any, h: any): Promise<any>;

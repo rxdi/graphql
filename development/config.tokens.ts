@@ -43,5 +43,7 @@ export interface GRAPHQL_AUTHENTICATION_FAKE {
     onSubOperation(connectionParams, params, webSocket): any;
 }
 
-
+export const GRAPHQL_TYPE_DEFINITIONS = new InjectionToken('graphql-type-definitions');
 export const GRAPHQL_PLUGIN_CONFIG = new InjectionToken<GRAPHQL_PLUGIN_CONFIG>('graphql-configuration-injection-token');
+
+export interface Neo4JInjectionInterface { makeAugmentedSchema(options: { typeDefs: string }); }

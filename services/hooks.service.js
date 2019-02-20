@@ -45,7 +45,7 @@ let HookService = class HookService {
         });
     }
     canAccess(routeScope, context) {
-        return context && routeScope.filter(scope => scope === context.type).length ? true : MakeError();
+        return context && context.user && routeScope.filter(scope => scope === context.user.type).length ? true : MakeError();
     }
     AuthenticationHooks(resolver, root, args, context, info) {
         this.canAccess(resolver.scope, context);
@@ -56,9 +56,9 @@ let HookService = class HookService {
     AddHooks(resolver) {
         if (this.config.authentication) {
             const resolve = resolver.resolve;
-            resolver.resolve = (root, args, context, info) => __awaiter(this, void 0, void 0, function* () {
+            resolver.resolve = (root, args, context, info, ...a) => __awaiter(this, void 0, void 0, function* () {
                 this.ResolverHooks(resolver, root, args, context, info);
-                return yield resolve(root, args, context, info);
+                return yield resolve(root, args, context, info, ...a);
             });
         }
     }

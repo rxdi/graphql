@@ -33,4 +33,10 @@ export interface GRAPHQL_AUTHENTICATION_FAKE {
     onSubConnection(connectionParams: any): any;
     onSubOperation(connectionParams: any, params: any, webSocket: any): any;
 }
+export declare const GRAPHQL_TYPE_DEFINITIONS: InjectionToken<{}>;
 export declare const GRAPHQL_PLUGIN_CONFIG: InjectionToken<GRAPHQL_PLUGIN_CONFIG>;
+export interface Neo4JInjectionInterface {
+    makeAugmentedSchema(options: {
+        typeDefs: string;
+    }): any;
+}

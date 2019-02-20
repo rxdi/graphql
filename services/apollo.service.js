@@ -29,10 +29,12 @@ const config_tokens_1 = require("../config.tokens");
 // import { AuthService } from '../auth/auth.service';
 // import { Container } from '../../container';
 const bootstrap_service_1 = require("../services/bootstrap.service");
+const graphql_1 = require("graphql");
 let ApolloService = class ApolloService {
-    constructor(server, config, bootstrapService) {
+    constructor(server, config, typeDefs, bootstrapService) {
         this.server = server;
         this.config = config;
+        this.typeDefs = typeDefs;
         this.bootstrapService = bootstrapService;
     }
     OnInit() {
@@ -42,6 +44,12 @@ let ApolloService = class ApolloService {
         }
         catch (e) { }
         this.config.graphqlOptions.schema = proxySchema || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        this.typeDefs = graphql_1.printSchema(this.config.graphqlOptions.schema);
+        try {
+            const neo4j = core_1.Container.get('neo4j-graphql-js');
+            this.config.graphqlOptions.schema = neo4j.makeAugmentedSchema({ typeDefs: this.typeDefs });
+        }
+        catch (e) { }
         this.register();
     }
     register() {
@@ -62,14 +70,14 @@ let ApolloService = class ApolloService {
                 if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                     try {
                         const serviceUtilsService = core_1.Container.get(this.config.authentication);
-                        this.config.graphqlOptions.context = yield serviceUtilsService.validateToken(request.headers.authorization);
+                        this.config.graphqlOptions.context.user = yield serviceUtilsService.validateToken(request.headers.authorization);
                     }
                     catch (e) {
                         return Boom.unauthorized();
                     }
                 }
                 else {
-                    this.config.graphqlOptions.context = null;
+                    this.config.graphqlOptions.context.user = null;
                 }
                 let gqlResponse;
                 gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
@@ -112,6 +120,7 @@ ApolloService = __decorate([
     core_1.Service(),
     __param(0, core_1.Inject(hapi_2.HAPI_SERVER)),
     __param(1, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
-    __metadata("design:paramtypes", [hapi_1.Server, Object, bootstrap_service_1.BootstrapService])
+    __param(2, core_1.Inject(config_tokens_1.GRAPHQL_TYPE_DEFINITIONS)),
+    __metadata("design:paramtypes", [hapi_1.Server, Object, String, bootstrap_service_1.BootstrapService])
 ], ApolloService);
 exports.ApolloService = ApolloService;

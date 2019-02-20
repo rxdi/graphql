@@ -28,6 +28,10 @@ let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
                     provide: config_tokens_1.GRAPHQL_PLUGIN_CONFIG,
                     useValue: config
                 },
+                {
+                    provide: config_tokens_1.GRAPHQL_TYPE_DEFINITIONS,
+                    useValue: 'empty-type-definitions'
+                },
                 services_1.HookService,
                 services_1.SchemaService
             ],

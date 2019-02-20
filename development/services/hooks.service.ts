@@ -29,7 +29,7 @@ export class HookService {
     }
 
     canAccess(routeScope, context) {
-        return context && routeScope.filter(scope => scope === context.type).length ? true : MakeError();
+        return context && context.user && routeScope.filter(scope => scope === context.user.type).length ? true : MakeError();
     }
 
     AuthenticationHooks(resolver, root, args, context, info) {
@@ -43,9 +43,9 @@ export class HookService {
     AddHooks(resolver) {
         if (this.config.authentication) {
             const resolve = resolver.resolve;
-            resolver.resolve = async (root, args, context, info) => {
+            resolver.resolve = async (root, args, context, info, ...a) => {
                 this.ResolverHooks(resolver, root, args, context, info);
-                return await resolve(root, args, context, info);
+                return await resolve(root, args, context, info, ...a);
             };
         }
     }

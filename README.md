@@ -15,12 +15,59 @@ $ npm install @rxdi/graphql --save
 
 ## Consuming @rxdi/graphql
 
+##### Import inside AppModule or CoreModule
+```typescript
+import { Module } from "@rxdi/core";
+import { HapiModule } from "@rxdi/hapi";
+import { GraphQLModule } from "@rxdi/graphql";
 
+@Module({
+    imports: [
+        HapiModule.forRoot({
+            hapi: {
+                port: 9000
+            }
+        }),
+        GraphQLModule.forRoot({
+            path: '/graphql',
+            openBrowser: false,
+            writeEffects: false,
+            graphiQlPath: '/graphiql',
+            graphiqlOptions: {
+                endpointURL: '/graphql',
+                subscriptionsEndpoint: `${
+                    process.env.GRAPHIQL_WS_SSH ? 'wss' : 'ws'
+                    }://${process.env.GRAPHIQL_WS_PATH || 'localhost'}${
+                    process.env.DEPLOY_PLATFORM === 'heroku'
+                        ? ''
+                        : `:${process.env.API_PORT ||
+                        process.env.PORT}`
+                    }/subscriptions`,
+                websocketConnectionParams: {
+                    token: process.env.GRAPHIQL_TOKEN
+                }
+            },
+            graphqlOptions: {
+                schema: null
+            }
+        }),
+    ]
+})
+export class CoreModule {}
+```
+
+
+
+##### Install NEO4J Driver
+```bash
+$ npm install neo4j-graphql-js neo4j-driver
+```
 ##### Neo4J Driver load
 ```typescript
 import { Module } from "@rxdi/core";
 import { HapiModule } from "@rxdi/hapi";
 import { GraphQLModule } from "@rxdi/graphql";
+import { v1 as neo4j } from 'neo4j-driver';
 import * as neo4jgql from 'neo4j-graphql-js';
 
 @Module({
@@ -90,46 +137,6 @@ export class CoreModule {}
 
 You are ready to write queries :)
 
-##### Import inside AppModule or CoreModule
-```typescript
-import { Module } from "@rxdi/core";
-import { HapiModule } from "@rxdi/hapi";
-import { GraphQLModule } from "@rxdi/graphql";
-
-@Module({
-    imports: [
-        HapiModule.forRoot({
-            hapi: {
-                port: 9000
-            }
-        }),
-        GraphQLModule.forRoot({
-            path: '/graphql',
-            openBrowser: false,
-            writeEffects: false,
-            graphiQlPath: '/graphiql',
-            graphiqlOptions: {
-                endpointURL: '/graphql',
-                subscriptionsEndpoint: `${
-                    process.env.GRAPHIQL_WS_SSH ? 'wss' : 'ws'
-                    }://${process.env.GRAPHIQL_WS_PATH || 'localhost'}${
-                    process.env.DEPLOY_PLATFORM === 'heroku'
-                        ? ''
-                        : `:${process.env.API_PORT ||
-                        process.env.PORT}`
-                    }/subscriptions`,
-                websocketConnectionParams: {
-                    token: process.env.GRAPHIQL_TOKEN
-                }
-            },
-            graphqlOptions: {
-                schema: null
-            }
-        }),
-    ]
-})
-export class CoreModule {}
-```
 
 
 

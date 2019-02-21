@@ -67,6 +67,7 @@ let ApolloService = class ApolloService {
     handler(request, h) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
                 if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                     try {
                         const serviceUtilsService = core_1.Container.get(this.config.authentication);

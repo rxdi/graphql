@@ -63,6 +63,7 @@ export class ApolloService implements PluginInterface {
 
     async handler(request, h) {
         try {
+            this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
             if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
                 try {
                     const serviceUtilsService: any = Container.get(<any>this.config.authentication);

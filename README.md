@@ -62,6 +62,7 @@ export class CoreModule {}
 ```bash
 $ npm install neo4j-graphql-js neo4j-driver
 ```
+
 ##### Neo4J Driver load
 ```typescript
 import { Module } from "@rxdi/core";
@@ -104,7 +105,7 @@ import * as neo4jgql from 'neo4j-graphql-js';
                 context: {
                     driver: (neo4j.driver(
                         'bolt://localhost:7687',
-                        neo4j.auth.basic('neo4j', '98412218')
+                        neo4j.auth.basic('neo4j', 'your-graph-password')
                     ))
                 },
                 schema: null

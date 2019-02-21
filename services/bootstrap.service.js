@@ -177,6 +177,7 @@ export type EffectTypes = keyof typeof EffectTypes;
             .map(key => {
             const currentConstructor = this.moduleService.watcherService.getConstructor(key);
             const options = currentConstructor.type['metadata'].options;
+            currentConstructor.type._descriptors = currentConstructor.type._descriptors || [];
             Array.from(currentConstructor.type._descriptors.keys()).map((k => {
                 if (options) {
                     const orig = currentConstructor.type._descriptors.get(k);

@@ -179,6 +179,7 @@ export type EffectTypes = keyof typeof EffectTypes;
             .map(key => {
                 const currentConstructor: { value: any; type: { _descriptors: Map<string, {value: () => GenericGapiResolversType}> } } = <any>this.moduleService.watcherService.getConstructor(key);
                 const options: GraphQLControllerOptions = currentConstructor.type['metadata'].options;
+                currentConstructor.type._descriptors = <any>currentConstructor.type._descriptors || [];
                 Array.from(currentConstructor.type._descriptors.keys()).map((k => {
                     if (options) {
                         const orig = currentConstructor.type._descriptors.get(k);

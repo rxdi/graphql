@@ -23,11 +23,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@rxdi/core");
 const graphql_1 = require("graphql");
 const hooks_service_1 = require("../services/hooks.service");
-const schema_service_1 = require("../services/schema.service");
 const fs_extra_1 = require("fs-extra");
 const effect_service_1 = require("./effect.service");
 const config_tokens_1 = require("../config.tokens");
 const rxjs_1 = require("rxjs");
+// import { makeExecutableSchema, addMockFunctionsToSchema, mergeSchemas, } from 'graphql-tools';
 class FieldsModule {
 }
 exports.FieldsModule = FieldsModule;
@@ -35,13 +35,16 @@ class MetaDescriptor {
 }
 exports.MetaDescriptor = MetaDescriptor;
 let BootstrapService = class BootstrapService {
-    constructor(moduleService, hookService, schemaService, effectService, logger, config) {
+    constructor(moduleService, effectService, logger, config) {
         this.moduleService = moduleService;
-        this.hookService = hookService;
-        this.schemaService = schemaService;
         this.effectService = effectService;
         this.logger = logger;
         this.config = config;
+        this.methodBasedEffects = [];
+        try {
+            this.neo4j = core_1.Container.get('neo4j-graphql-js');
+        }
+        catch (e) { }
     }
     validateGuard(res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -68,78 +71,84 @@ let BootstrapService = class BootstrapService {
             })));
         });
     }
-    generateSchema() {
-        const methodBasedEffects = [];
+    collectAppSchema() {
         const Fields = { query: {}, mutation: {}, subscription: {} };
-        const events = this.effectService;
-        const currentConstructor = this;
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
             const desc = descriptor();
+            desc.self = self;
             Fields[desc.method_type][desc.method_name] = desc;
-            const effectName = desc.effect ? desc.effect : desc.method_name;
-            methodBasedEffects.push(effectName);
-            const originalResolve = desc.resolve.bind(self);
-            if (desc.subscribe) {
-                const originalSubscribe = desc.subscribe;
-                desc.subscribe = function subscribe(...args) {
-                    return originalSubscribe.bind(self)(self, ...args);
-                };
-            }
-            desc.resolve = function resolve(...args) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    if (!desc.public
-                        && desc.guards && desc.guards.length
-                        && currentConstructor.config.authentication) {
-                        yield currentConstructor.applyGuards(desc, args);
-                    }
-                    let val = originalResolve.apply(self, args);
-                    if (!val && !process.env.STRICT_RETURN_TYPE) {
-                        val = {};
-                    }
-                    if (!val && process.env.STRICT_RETURN_TYPE) {
-                        throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
-                    }
-                    if (val.constructor === Object
-                        || val.constructor === Array
-                        || val.constructor === String
-                        || val.constructor === Number) {
-                        val = rxjs_1.of(val);
-                    }
-                    let observable = rxjs_1.from(val);
-                    if (desc.interceptor) {
-                        observable = yield core_1.Container
-                            .get(desc.interceptor)
-                            .intercept(observable, args[2], args[1], desc);
-                    }
-                    let result;
-                    if (observable.constructor === Object) {
-                        result = observable;
-                    }
-                    else {
-                        result = yield observable.toPromise();
-                    }
-                    if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
-                        events
-                            .getLayer(effectName)
-                            .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
-                    }
-                    return result;
-                });
-            };
         });
-        const query = this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data');
-        const mutation = this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data');
-        const subscription = this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all rabbitmq subscriptions via pub sub');
-        this.hookService.AttachHooks([query, mutation, subscription]);
-        const schema = this.schemaService.generateSchema(query, mutation, subscription);
-        try {
-            this.writeEffectTypes(methodBasedEffects);
+        return Fields;
+    }
+    applyMetaToResolvers(desc, self) {
+        const events = this.effectService;
+        const currentConstructor = this;
+        const effectName = desc.effect ? desc.effect : desc.method_name;
+        this.methodBasedEffects = [];
+        this.methodBasedEffects.push(effectName);
+        const originalResolve = desc.resolve.bind(self);
+        if (desc.subscribe) {
+            const originalSubscribe = desc.subscribe;
+            desc.subscribe = function subscribe(...args) {
+                return originalSubscribe.bind(self)(self, ...args);
+            };
         }
-        catch (e) {
-            console.error(e, 'Effects are not saved to directory');
+        desc.resolve = function resolve(...args) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (!desc.public
+                    && desc.guards && desc.guards.length
+                    && currentConstructor.config.authentication) {
+                    yield currentConstructor.applyGuards(desc, args);
+                }
+                let val = originalResolve.apply(self, args);
+                if (!val && !process.env.STRICT_RETURN_TYPE) {
+                    val = {};
+                }
+                if (!val && process.env.STRICT_RETURN_TYPE) {
+                    throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
+                }
+                if (val.constructor === Object
+                    || val.constructor === Array
+                    || val.constructor === String
+                    || val.constructor === Number) {
+                    val = rxjs_1.of(val);
+                }
+                let observable = rxjs_1.from(val);
+                if (desc.interceptor) {
+                    observable = yield core_1.Container
+                        .get(desc.interceptor)
+                        .intercept(observable, args[2], args[1], desc);
+                }
+                let result;
+                if (observable.constructor === Object) {
+                    result = observable;
+                }
+                else {
+                    result = yield observable.toPromise();
+                }
+                if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
+                    events
+                        .getLayer(effectName)
+                        .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
+                }
+                return result;
+            });
+        };
+    }
+    generateSchema() {
+        const Fields = this.collectAppSchema();
+        let schema = new graphql_1.GraphQLSchema({
+            query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
+            mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
+            subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
+        });
+        if (this.neo4j) {
+            schema = this.neo4j.makeAugmentedSchema({ typeDefs: graphql_1.printSchema(schema) });
         }
+        this.hookService.AttachHooks([schema.getQueryType(), schema.getMutationType(), schema.getSubscriptionType()]);
+        this.writeEffectTypes(this.methodBasedEffects);
         return schema;
     }
     writeEffectTypes(effects) {
@@ -157,19 +166,20 @@ function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
 export const EffectTypes = strEnum(${JSON.stringify(effects).replace(/'/g, `'`).replace(/,/g, ',\n')});
 export type EffectTypes = keyof typeof EffectTypes;
 `;
-        const folder = process.env.INTROSPECTION_FOLDER || `./src/app/core/api-introspection/`;
-        fs_extra_1.ensureDirSync(folder);
-        fs_extra_1.writeFileSync(folder + 'EffectTypes.ts', types, 'utf8');
+        try {
+            const folder = process.env.INTROSPECTION_FOLDER || `./src/app/core/api-introspection/`;
+            fs_extra_1.ensureDirSync(folder);
+            fs_extra_1.writeFileSync(folder + 'EffectTypes.ts', types, 'utf8');
+        }
+        catch (e) {
+            console.error(e, 'Effects are not saved to directory');
+        }
     }
-    generateType(query, name, description) {
-        if (!Object.keys(query).length) {
+    generateType(fields, name, description) {
+        if (!Object.keys(fields).length) {
             return;
         }
-        return new graphql_1.GraphQLObjectType({
-            name: name,
-            description: description,
-            fields: query
-        });
+        return new graphql_1.GraphQLObjectType({ name, description, fields });
     }
     applyGlobalControllerOptions() {
         Array.from(this.moduleService.watcherService._constructors.keys())
@@ -213,12 +223,14 @@ export type EffectTypes = keyof typeof EffectTypes;
         return descriptors;
     }
 };
+__decorate([
+    core_1.Inject(() => hooks_service_1.HookService),
+    __metadata("design:type", hooks_service_1.HookService)
+], BootstrapService.prototype, "hookService", void 0);
 BootstrapService = __decorate([
     core_1.Service(),
-    __param(5, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
+    __param(3, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
     __metadata("design:paramtypes", [core_1.ModuleService,
-        hooks_service_1.HookService,
-        schema_service_1.SchemaService,
         effect_service_1.EffectService,
         core_1.BootstrapLogger, Object])
 ], BootstrapService);

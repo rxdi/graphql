@@ -6,22 +6,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const graphql_1 = require("graphql");
 const core_1 = require("@rxdi/core");
 let SchemaService = class SchemaService {
-    generateSchema(Query, Mutation, Subscription) {
-        const schema = {};
-        if (Query) {
-            schema.query = Query;
-        }
-        if (Mutation) {
-            schema.mutation = Mutation;
-        }
-        if (Subscription) {
-            schema.subscription = Subscription;
-        }
-        return new graphql_1.GraphQLSchema(schema);
-    }
 };
 SchemaService = __decorate([
     core_1.Service()

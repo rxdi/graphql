@@ -19,7 +19,6 @@ export class ServerPushPlugin implements PluginInterface {
     constructor(
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
         @Inject(HAPI_SERVER) private server: HapiServer,
-        @Inject(HAPI_CONFIG) private hapiPluginConfig: HapiServer,
         private exitHandler: ExitHandlerService,
         private afterStarterService: AfterStarterService,
         private startService: StartService
@@ -66,7 +65,7 @@ export class ServerPushPlugin implements PluginInterface {
     }
 
     async stopServerWatcher() {
-        return await new Promise((resolve) => this.serverWatcher.close(() => resolve()));
+        return await new Promise((resolve) => this.serverWatcher.close(resolve));
     }
 
     createServerWatcher() {
@@ -92,10 +91,10 @@ export class ServerPushPlugin implements PluginInterface {
             this.sendToClient.subscribe((data) => res.write('data: ' + JSON.stringify(data) + '\n\n'));
 
             this.sendTime.subscribe(
-                (data) => res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n')
+                () => res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n')
             );
             this.sendTime.subscribe(
-                (data) => res.write('data: ' + JSON.stringify({
+                () => res.write('data: ' + JSON.stringify({
                     config: {
                         graphql: {...this.config, graphqlOptions: null },
                         hapi: this.server.info

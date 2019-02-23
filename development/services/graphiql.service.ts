@@ -1,7 +1,7 @@
-import { Plugin, PluginInterface, Inject, Service } from '@rxdi/core';
+import { PluginInterface, Inject, Service } from '@rxdi/core';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
-import { Server } from 'hapi';
+import { Server, ResponseToolkit } from 'hapi';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 
 @Service()
@@ -21,18 +21,18 @@ export class GraphiQLService implements PluginInterface {
 
     async register() {
         if (this.config.graphiql) {
-            this.server.route(<any>{
+            this.server.route({
                 method: 'GET',
                 path: this.config.graphiQlPath || '/graphiql',
-                config: this.config.route || {},
-                handler: this.handler.bind(this)
+                options: this.config.route,
+                handler: this.handler
             });
         }
     }
 
-    async handler(request, h) {
+    handler = async (request: Request, h: ResponseToolkit, err?: Error) => {
         const graphiqlString = await GraphiQL.resolveGraphiQLString(
-            request.query,
+            request['query'],
             this.config.graphiqlOptions,
             request,
         );

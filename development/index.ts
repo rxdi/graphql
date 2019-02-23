@@ -1,7 +1,7 @@
 import { Module, ModuleWithServices } from '@rxdi/core';
-import { HookService, SchemaService, EffectService, ServerPushPlugin } from './services';
+import { HookService, EffectService, ServerPushPlugin } from './services';
 import { ApolloService } from './services/apollo.service';
-import { GRAPHQL_PLUGIN_CONFIG, GRAPHQL_TYPE_DEFINITIONS } from './config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
 import { BootstrapService } from './services/bootstrap.service';
 import { GraphiQLService } from './services/graphiql.service';
 import { StartService } from './services/start.service';
@@ -27,12 +27,8 @@ export class GraphQLModule {
                     provide: GRAPHQL_PLUGIN_CONFIG,
                     useValue: config
                 },
-                {
-                    provide: GRAPHQL_TYPE_DEFINITIONS,
-                    useValue: 'empty-type-definitions'
-                },
                 HookService,
-                SchemaService
+                //
             ],
             frameworkImports: [
                 PlaygroundModule.forRoot({

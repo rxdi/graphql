@@ -7,7 +7,6 @@ import { StartService } from './start.service';
 export declare class ServerPushPlugin implements PluginInterface {
     private config;
     private server;
-    private hapiPluginConfig;
     private exitHandler;
     private afterStarterService;
     private startService;
@@ -16,7 +15,7 @@ export declare class ServerPushPlugin implements PluginInterface {
     sendToClient: Subject<any>;
     sendTime: Subject<boolean>;
     clientConnected: Subject<boolean>;
-    constructor(config: GRAPHQL_PLUGIN_CONFIG, server: HapiServer, hapiPluginConfig: HapiServer, exitHandler: ExitHandlerService, afterStarterService: AfterStarterService, startService: StartService);
+    constructor(config: GRAPHQL_PLUGIN_CONFIG, server: HapiServer, exitHandler: ExitHandlerService, afterStarterService: AfterStarterService, startService: StartService);
     waitXSeconds(sec: any): Observable<any>;
     register(): Promise<void>;
     stopServerWatcher(): Promise<{}>;

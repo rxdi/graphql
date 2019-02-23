@@ -26,46 +26,13 @@ const hapi_1 = require("hapi");
 const apollo_server_core_1 = require("apollo-server-core");
 const hapi_2 = require("@rxdi/hapi");
 const config_tokens_1 = require("../config.tokens");
-// import { AuthService } from '../auth/auth.service';
-// import { Container } from '../../container';
 const bootstrap_service_1 = require("../services/bootstrap.service");
-const graphql_1 = require("graphql");
 let ApolloService = class ApolloService {
-    constructor(server, config, typeDefs, bootstrapService) {
+    constructor(server, config, bootstrapService) {
         this.server = server;
         this.config = config;
-        this.typeDefs = typeDefs;
         this.bootstrapService = bootstrapService;
-    }
-    OnInit() {
-        let proxySchema;
-        try {
-            proxySchema = core_1.Container.get('gapi-custom-schema-definition');
-        }
-        catch (e) { }
-        this.config.graphqlOptions.schema = proxySchema || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
-        this.typeDefs = graphql_1.printSchema(this.config.graphqlOptions.schema);
-        try {
-            const neo4j = core_1.Container.get('neo4j-graphql-js');
-            this.config.graphqlOptions.schema = neo4j.makeAugmentedSchema({ typeDefs: this.typeDefs });
-        }
-        catch (e) { }
-        this.register();
-    }
-    register() {
-        if (!this.config || !this.config.graphqlOptions) {
-            throw new Error('Apollo Server requires options.');
-        }
-        this.server.route({
-            method: ['GET', 'POST'],
-            path: this.config.path || '/graphql',
-            vhost: this.config.vhost || undefined,
-            config: this.config.route || {},
-            handler: this.handler.bind(this)
-        });
-    }
-    handler(request, h) {
-        return __awaiter(this, void 0, void 0, function* () {
+        this.handler = (request, h, err) => __awaiter(this, void 0, void 0, function* () {
             try {
                 this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
                 if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
@@ -80,8 +47,7 @@ let ApolloService = class ApolloService {
                 else {
                     this.config.graphqlOptions.context.user = null;
                 }
-                let gqlResponse;
-                gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
+                const gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
                     method: request.method.toUpperCase(),
                     options: this.config.graphqlOptions,
                     query: request.method === 'post' ? request.payload : request.query,
@@ -106,9 +72,7 @@ let ApolloService = class ApolloService {
                 }
                 const err = new Boom(error.message, { statusCode: error.statusCode });
                 if (error.headers) {
-                    Object.keys(error.headers).forEach(header => {
-                        err.output.headers[header] = error.headers[header];
-                    });
+                    Object.keys(error.headers).forEach(header => err.output.headers[header] = error.headers[header]);
                 }
                 // Boom hides the error when status code is 500
                 err.output.payload.message = error.message;
@@ -116,12 +80,32 @@ let ApolloService = class ApolloService {
             }
         });
     }
+    OnInit() {
+        let customSchemaDefinition;
+        try {
+            customSchemaDefinition = core_1.Container.get('gapi-custom-schema-definition');
+        }
+        catch (e) { }
+        this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        this.register();
+    }
+    register() {
+        if (!this.config || !this.config.graphqlOptions) {
+            throw new Error('Apollo Server requires options.');
+        }
+        this.server.route({
+            method: ['GET', 'POST'],
+            path: this.config.path || '/graphql',
+            vhost: this.config.vhost,
+            config: this.config.route || {},
+            handler: this.handler
+        });
+    }
 };
 ApolloService = __decorate([
     core_1.Service(),
     __param(0, core_1.Inject(hapi_2.HAPI_SERVER)),
     __param(1, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
-    __param(2, core_1.Inject(config_tokens_1.GRAPHQL_TYPE_DEFINITIONS)),
-    __metadata("design:paramtypes", [hapi_1.Server, Object, String, bootstrap_service_1.BootstrapService])
+    __metadata("design:paramtypes", [hapi_1.Server, Object, bootstrap_service_1.BootstrapService])
 ], ApolloService);
 exports.ApolloService = ApolloService;

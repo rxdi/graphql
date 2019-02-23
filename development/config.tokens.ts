@@ -6,6 +6,8 @@ import {
     runHttpQuery,
     HttpQueryError,
 } from 'apollo-server-core';
+import { GraphQLSchema } from 'graphql';
+import { Server } from 'hapi';
 
 export interface HapiOptionsFunction {
     (req?: Request): GraphQLOptions | Promise<GraphQLOptions>;
@@ -32,7 +34,7 @@ export interface GRAPHQL_PLUGIN_CONFIG {
     authentication?: Function | InjectionToken<any>;
     vhost?: string;
     route?: {
-        cors?: boolean
+        cors?: boolean;
     };
     graphqlOptions?: GraphQLOptions;
     graphiqlOptions?: GraphiQL.GraphiQLData;
@@ -43,7 +45,19 @@ export interface GRAPHQL_AUTHENTICATION_FAKE {
     onSubOperation(connectionParams, params, webSocket): any;
 }
 
-export const GRAPHQL_TYPE_DEFINITIONS = new InjectionToken('graphql-type-definitions');
 export const GRAPHQL_PLUGIN_CONFIG = new InjectionToken<GRAPHQL_PLUGIN_CONFIG>('graphql-configuration-injection-token');
 
-export interface Neo4JInjectionInterface { makeAugmentedSchema(options: { typeDefs: string }); }
+export interface Neo4JInjectionInterface {
+    makeAugmentedSchema(options: { typeDefs: string }): GraphQLSchema;
+    augmentSchema(schema): GraphQLSchema;
+}
+
+export interface IRegister {
+    (server: Server, options: any): void;
+}
+
+export interface IPlugin {
+    name: string;
+    version?: string;
+    register: IRegister;
+}

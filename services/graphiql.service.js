@@ -29,6 +29,12 @@ let GraphiQLService = class GraphiQLService {
     constructor(server, config) {
         this.server = server;
         this.config = config;
+        this.handler = (request, h, err) => __awaiter(this, void 0, void 0, function* () {
+            const graphiqlString = yield GraphiQL.resolveGraphiQLString(request['query'], this.config.graphiqlOptions, request);
+            const response = h.response(graphiqlString);
+            response.type('text/html');
+            return response;
+        });
     }
     OnInit() {
         if (!this.config || !this.config.graphiqlOptions) {
@@ -42,18 +48,10 @@ let GraphiQLService = class GraphiQLService {
                 this.server.route({
                     method: 'GET',
                     path: this.config.graphiQlPath || '/graphiql',
-                    config: this.config.route || {},
-                    handler: this.handler.bind(this)
+                    options: this.config.route,
+                    handler: this.handler
                 });
             }
-        });
-    }
-    handler(request, h) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const graphiqlString = yield GraphiQL.resolveGraphiQLString(request.query, this.config.graphiqlOptions, request);
-            const response = h.response(graphiqlString);
-            response.type('text/html');
-            return response;
         });
     }
 };

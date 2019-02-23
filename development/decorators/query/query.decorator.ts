@@ -19,6 +19,7 @@ export class GenericGapiResolversType implements GraphQLControllerOptions {
             [type: string]: GraphQLObjectType | GraphQLNonNull<any>;
         };
     };
+    self?: any;
 }
 
 interface TargetConstructor {

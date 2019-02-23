@@ -1,6 +1,7 @@
 import { Scope, Type, GapiObjectType, Query } from '../index';
 import { GraphQLInt, GraphQLScalarType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Container } from '@rxdi/core';
+import 'jest';
 
 @GapiObjectType()
 class UserType {

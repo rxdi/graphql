@@ -1,5 +1,6 @@
 import { Query, Public } from '../index';
 import { Controller, Container } from '@rxdi/core';
+import 'jest';
 
 describe('Decorators: @Public', () => {
     it('Should get raw object value ', (done) => {

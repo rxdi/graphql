@@ -49,10 +49,10 @@ export class ApolloService implements PluginInterface {
             } else {
                 this.config.graphqlOptions.context.user = null;
             }
-            const gqlResponse = await runHttpQuery([request], {
+            const gqlResponse = await runHttpQuery([request], <any>{
                 method: request.method.toUpperCase(),
                 options: this.config.graphqlOptions,
-                query: request.method === 'post' ? <any>request.payload : request.query,
+                query: request.method === 'post' ? request.payload : request.query,
             });
             const response = h.response(gqlResponse);
             response.type('application/json');

@@ -1,6 +1,7 @@
 import { Type, GapiObjectType, Query } from '../index';
 import { GraphQLInt, GraphQLScalarType } from 'graphql';
 import { Controller, Container } from '@rxdi/core';
+import 'jest';
 
 @GapiObjectType()
 export class UserType {

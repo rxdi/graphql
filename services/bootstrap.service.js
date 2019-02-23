@@ -147,9 +147,16 @@ let BootstrapService = class BootstrapService {
         if (this.neo4j) {
             schema = this.neo4j.makeAugmentedSchema({ typeDefs: graphql_1.printSchema(schema) });
         }
+        // Build astNode https://github.com/graphql/graphql-js/issues/1575
         this.hookService.AttachHooks([schema.getQueryType(), schema.getMutationType(), schema.getSubscriptionType()]);
         this.writeEffectTypes(this.methodBasedEffects);
         return schema;
+    }
+    generateType(fields, name, description) {
+        if (!Object.keys(fields).length) {
+            return;
+        }
+        return new graphql_1.GraphQLObjectType({ name, description, fields });
     }
     writeEffectTypes(effects) {
         if (!this.config.writeEffects) {
@@ -174,12 +181,6 @@ export type EffectTypes = keyof typeof EffectTypes;
         catch (e) {
             console.error(e, 'Effects are not saved to directory');
         }
-    }
-    generateType(fields, name, description) {
-        if (!Object.keys(fields).length) {
-            return;
-        }
-        return new graphql_1.GraphQLObjectType({ name, description, fields });
     }
     applyGlobalControllerOptions() {
         Array.from(this.moduleService.watcherService._constructors.keys())

@@ -85,7 +85,7 @@ export class BootstrapService {
                 return originalSubscribe.bind(self)(self, ...args);
             };
         }
-        desc.resolve = async function resolve<T>(...args: any[]) {
+        desc.resolve = async function resolve(...args: any[]) {
             if (!desc.public
                 && desc.guards && desc.guards.length
                 && currentConstructor.config.authentication
@@ -109,7 +109,7 @@ export class BootstrapService {
                 val = of(val);
             }
 
-            let observable = from<T>(val);
+            let observable = from(val);
 
             if (desc.interceptor) {
                 observable = await Container
@@ -149,7 +149,14 @@ export class BootstrapService {
         return schema;
     }
 
-    writeEffectTypes(effects: Array<string>): void {
+    private generateType(fields: GraphQLFieldConfigMap<any, any>, name: string, description: string): GraphQLObjectType {
+        if (!Object.keys(fields).length) {
+            return;
+        }
+        return new GraphQLObjectType({ name, description, fields });
+    }
+
+    private writeEffectTypes(effects: Array<string>): void {
         if (!this.config.writeEffects) {
             return;
         }
@@ -173,14 +180,8 @@ export type EffectTypes = keyof typeof EffectTypes;
         }
     }
 
-    generateType(fields: GraphQLFieldConfigMap<any, any>, name: string, description: string): GraphQLObjectType {
-        if (!Object.keys(fields).length) {
-            return;
-        }
-        return new GraphQLObjectType({ name, description, fields });
-    }
 
-    applyGlobalControllerOptions() {
+    private applyGlobalControllerOptions() {
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map(key => {

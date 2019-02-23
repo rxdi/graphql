@@ -1,6 +1,7 @@
 import { Query } from '../index';
 import { Controller, Container } from '@rxdi/core';
 import { EffectName } from './effect-name.decorator';
+import 'jest';
 
 describe('Decorators: @EffectName', () => {
     it('Should get raw object value ', (done) => {

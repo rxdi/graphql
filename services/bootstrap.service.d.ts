@@ -1,5 +1,5 @@
 import { ModuleService, BootstrapLogger } from '@rxdi/core';
-import { GraphQLObjectType, GraphQLSchema, GraphQLFieldConfigMap } from 'graphql';
+import { GraphQLSchema, GraphQLFieldConfigMap } from 'graphql';
 import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG, Neo4JInjectionInterface } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
@@ -32,14 +32,20 @@ export declare class BootstrapService {
     validateGuard(res: Function): Promise<void>;
     applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
     collectAppSchema(): {
-        query: GraphQLFieldConfigMap<any, any>;
-        mutation: GraphQLFieldConfigMap<any, any>;
-        subscription: GraphQLFieldConfigMap<any, any>;
+        query: GraphQLFieldConfigMap<any, any, {
+            [key: string]: any;
+        }>;
+        mutation: GraphQLFieldConfigMap<any, any, {
+            [key: string]: any;
+        }>;
+        subscription: GraphQLFieldConfigMap<any, any, {
+            [key: string]: any;
+        }>;
     };
     applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
     generateSchema(): GraphQLSchema;
-    writeEffectTypes(effects: Array<string>): void;
-    generateType(fields: GraphQLFieldConfigMap<any, any>, name: string, description: string): GraphQLObjectType;
-    applyGlobalControllerOptions(): void;
+    private generateType;
+    private writeEffectTypes;
+    private applyGlobalControllerOptions;
     getMetaDescriptors(): MetaDescriptor[];
 }

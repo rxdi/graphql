@@ -41,7 +41,7 @@ let ApolloService = class ApolloService {
             }
             catch (e) { }
             if (onRequest) {
-                return yield onRequest(this.makeGQLRequest(request, response, error), this.config.graphqlOptions.context, request, response, error);
+                return yield onRequest(() => this.makeGQLRequest(request, response, error), this.config.graphqlOptions.context, request, response, error);
             }
             this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
             if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {

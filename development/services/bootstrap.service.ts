@@ -18,12 +18,17 @@ export interface CurrentConstructorInteraface {
         _descriptors: Map<string, { value: () => GenericGapiResolversType }>
     };
 }
+export interface InternalFields {
+    query: GraphQLFieldConfigMap<any, any>;
+    mutation: GraphQLFieldConfigMap<any, any>;
+    subscription: GraphQLFieldConfigMap<any, any>;
+}
 
 @Service()
 export class BootstrapService {
 
     methodBasedEffects = [];
-
+    Fields: InternalFields = { query: {}, mutation: {}, subscription: {} };
     constructor(
         private moduleService: ModuleService,
         private effectService: EffectService,
@@ -53,26 +58,25 @@ export class BootstrapService {
     }
 
     getResolverByName(resolverName: string) {
-        const schema = this.collectAppSchema();
-        return schema.query[resolverName] || schema.mutation[resolverName] || schema.subscription[resolverName];
+        return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
     }
 
-    collectAppSchema() {
-        const Fields: { query: GraphQLFieldConfigMap<any, any>; mutation: GraphQLFieldConfigMap<any, any>; subscription: GraphQLFieldConfigMap<any, any> } = { query: {}, mutation: {}, subscription: {} };
+    private collectAppSchema() {
+        const Fields: InternalFields = this.Fields;
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
             .forEach(({ descriptor }) => {
                 const desc = descriptor();
                 Fields[desc.method_type][desc.method_name] = desc;
             });
-        return Fields;
+        this.Fields = Fields;
+        return this.Fields;
     }
 
     applyMetaToResolvers(desc: GenericGapiResolversType, self: any) {
         const events = this.effectService;
         const currentConstructor = this;
         const effectName = desc.effect ? desc.effect : desc.method_name;
-        this.methodBasedEffects = [];
         this.methodBasedEffects.push(effectName);
         const originalResolve = desc.resolve.bind(self);
 
@@ -147,7 +151,7 @@ export class BootstrapService {
         return new GraphQLObjectType({ name, description, fields });
     }
 
-    writeEffectTypes(effects: Array<string>): void {
+    writeEffectTypes(effects?: Array<string>): void {
         if (!this.config.writeEffects) {
             return;
         }
@@ -159,7 +163,7 @@ function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
         return res;
     }, Object.create(null));
 }
-export const EffectTypes = strEnum(${JSON.stringify(effects).replace(/'/g, `'`).replace(/,/g, ',\n')});
+export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects).replace(/'/g, `'`).replace(/,/g, ',\n')});
 export type EffectTypes = keyof typeof EffectTypes;
 `;
         try {

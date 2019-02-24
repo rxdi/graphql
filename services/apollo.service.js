@@ -104,7 +104,7 @@ let ApolloService = class ApolloService {
             this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
         }
         this.hookService.AttachHooks([this.config.graphqlOptions.schema.getQueryType(), this.config.graphqlOptions.schema.getMutationType(), this.config.graphqlOptions.schema.getSubscriptionType()]);
-        this.bootstrapService.writeEffectTypes(this.bootstrapService.methodBasedEffects);
+        this.bootstrapService.writeEffectTypes();
         this.register();
     }
     register() {

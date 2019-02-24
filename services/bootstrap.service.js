@@ -40,6 +40,7 @@ let BootstrapService = class BootstrapService {
         this.logger = logger;
         this.config = config;
         this.methodBasedEffects = [];
+        this.Fields = { query: {}, mutation: {}, subscription: {} };
     }
     validateGuard(res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -67,23 +68,23 @@ let BootstrapService = class BootstrapService {
         });
     }
     getResolverByName(resolverName) {
-        return this.collectAppSchema().query[resolverName] || this.collectAppSchema().mutation[resolverName] || this.collectAppSchema().subscription[resolverName];
+        return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
     }
     collectAppSchema() {
-        const Fields = { query: {}, mutation: {}, subscription: {} };
+        const Fields = this.Fields;
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
             .forEach(({ descriptor }) => {
             const desc = descriptor();
             Fields[desc.method_type][desc.method_name] = desc;
         });
-        return Fields;
+        this.Fields = Fields;
+        return this.Fields;
     }
     applyMetaToResolvers(desc, self) {
         const events = this.effectService;
         const currentConstructor = this;
         const effectName = desc.effect ? desc.effect : desc.method_name;
-        this.methodBasedEffects = [];
         this.methodBasedEffects.push(effectName);
         const originalResolve = desc.resolve.bind(self);
         if (desc.subscribe) {
@@ -161,7 +162,7 @@ function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
         return res;
     }, Object.create(null));
 }
-export const EffectTypes = strEnum(${JSON.stringify(effects).replace(/'/g, `'`).replace(/,/g, ',\n')});
+export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects).replace(/'/g, `'`).replace(/,/g, ',\n')});
 export type EffectTypes = keyof typeof EffectTypes;
 `;
         try {
@@ -181,24 +182,25 @@ export type EffectTypes = keyof typeof EffectTypes;
             const options = currentConstructor.type['metadata'].options;
             currentConstructor.type._descriptors = currentConstructor.type._descriptors || [];
             Array.from(currentConstructor.type._descriptors.keys()).map((k => {
-                if (options) {
-                    const orig = currentConstructor.type._descriptors.get(k);
-                    const descriptor = orig.value();
-                    if (options.scope) {
-                        descriptor.scope = descriptor.scope || options.scope;
-                    }
-                    if (options.guards && options.guards.length && !descriptor.public) {
-                        descriptor.guards = descriptor.guards || options.guards;
-                    }
-                    if (options.type) {
-                        descriptor.type = descriptor.type || options.type;
-                    }
-                    if (options.interceptor && !descriptor.interceptor) {
-                        descriptor.interceptor = options.interceptor;
-                    }
-                    orig.value = () => descriptor;
-                    currentConstructor.type._descriptors.set(k, orig);
+                if (!options) {
+                    return;
                 }
+                const orig = currentConstructor.type._descriptors.get(k);
+                const descriptor = orig.value();
+                if (options.scope) {
+                    descriptor.scope = descriptor.scope || options.scope;
+                }
+                if (options.guards && options.guards.length && !descriptor.public) {
+                    descriptor.guards = descriptor.guards || options.guards;
+                }
+                if (options.type) {
+                    descriptor.type = descriptor.type || options.type;
+                }
+                if (options.interceptor && !descriptor.interceptor) {
+                    descriptor.interceptor = options.interceptor;
+                }
+                orig.value = () => descriptor;
+                currentConstructor.type._descriptors.set(k, orig);
             }));
             return key;
         });

@@ -34,6 +34,8 @@ let HookService = class HookService {
                     }
                     resolvers[resolver].resolve = currentResolver.resolve;
                     resolvers[resolver]['target'] = currentResolver['target'];
+                    resolvers[resolver]['method_name'] = currentResolver['method_name'];
+                    resolvers[resolver]['method_type'] = currentResolver['method_type'];
                     resolvers[resolver]['interceptor'] = currentResolver['interceptor'];
                     resolvers[resolver]['scope'] = currentResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
                     this.bootstrap.applyMetaToResolvers(resolvers[resolver], resolvers[resolver]['target']);

@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/graphql",
-  "version": "0.0.365",
+  "version": "0.0.366",
   "repository": {
     "type": "git",
     "url": "https://github.com/rxdi/graphql.git"
@@ -37,8 +37,8 @@
     "graphql": "^0.13.2"
   },
   "devDependencies": {
-    "@rxdi/core": "^0.0.364",
-    "@rxdi/hapi": "^0.0.364",
+    "@rxdi/core": "^0.0.365",
+    "@rxdi/hapi": "^0.0.365",
     "@types/graphql": "^14.0.7",
     "@types/hapi": "^18.0.1",
     "@types/jest": "^24.0.6",

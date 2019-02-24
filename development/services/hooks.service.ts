@@ -20,11 +20,17 @@ export class HookService {
             }
             const resolvers = type.getFields();
             Object.keys(resolvers).forEach(resolver => {
-                resolvers[resolver]['scope'] = resolvers[resolver]['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-                if (!resolvers[resolver]['public']) {
-                    this.AddHooks(resolvers[resolver]);
+                const currentResolver = this.bootstrap.getResolverByName(resolvers[resolver]['name']);
+                if (currentResolver) {
+                    if (!resolvers[resolver]['public']) {
+                        this.AddHooks(resolvers[resolver]);
+                    }
+                    resolvers[resolver].resolve = currentResolver.resolve;
+                    resolvers[resolver]['target'] = currentResolver['target'];
+                    resolvers[resolver]['interceptor'] = currentResolver['interceptor'];
+                    resolvers[resolver]['scope'] = currentResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
+                    this.bootstrap.applyMetaToResolvers(<any>currentResolver, currentResolver['target']);
                 }
-                this.bootstrap.applyMetaToResolvers(<any>resolvers[resolver], resolvers[resolver]['self']);
             });
         });
     }

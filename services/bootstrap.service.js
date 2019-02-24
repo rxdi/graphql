@@ -71,13 +71,15 @@ let BootstrapService = class BootstrapService {
             })));
         });
     }
+    getResolverByName(resolverName) {
+        return this.collectAppSchema().query[resolverName] || this.collectAppSchema().mutation[resolverName] || this.collectAppSchema().subscription[resolverName];
+    }
     collectAppSchema() {
         const Fields = { query: {}, mutation: {}, subscription: {} };
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
-            .forEach(({ descriptor, self }) => {
+            .forEach(({ descriptor }) => {
             const desc = descriptor();
-            desc.self = self;
             Fields[desc.method_type][desc.method_name] = desc;
         });
         return Fields;
@@ -144,9 +146,11 @@ let BootstrapService = class BootstrapService {
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
         });
+        schema = graphql_1.buildSchema(graphql_1.printSchema(schema));
         if (this.neo4j) {
             schema = this.neo4j.makeAugmentedSchema({ typeDefs: graphql_1.printSchema(schema) });
         }
+        // console.log(schema.getQueryType().getFields());
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         this.hookService.AttachHooks([schema.getQueryType(), schema.getMutationType(), schema.getSubscriptionType()]);
         this.writeEffectTypes(this.methodBasedEffects);

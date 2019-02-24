@@ -58,14 +58,15 @@ export class BootstrapService {
             await this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
         }));
     }
-
+    getResolverByName(resolverName: string) {
+        return this.collectAppSchema().query[resolverName] || this.collectAppSchema().mutation[resolverName] || this.collectAppSchema().subscription[resolverName];
+    }
     collectAppSchema() {
         const Fields: { query: GraphQLFieldConfigMap<any, any>; mutation: GraphQLFieldConfigMap<any, any>; subscription: GraphQLFieldConfigMap<any, any> } = { query: {}, mutation: {}, subscription: {} };
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
-            .forEach(({ descriptor, self }) => {
+            .forEach(({ descriptor }) => {
                 const desc = descriptor();
-                desc.self = self;
                 Fields[desc.method_type][desc.method_name] = desc;
             });
         return Fields;
@@ -140,9 +141,12 @@ export class BootstrapService {
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
         });
+        schema = buildSchema(printSchema(schema));
         if (this.neo4j) {
             schema = this.neo4j.makeAugmentedSchema({ typeDefs: printSchema(schema) });
         }
+
+        // console.log(schema.getQueryType().getFields());
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         this.hookService.AttachHooks([schema.getQueryType(), schema.getMutationType(), schema.getSubscriptionType()]);
         this.writeEffectTypes(this.methodBasedEffects);

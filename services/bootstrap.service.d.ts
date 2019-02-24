@@ -31,6 +31,9 @@ export declare class BootstrapService {
     constructor(moduleService: ModuleService, effectService: EffectService, logger: BootstrapLogger, config: GRAPHQL_PLUGIN_CONFIG);
     validateGuard(res: Function): Promise<void>;
     applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
+    getResolverByName(resolverName: string): import("graphql/type/definition").GraphQLFieldConfig<any, any, {
+        [key: string]: any;
+    }>;
     collectAppSchema(): {
         query: GraphQLFieldConfigMap<any, any, {
             [key: string]: any;

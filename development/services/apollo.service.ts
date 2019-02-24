@@ -51,14 +51,14 @@ export class ApolloService implements PluginInterface {
         });
     }
     defaultOrNew = async (request: Request, response: ResponseToolkit, error: Error) => {
-        let onRequest: (next: any, context?: any, request?: Request, h?: ResponseToolkit, err?: Error) => any;
+        let onRequest: (next: any, context?: any, request?: Request, h?: ResponseToolkit, err?: Error) => Promise<any>;
         try {
             onRequest = <any>Container.get(ON_REQUEST_HANDLER);
         } catch (e) { }
 
         if (onRequest) {
             return await onRequest(
-                this.makeGQLRequest(request, response, error),
+                () => this.makeGQLRequest(request, response, error),
                 this.config.graphqlOptions.context,
                 request,
                 response,

@@ -146,7 +146,7 @@ import { Request, ResponseToolkit } from 'hapi';
                 //         context.user = {id: 1, name: 'pesho'};
                 //     }
                 // }
-                return next;
+                return next();
             }
         }
     ]

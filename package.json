@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/graphql",
-  "version": "0.0.362",
+  "version": "0.0.363",
   "repository": {
     "type": "git",
     "url": "https://github.com/rxdi/graphql.git"
@@ -34,7 +34,7 @@
     "apollo-server-module-graphiql": "1.3.4",
     "boom": "^7.3.0",
     "fs-extra": "^7.0.1",
-    "graphql": "^14.1.1"
+    "graphql": "^0.13.2"
   },
   "devDependencies": {
     "@rxdi/core": "^0.0.362",

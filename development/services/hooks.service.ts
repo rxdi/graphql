@@ -29,7 +29,7 @@ export class HookService {
                     resolvers[resolver]['target'] = currentResolver['target'];
                     resolvers[resolver]['interceptor'] = currentResolver['interceptor'];
                     resolvers[resolver]['scope'] = currentResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-                    this.bootstrap.applyMetaToResolvers(<any>currentResolver, currentResolver['target']);
+                    this.bootstrap.applyMetaToResolvers(<any>resolvers[resolver], resolvers[resolver]['target']);
                 }
             });
         });
@@ -51,9 +51,9 @@ export class HookService {
         if (this.config.authentication) {
             const resolve = resolver.resolve;
             const self = this;
-            resolver.resolve = async function (root, args, context, info, ...a) {
+            resolver.resolve = function (root, args, context, info, ...a) {
                 self.ResolverHooks(resolver, root, args, context, info);
-                return await resolve(root, args, context, info, ...a);
+                return resolve(root, args, context, info, ...a);
             };
         }
     }

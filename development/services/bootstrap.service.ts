@@ -22,21 +22,14 @@ export interface CurrentConstructorInteraface {
 @Service()
 export class BootstrapService {
 
-    @Inject(() => HookService) private hookService: HookService;
-
     methodBasedEffects = [];
-    neo4j: Neo4JInjectionInterface;
 
     constructor(
         private moduleService: ModuleService,
         private effectService: EffectService,
         private logger: BootstrapLogger,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
-    ) {
-        try {
-            this.neo4j = Container.get('neo4j-graphql-js');
-        } catch (e) { }
-    }
+    ) {}
 
     async validateGuard(res: Function) {
         if (res.constructor === Boolean) {
@@ -58,9 +51,11 @@ export class BootstrapService {
             await this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
         }));
     }
+
     getResolverByName(resolverName: string) {
         return this.collectAppSchema().query[resolverName] || this.collectAppSchema().mutation[resolverName] || this.collectAppSchema().subscription[resolverName];
     }
+
     collectAppSchema() {
         const Fields: { query: GraphQLFieldConfigMap<any, any>; mutation: GraphQLFieldConfigMap<any, any>; subscription: GraphQLFieldConfigMap<any, any> } = { query: {}, mutation: {}, subscription: {} };
         this.applyGlobalControllerOptions();
@@ -87,6 +82,7 @@ export class BootstrapService {
             };
         }
         desc.resolve = async function resolve(...args: any[]) {
+
             if (!desc.public
                 && desc.guards && desc.guards.length
                 && currentConstructor.config.authentication
@@ -111,7 +107,6 @@ export class BootstrapService {
             }
 
             let observable = from(val);
-
             if (desc.interceptor) {
                 observable = await Container
                     .get<InterceptResolver>(desc.interceptor)
@@ -136,21 +131,12 @@ export class BootstrapService {
 
     generateSchema(): GraphQLSchema {
         const Fields = this.collectAppSchema();
-        let schema = new GraphQLSchema({
+        // Build astNode https://github.com/graphql/graphql-js/issues/1575
+        return buildSchema(printSchema(new GraphQLSchema({
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
-        });
-        schema = buildSchema(printSchema(schema));
-        if (this.neo4j) {
-            schema = this.neo4j.makeAugmentedSchema({ typeDefs: printSchema(schema) });
-        }
-
-        // console.log(schema.getQueryType().getFields());
-        // Build astNode https://github.com/graphql/graphql-js/issues/1575
-        this.hookService.AttachHooks([schema.getQueryType(), schema.getMutationType(), schema.getSubscriptionType()]);
-        this.writeEffectTypes(this.methodBasedEffects);
-        return schema;
+        })));
     }
 
     private generateType(fields: GraphQLFieldConfigMap<any, any>, name: string, description: string): GraphQLObjectType {
@@ -160,7 +146,7 @@ export class BootstrapService {
         return new GraphQLObjectType({ name, description, fields });
     }
 
-    private writeEffectTypes(effects: Array<string>): void {
+    writeEffectTypes(effects: Array<string>): void {
         if (!this.config.writeEffects) {
             return;
         }

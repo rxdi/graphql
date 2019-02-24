@@ -6,6 +6,7 @@ import { HAPI_SERVER } from '@rxdi/hapi';
 import { GRAPHQL_PLUGIN_CONFIG, SCHEMA_OVERRIDE, CUSTOM_SCHEMA_DEFINITION, ON_REQUEST_HANDLER } from '../config.tokens';
 import { BootstrapService } from '../services/bootstrap.service';
 import { GraphQLSchema } from 'graphql';
+import { HookService } from './hooks.service';
 
 @Service()
 export class ApolloService implements PluginInterface {
@@ -13,12 +14,12 @@ export class ApolloService implements PluginInterface {
     constructor(
         @Inject(HAPI_SERVER) private server: Server,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
-        private bootstrapService: BootstrapService
+        private bootstrapService: BootstrapService,
+        private hookService: HookService
     ) { }
 
     OnInit() {
         let schemaOverride: (schema: GraphQLSchema) => GraphQLSchema;
-
         try {
             schemaOverride = Container.get(SCHEMA_OVERRIDE);
         } catch (e) { }
@@ -32,6 +33,8 @@ export class ApolloService implements PluginInterface {
             } catch (e) { }
             this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
         }
+        this.hookService.AttachHooks([this.config.graphqlOptions.schema.getQueryType(), this.config.graphqlOptions.schema.getMutationType(), this.config.graphqlOptions.schema.getSubscriptionType()]);
+        this.bootstrapService.writeEffectTypes(this.bootstrapService.methodBasedEffects);
         this.register();
     }
 

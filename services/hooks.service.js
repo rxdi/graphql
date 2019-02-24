@@ -11,14 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const error_service_1 = require("./error.service");
 const core_1 = require("@rxdi/core");
@@ -44,7 +36,7 @@ let HookService = class HookService {
                     resolvers[resolver]['target'] = currentResolver['target'];
                     resolvers[resolver]['interceptor'] = currentResolver['interceptor'];
                     resolvers[resolver]['scope'] = currentResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-                    this.bootstrap.applyMetaToResolvers(currentResolver, currentResolver['target']);
+                    this.bootstrap.applyMetaToResolvers(resolvers[resolver], resolvers[resolver]['target']);
                 }
             });
         });
@@ -63,10 +55,8 @@ let HookService = class HookService {
             const resolve = resolver.resolve;
             const self = this;
             resolver.resolve = function (root, args, context, info, ...a) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    self.ResolverHooks(resolver, root, args, context, info);
-                    return yield resolve(root, args, context, info, ...a);
-                });
+                self.ResolverHooks(resolver, root, args, context, info);
+                return resolve(root, args, context, info, ...a);
             };
         }
     }

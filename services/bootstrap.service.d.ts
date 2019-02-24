@@ -1,7 +1,7 @@
 import { ModuleService, BootstrapLogger } from '@rxdi/core';
 import { GraphQLSchema, GraphQLFieldConfigMap } from 'graphql';
 import { EffectService } from './effect.service';
-import { GRAPHQL_PLUGIN_CONFIG, Neo4JInjectionInterface } from '../config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 export declare class FieldsModule {
     query: {};
@@ -25,9 +25,7 @@ export declare class BootstrapService {
     private effectService;
     private logger;
     private config;
-    private hookService;
     methodBasedEffects: any[];
-    neo4j: Neo4JInjectionInterface;
     constructor(moduleService: ModuleService, effectService: EffectService, logger: BootstrapLogger, config: GRAPHQL_PLUGIN_CONFIG);
     validateGuard(res: Function): Promise<void>;
     applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
@@ -48,7 +46,7 @@ export declare class BootstrapService {
     applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
     generateSchema(): GraphQLSchema;
     private generateType;
-    private writeEffectTypes;
+    writeEffectTypes(effects: Array<string>): void;
     private applyGlobalControllerOptions;
     getMetaDescriptors(): MetaDescriptor[];
 }

@@ -27,11 +27,13 @@ const apollo_server_core_1 = require("apollo-server-core");
 const hapi_2 = require("@rxdi/hapi");
 const config_tokens_1 = require("../config.tokens");
 const bootstrap_service_1 = require("../services/bootstrap.service");
+const hooks_service_1 = require("./hooks.service");
 let ApolloService = class ApolloService {
-    constructor(server, config, bootstrapService) {
+    constructor(server, config, bootstrapService, hookService) {
         this.server = server;
         this.config = config;
         this.bootstrapService = bootstrapService;
+        this.hookService = hookService;
         this.defaultOrNew = (request, response, error) => __awaiter(this, void 0, void 0, function* () {
             let onRequest;
             try {
@@ -101,6 +103,8 @@ let ApolloService = class ApolloService {
             catch (e) { }
             this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
         }
+        this.hookService.AttachHooks([this.config.graphqlOptions.schema.getQueryType(), this.config.graphqlOptions.schema.getMutationType(), this.config.graphqlOptions.schema.getSubscriptionType()]);
+        this.bootstrapService.writeEffectTypes(this.bootstrapService.methodBasedEffects);
         this.register();
     }
     register() {
@@ -132,6 +136,7 @@ ApolloService = __decorate([
     core_1.Service(),
     __param(0, core_1.Inject(hapi_2.HAPI_SERVER)),
     __param(1, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
-    __metadata("design:paramtypes", [hapi_1.Server, Object, bootstrap_service_1.BootstrapService])
+    __metadata("design:paramtypes", [hapi_1.Server, Object, bootstrap_service_1.BootstrapService,
+        hooks_service_1.HookService])
 ], ApolloService);
 exports.ApolloService = ApolloService;

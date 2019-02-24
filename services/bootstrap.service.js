@@ -22,7 +22,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@rxdi/core");
 const graphql_1 = require("graphql");
-const hooks_service_1 = require("../services/hooks.service");
 const fs_extra_1 = require("fs-extra");
 const effect_service_1 = require("./effect.service");
 const config_tokens_1 = require("../config.tokens");
@@ -41,10 +40,6 @@ let BootstrapService = class BootstrapService {
         this.logger = logger;
         this.config = config;
         this.methodBasedEffects = [];
-        try {
-            this.neo4j = core_1.Container.get('neo4j-graphql-js');
-        }
-        catch (e) { }
     }
     validateGuard(res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -141,20 +136,12 @@ let BootstrapService = class BootstrapService {
     }
     generateSchema() {
         const Fields = this.collectAppSchema();
-        let schema = new graphql_1.GraphQLSchema({
+        // Build astNode https://github.com/graphql/graphql-js/issues/1575
+        return graphql_1.buildSchema(graphql_1.printSchema(new graphql_1.GraphQLSchema({
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
-        });
-        schema = graphql_1.buildSchema(graphql_1.printSchema(schema));
-        if (this.neo4j) {
-            schema = this.neo4j.makeAugmentedSchema({ typeDefs: graphql_1.printSchema(schema) });
-        }
-        // console.log(schema.getQueryType().getFields());
-        // Build astNode https://github.com/graphql/graphql-js/issues/1575
-        this.hookService.AttachHooks([schema.getQueryType(), schema.getMutationType(), schema.getSubscriptionType()]);
-        this.writeEffectTypes(this.methodBasedEffects);
-        return schema;
+        })));
     }
     generateType(fields, name, description) {
         if (!Object.keys(fields).length) {
@@ -228,10 +215,6 @@ export type EffectTypes = keyof typeof EffectTypes;
         return descriptors;
     }
 };
-__decorate([
-    core_1.Inject(() => hooks_service_1.HookService),
-    __metadata("design:type", hooks_service_1.HookService)
-], BootstrapService.prototype, "hookService", void 0);
 BootstrapService = __decorate([
     core_1.Service(),
     __param(3, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),

@@ -53,7 +53,8 @@ export class BootstrapService {
     }
 
     getResolverByName(resolverName: string) {
-        return this.collectAppSchema().query[resolverName] || this.collectAppSchema().mutation[resolverName] || this.collectAppSchema().subscription[resolverName];
+        const schema = this.collectAppSchema();
+        return schema.query[resolverName] || schema.mutation[resolverName] || schema.subscription[resolverName];
     }
 
     collectAppSchema() {
@@ -179,30 +180,29 @@ export type EffectTypes = keyof typeof EffectTypes;
                 const options: GraphQLControllerOptions = currentConstructor.type['metadata'].options;
                 currentConstructor.type._descriptors = <any>currentConstructor.type._descriptors || [];
                 Array.from(currentConstructor.type._descriptors.keys()).map((k => {
-                    if (options) {
-                        const orig = currentConstructor.type._descriptors.get(k);
-                        const descriptor: GenericGapiResolversType = orig.value();
+                    if (!options) {
+                        return;
+                    }
+                    const orig = currentConstructor.type._descriptors.get(k);
+                    const descriptor: GenericGapiResolversType = orig.value();
 
-                        if (options.scope) {
-                            descriptor.scope = descriptor.scope || options.scope;
-                        }
-
-                        if (options.guards && options.guards.length && !descriptor.public) {
-                            descriptor.guards = descriptor.guards || options.guards;
-                        }
-
-                        if (options.type) {
-                            descriptor.type = descriptor.type || options.type;
-                        }
-
-                        if (options.interceptor && !descriptor.interceptor) {
-                            descriptor.interceptor = options.interceptor;
-                        }
-
-                        orig.value = () => descriptor;
-                        currentConstructor.type._descriptors.set(k, orig);
+                    if (options.scope) {
+                        descriptor.scope = descriptor.scope || options.scope;
                     }
 
+                    if (options.guards && options.guards.length && !descriptor.public) {
+                        descriptor.guards = descriptor.guards || options.guards;
+                    }
+
+                    if (options.type) {
+                        descriptor.type = descriptor.type || options.type;
+                    }
+
+                    if (options.interceptor && !descriptor.interceptor) {
+                        descriptor.interceptor = options.interceptor;
+                    }
+                    orig.value = () => descriptor;
+                    currentConstructor.type._descriptors.set(k, orig);
                 }));
                 return key;
             });

@@ -116,6 +116,44 @@ import * as neo4jgql from 'neo4j-graphql-js';
 export class CoreModule {}
 ```
 
+#### Using ON_REQUEST and SCHEMA_OVERRIDE
+
+```typescript
+import { Module, ON_REQUEST_HANDLER, SCHEMA_OVERRIDE, Boom } from "@gapi/core";
+import { AppQueriesController } from "./app.controller";
+import { Request, ResponseToolkit } from 'hapi';
+
+@Module({
+    controllers: [AppQueriesController],
+    providers: [
+        {
+            provide: SCHEMA_OVERRIDE,
+            useFactory: () => (schema) => {
+                // Do things with bootstrapped schema
+                return schema;
+            }
+        },
+        {
+            provide: ON_REQUEST_HANDLER,
+            useFactory: () => async (next, context, request: Request, h: ResponseToolkit, err: Error) => {
+                // Authenticate user here if it is not authenticated return Boom.unauthorized()
+                // if (request.headers.authorization) {
+                //     const tokenData = ValidateToken(request.headers.authorization);
+                //     const user = {};
+                //     if (!user) {
+                //         return Boom.unauthorized();
+                //     } else {
+                //         context.user = {id: 1, name: 'pesho'};
+                //     }
+                // }
+                return next;
+            }
+        }
+    ]
+})
+export class AppModule { }
+```
+
 #### Here we inject neo4j-graphql-js library to dependency injection so graphql server will handle it and work with the library
 
 ```typescript

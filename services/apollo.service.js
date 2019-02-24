@@ -32,29 +32,33 @@ let ApolloService = class ApolloService {
         this.server = server;
         this.config = config;
         this.bootstrapService = bootstrapService;
+        this.defaultOrNew = (request, response, error) => __awaiter(this, void 0, void 0, function* () {
+            let onRequest;
+            try {
+                onRequest = core_1.Container.get(config_tokens_1.ON_REQUEST_HANDLER);
+            }
+            catch (e) { }
+            if (onRequest) {
+                return yield onRequest(this.makeGQLRequest(request, response, error), this.config.graphqlOptions.context, request, response, error);
+            }
+            this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
+            if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
+                try {
+                    const serviceUtilsService = core_1.Container.get(this.config.authentication);
+                    this.config.graphqlOptions.context.user = yield serviceUtilsService.validateToken(request.headers.authorization);
+                }
+                catch (e) {
+                    return Boom.unauthorized();
+                }
+            }
+            else {
+                this.config.graphqlOptions.context.user = null;
+            }
+            return this.makeGQLRequest(request, response, error);
+        });
         this.handler = (request, h, err) => __awaiter(this, void 0, void 0, function* () {
             try {
-                this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
-                if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
-                    try {
-                        const serviceUtilsService = core_1.Container.get(this.config.authentication);
-                        this.config.graphqlOptions.context.user = yield serviceUtilsService.validateToken(request.headers.authorization);
-                    }
-                    catch (e) {
-                        return Boom.unauthorized();
-                    }
-                }
-                else {
-                    this.config.graphqlOptions.context.user = null;
-                }
-                const gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
-                    method: request.method.toUpperCase(),
-                    options: this.config.graphqlOptions,
-                    query: request.method === 'post' ? request.payload : request.query,
-                });
-                const response = h.response(gqlResponse);
-                response.type('application/json');
-                return response;
+                return yield this.defaultOrNew(request, h, err);
             }
             catch (error) {
                 if ('HttpQueryError' !== error.name) {
@@ -81,12 +85,22 @@ let ApolloService = class ApolloService {
         });
     }
     OnInit() {
-        let customSchemaDefinition;
+        let schemaOverride;
         try {
-            customSchemaDefinition = core_1.Container.get('gapi-custom-schema-definition');
+            schemaOverride = core_1.Container.get(config_tokens_1.SCHEMA_OVERRIDE);
         }
         catch (e) { }
-        this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        if (schemaOverride) {
+            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema());
+        }
+        else {
+            let customSchemaDefinition;
+            try {
+                customSchemaDefinition = core_1.Container.get(config_tokens_1.CUSTOM_SCHEMA_DEFINITION);
+            }
+            catch (e) { }
+            this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        }
         this.register();
     }
     register() {
@@ -99,6 +113,18 @@ let ApolloService = class ApolloService {
             vhost: this.config.vhost,
             config: this.config.route || {},
             handler: this.handler
+        });
+    }
+    makeGQLRequest(request, h, err) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
+                method: request.method.toUpperCase(),
+                options: this.config.graphqlOptions,
+                query: request.method === 'post' ? request.payload : request.query,
+            });
+            const response = h.response(gqlResponse);
+            response.type('application/json');
+            return response;
         });
     }
 };

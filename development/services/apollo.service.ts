@@ -3,7 +3,7 @@ import * as Boom from 'boom';
 import { Server, Request, ResponseToolkit } from 'hapi';
 import { runHttpQuery } from 'apollo-server-core';
 import { HAPI_SERVER } from '@rxdi/hapi';
-import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG, SCHEMA_OVERRIDE, CUSTOM_SCHEMA_DEFINITION, ON_REQUEST_HANDLER } from '../config.tokens';
 import { BootstrapService } from '../services/bootstrap.service';
 import { GraphQLSchema } from 'graphql';
 
@@ -17,9 +17,21 @@ export class ApolloService implements PluginInterface {
     ) { }
 
     OnInit() {
-        let customSchemaDefinition: GraphQLSchema;
-        try { customSchemaDefinition = Container.get('gapi-custom-schema-definition'); } catch (e) { }
-        this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        let schemaOverride: (schema: GraphQLSchema) => GraphQLSchema;
+
+        try {
+            schemaOverride = Container.get(SCHEMA_OVERRIDE);
+        } catch (e) { }
+
+        if (schemaOverride) {
+            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema());
+        } else {
+            let customSchemaDefinition: GraphQLSchema;
+            try {
+                customSchemaDefinition = Container.get(CUSTOM_SCHEMA_DEFINITION);
+            } catch (e) { }
+            this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
+        }
         this.register();
     }
 
@@ -35,28 +47,48 @@ export class ApolloService implements PluginInterface {
             handler: this.handler
         });
     }
+    defaultOrNew = async (request: Request, response: ResponseToolkit, error: Error) => {
+        let onRequest: (next: any, context?: any, request?: Request, h?: ResponseToolkit, err?: Error) => any;
+        try {
+            onRequest = <any>Container.get(ON_REQUEST_HANDLER);
+        } catch (e) { }
 
+        if (onRequest) {
+            return await onRequest(
+                this.makeGQLRequest(request, response, error),
+                this.config.graphqlOptions.context,
+                request,
+                response,
+                error,
+            );
+        }
+        this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
+        if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
+            try {
+                const serviceUtilsService: any = Container.get(<any>this.config.authentication);
+                this.config.graphqlOptions.context.user = await serviceUtilsService.validateToken(request.headers.authorization);
+            } catch (e) {
+                return Boom.unauthorized();
+            }
+        } else {
+            this.config.graphqlOptions.context.user = null;
+        }
+        return this.makeGQLRequest(request, response, error);
+
+    }
+    async makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error) {
+        const gqlResponse = await runHttpQuery([request], <any>{
+            method: request.method.toUpperCase(),
+            options: this.config.graphqlOptions,
+            query: request.method === 'post' ? request.payload : request.query,
+        });
+        const response = h.response(gqlResponse);
+        response.type('application/json');
+        return response;
+    }
     handler = async (request: Request, h: ResponseToolkit, err?: Error) => {
         try {
-            this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
-            if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
-                try {
-                    const serviceUtilsService: any = Container.get(<any>this.config.authentication);
-                    this.config.graphqlOptions.context.user = await serviceUtilsService.validateToken(request.headers.authorization);
-                } catch (e) {
-                    return Boom.unauthorized();
-                }
-            } else {
-                this.config.graphqlOptions.context.user = null;
-            }
-            const gqlResponse = await runHttpQuery([request], <any>{
-                method: request.method.toUpperCase(),
-                options: this.config.graphqlOptions,
-                query: request.method === 'post' ? request.payload : request.query,
-            });
-            const response = h.response(gqlResponse);
-            response.type('application/json');
-            return response;
+            return await this.defaultOrNew(request, h, err);
         } catch (error) {
             if ('HttpQueryError' !== error.name) {
                 throw Boom.boomify(error);

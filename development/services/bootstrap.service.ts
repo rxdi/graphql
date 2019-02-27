@@ -61,7 +61,7 @@ export class BootstrapService {
         return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
     }
 
-    private collectAppSchema() {
+    collectAppSchema() {
         const Fields: InternalFields = this.Fields;
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()

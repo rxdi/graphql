@@ -19,6 +19,11 @@ export class ApolloService implements PluginInterface {
     ) { }
 
     OnInit() {
+        this.init();
+        this.register();
+    }
+
+    init() {
         let schemaOverride: (schema: GraphQLSchema) => GraphQLSchema;
         try {
             schemaOverride = Container.get(SCHEMA_OVERRIDE);
@@ -35,7 +40,6 @@ export class ApolloService implements PluginInterface {
         }
         this.hookService.AttachHooks([this.config.graphqlOptions.schema.getQueryType(), this.config.graphqlOptions.schema.getMutationType(), this.config.graphqlOptions.schema.getSubscriptionType()]);
         this.bootstrapService.writeEffectTypes();
-        this.register();
     }
 
     register() {

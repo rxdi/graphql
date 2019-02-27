@@ -7,6 +7,7 @@ import { GraphQLModule } from '../../index';
 import 'jest';
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HookService, ApolloService } from '../../services';
+import { of } from 'rxjs';
 
 
 @GapiObjectType()
@@ -44,7 +45,7 @@ class ClassTestProvider {
         }
     })
     testInjection() {
-        return this.injecatble.pesho;
+        return of(this.injecatble.pesho);
     }
 }
 

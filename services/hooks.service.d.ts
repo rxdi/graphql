@@ -5,6 +5,7 @@ export declare class HookService {
     private bootstrap;
     constructor(config: GRAPHQL_PLUGIN_CONFIG);
     AttachHooks(graphQLFields: GraphQLObjectType[]): void;
+    applyMeta(resolver: GraphQLField<any, any>): void;
     canAccess<K extends {
         user: {
             type: string;

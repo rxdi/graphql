@@ -65,8 +65,9 @@ export class BootstrapService {
         const Fields: InternalFields = this.Fields;
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
-            .forEach(({ descriptor }) => {
+            .forEach(({ descriptor, self }) => {
                 const desc = descriptor();
+                desc.target = self;
                 Fields[desc.method_type][desc.method_name] = desc;
             });
         this.Fields = Fields;

@@ -26,24 +26,26 @@ let HookService = class HookService {
                 return;
             }
             const resolvers = type.getFields();
-            Object.keys(resolvers).forEach(resolver => {
-                const currentResolver = this.bootstrap.getResolverByName(resolvers[resolver]['name']);
-                if (currentResolver) {
-                    if (!resolvers[resolver]['public']) {
-                        this.AddHooks(resolvers[resolver]);
-                    }
-                    resolvers[resolver].resolve = currentResolver.resolve;
-                    resolvers[resolver]['target'] = currentResolver['target'];
-                    resolvers[resolver]['method_name'] = currentResolver['method_name'];
-                    resolvers[resolver]['method_type'] = currentResolver['method_type'];
-                    resolvers[resolver]['interceptor'] = currentResolver['interceptor'];
-                    resolvers[resolver]['effect'] = currentResolver['effect'];
-                    resolvers[resolver]['guards'] = currentResolver['guards'];
-                    resolvers[resolver]['scope'] = currentResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-                    this.bootstrap.applyMetaToResolvers(resolvers[resolver], resolvers[resolver]['target']);
-                }
-            });
+            Object.keys(resolvers).forEach(resolver => this.applyMeta(resolvers[resolver]));
         });
+    }
+    applyMeta(resolver) {
+        const cr = this.bootstrap.getResolverByName(resolver['name']);
+        if (cr) {
+            if (!resolver['public']) {
+                this.AddHooks(resolver);
+            }
+            resolver.resolve = cr.resolve;
+            resolver.subscribe = cr.subscribe;
+            resolver['target'] = cr['target'];
+            resolver['method_name'] = cr['method_name'];
+            resolver['method_type'] = cr['method_type'];
+            resolver['interceptor'] = cr['interceptor'];
+            resolver['effect'] = cr['effect'];
+            resolver['guards'] = cr['guards'];
+            resolver['scope'] = cr['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
+            this.bootstrap.applyMetaToResolvers(resolver, resolver['target']);
+        }
     }
     canAccess(resolverScope, context) {
         return context && context.user && resolverScope.filter(scope => scope === context.user.type).length ? true : error_service_1.errorUnauthorized();

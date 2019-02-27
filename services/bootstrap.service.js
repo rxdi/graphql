@@ -74,8 +74,9 @@ let BootstrapService = class BootstrapService {
         const Fields = this.Fields;
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
-            .forEach(({ descriptor }) => {
+            .forEach(({ descriptor, self }) => {
             const desc = descriptor();
+            desc.target = self;
             Fields[desc.method_type][desc.method_name] = desc;
         });
         this.Fields = Fields;

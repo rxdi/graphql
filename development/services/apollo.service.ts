@@ -1,7 +1,7 @@
 import { Service, Inject, PluginInterface, Container } from '@rxdi/core';
 import * as Boom from 'boom';
 import { Server, Request, ResponseToolkit } from 'hapi';
-import { runHttpQuery } from 'apollo-server-core';
+import { runHttpQuery, convertNodeHttpToRequest } from 'apollo-server-core';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { GRAPHQL_PLUGIN_CONFIG, SCHEMA_OVERRIDE, CUSTOM_SCHEMA_DEFINITION, ON_REQUEST_HANDLER } from '../config.tokens';
 import { BootstrapService } from '../services/bootstrap.service';
@@ -88,14 +88,23 @@ export class ApolloService implements PluginInterface {
         } else {
             this.isInitQuery = false;
         }
-        const gqlResponse = await runHttpQuery([request], <any>{
-            method: request.method.toUpperCase(),
-            options: this.config.graphqlOptions,
-            query: request.method === 'post' ? request.payload : request.query,
-        });
-        const response = h.response(gqlResponse);
-        response.type('application/json');
-        return response;
+        const { graphqlResponse, responseInit } = await runHttpQuery(
+            [request, h],
+            {
+              method: request.method.toUpperCase(),
+              options: this.config.graphqlOptions,
+              query:
+                request.method === 'post'
+                  ? // TODO type payload as string or Record
+                    (request.payload as any)
+                  : request.query,
+              request: convertNodeHttpToRequest(request.raw.req),
+            },
+          );
+
+          const response = h.response(graphqlResponse);
+          response.type('application/json');
+          return response;
     }
     handler = async (request: Request, h: ResponseToolkit, err?: Error) => {
         try {

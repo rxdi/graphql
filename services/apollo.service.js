@@ -138,12 +138,16 @@ let ApolloService = class ApolloService {
             else {
                 this.isInitQuery = false;
             }
-            const gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
+            const { graphqlResponse, responseInit } = yield apollo_server_core_1.runHttpQuery([request, h], {
                 method: request.method.toUpperCase(),
                 options: this.config.graphqlOptions,
-                query: request.method === 'post' ? request.payload : request.query,
+                query: request.method === 'post'
+                    ? // TODO type payload as string or Record
+                        request.payload
+                    : request.query,
+                request: apollo_server_core_1.convertNodeHttpToRequest(request.raw.req),
             });
-            const response = h.response(gqlResponse);
+            const response = h.response(graphqlResponse);
             response.type('application/json');
             return response;
         });

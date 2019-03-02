@@ -6,6 +6,7 @@ import { BootstrapService } from './services/bootstrap.service';
 import { GraphiQLService } from './services/graphiql.service';
 import { StartService } from './services/start.service';
 import { PlaygroundModule } from '@gapi/playground';
+import { PluginInit } from './plugin-init';
 
 @Module({
     services: [
@@ -15,7 +16,7 @@ import { PlaygroundModule } from '@gapi/playground';
         GraphiQLService,
         StartService
     ],
-    plugins: [ServerPushPlugin]
+    plugins: [ServerPushPlugin, PluginInit]
 })
 export class GraphQLModule {
     public static forRoot(config: GRAPHQL_PLUGIN_CONFIG): ModuleWithServices {
@@ -28,7 +29,6 @@ export class GraphQLModule {
                     useValue: config
                 },
                 HookService,
-                //
             ],
             frameworkImports: [
                 PlaygroundModule.forRoot({

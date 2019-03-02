@@ -10,7 +10,7 @@ import { HookService } from './hooks.service';
 
 @Service()
 export class ApolloService implements PluginInterface {
-
+    isInitQuery: boolean;
     constructor(
         @Inject(HAPI_SERVER) private server: Server,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
@@ -42,7 +42,7 @@ export class ApolloService implements PluginInterface {
         this.bootstrapService.writeEffectTypes();
     }
 
-    register() {
+    async register() {
         if (!this.config || !this.config.graphqlOptions) {
             throw new Error('Apollo Server requires options.');
         }
@@ -59,7 +59,6 @@ export class ApolloService implements PluginInterface {
         try {
             onRequest = <any>Container.get(ON_REQUEST_HANDLER);
         } catch (e) { }
-
         if (onRequest) {
             return await onRequest(
                 () => this.makeGQLRequest(request, response, error),
@@ -84,6 +83,11 @@ export class ApolloService implements PluginInterface {
 
     }
     async makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error) {
+        if (request.payload && request.payload.toString().includes('initQuery')) {
+            this.isInitQuery = true;
+        } else {
+            this.isInitQuery = false;
+        }
         const gqlResponse = await runHttpQuery([request], <any>{
             method: request.method.toUpperCase(),
             options: this.config.graphqlOptions,
@@ -97,6 +101,12 @@ export class ApolloService implements PluginInterface {
         try {
             return await this.defaultOrNew(request, h, err);
         } catch (error) {
+            if (this.isInitQuery) {
+                throw new Error(error);
+            }
+            if (error) {
+                console.error(error);
+            }
             if ('HttpQueryError' !== error.name) {
                 throw Boom.boomify(error);
             }

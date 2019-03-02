@@ -1,9 +1,8 @@
 import { ModuleService, Service, Inject, Container, BootstrapLogger } from '@rxdi/core';
-import { GraphQLObjectType, GraphQLSchema, printSchema, GraphQLFieldConfigMap, buildSchema } from 'graphql';
-import { HookService } from '../services/hooks.service';
+import { GraphQLObjectType, GraphQLSchema, printSchema, GraphQLFieldConfigMap, buildSchema, GraphQLString } from 'graphql';
 import { ensureDirSync, writeFileSync } from 'fs-extra';
 import { EffectService } from './effect.service';
-import { GRAPHQL_PLUGIN_CONFIG, Neo4JInjectionInterface } from '../config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 import { CanActivateResolver, GraphQLControllerOptions } from '../decorators/guard/guard.interface';
 import { Observable, from, of } from 'rxjs';
@@ -34,7 +33,7 @@ export class BootstrapService {
         private effectService: EffectService,
         private logger: BootstrapLogger,
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
-    ) {}
+    ) { }
 
     async validateGuard(res: Function) {
         if (res.constructor === Boolean) {
@@ -61,15 +60,35 @@ export class BootstrapService {
         return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
     }
 
+    validateResolver(desc: GenericGapiResolversType, self: Function) {
+        if (!desc.type) {
+            throw new Error(`Missing type for resolver ${desc.method_name} inside @Controller ${self.constructor['originalName']}`);
+        }
+    }
+    applyInitStatus() {
+        return {
+            type: new GraphQLObjectType({ name: 'StatusQueryType', fields: () => ({ status: { type: GraphQLString } }) }),
+            method_name: 'status',
+            method_type: 'query',
+            target: () => { },
+            resolve: function initQuery() { return { status: 200 }; }
+        };
+    }
+
     collectAppSchema() {
         const Fields: InternalFields = this.Fields;
+        if (this.config.initQuery) {
+            Fields.query.status = this.applyInitStatus();
+        }
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
                 const desc = descriptor();
                 desc.target = self;
+                this.validateResolver(desc, self);
                 Fields[desc.method_type][desc.method_name] = desc;
             });
+
         this.Fields = Fields;
         return this.Fields;
     }

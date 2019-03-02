@@ -1,5 +1,5 @@
 import { ModuleService, BootstrapLogger } from '@rxdi/core';
-import { GraphQLSchema, GraphQLFieldConfigMap } from 'graphql';
+import { GraphQLObjectType, GraphQLSchema, GraphQLFieldConfigMap } from 'graphql';
 import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
@@ -38,7 +38,19 @@ export declare class BootstrapService {
     getResolverByName(resolverName: string): import("graphql/type/definition").GraphQLFieldConfig<any, any, {
         [key: string]: any;
     }>;
-    private collectAppSchema;
+    validateResolver(desc: GenericGapiResolversType, self: Function): void;
+    applyInitStatus(): {
+        type: GraphQLObjectType<any, any, {
+            [key: string]: any;
+        }>;
+        method_name: string;
+        method_type: string;
+        target: () => void;
+        resolve: () => {
+            status: number;
+        };
+    };
+    collectAppSchema(): InternalFields;
     applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
     generateSchema(): GraphQLSchema;
     private generateType;

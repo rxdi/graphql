@@ -8,9 +8,11 @@ export declare class ApolloService implements PluginInterface {
     private config;
     private bootstrapService;
     private hookService;
+    isInitQuery: boolean;
     constructor(server: Server, config: GRAPHQL_PLUGIN_CONFIG, bootstrapService: BootstrapService, hookService: HookService);
     OnInit(): void;
-    register(): void;
+    init(): void;
+    register(): Promise<void>;
     defaultOrNew: (request: Request, response: ResponseToolkit, error: Error) => Promise<any>;
     makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error): Promise<import("hapi").ResponseObject>;
     handler: (request: Request, h: ResponseToolkit, err?: Error) => Promise<any>;

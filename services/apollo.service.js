@@ -63,6 +63,12 @@ let ApolloService = class ApolloService {
                 return yield this.defaultOrNew(request, h, err);
             }
             catch (error) {
+                if (this.isInitQuery) {
+                    throw new Error(error);
+                }
+                if (error) {
+                    console.error(error);
+                }
                 if ('HttpQueryError' !== error.name) {
                     throw Boom.boomify(error);
                 }
@@ -87,6 +93,10 @@ let ApolloService = class ApolloService {
         });
     }
     OnInit() {
+        this.init();
+        this.register();
+    }
+    init() {
         let schemaOverride;
         try {
             schemaOverride = core_1.Container.get(config_tokens_1.SCHEMA_OVERRIDE);
@@ -105,22 +115,29 @@ let ApolloService = class ApolloService {
         }
         this.hookService.AttachHooks([this.config.graphqlOptions.schema.getQueryType(), this.config.graphqlOptions.schema.getMutationType(), this.config.graphqlOptions.schema.getSubscriptionType()]);
         this.bootstrapService.writeEffectTypes();
-        this.register();
     }
     register() {
-        if (!this.config || !this.config.graphqlOptions) {
-            throw new Error('Apollo Server requires options.');
-        }
-        this.server.route({
-            method: ['GET', 'POST'],
-            path: this.config.path || '/graphql',
-            vhost: this.config.vhost,
-            config: this.config.route || {},
-            handler: this.handler
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.config || !this.config.graphqlOptions) {
+                throw new Error('Apollo Server requires options.');
+            }
+            this.server.route({
+                method: ['GET', 'POST'],
+                path: this.config.path || '/graphql',
+                vhost: this.config.vhost,
+                config: this.config.route || {},
+                handler: this.handler
+            });
         });
     }
     makeGQLRequest(request, h, err) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (request.payload && request.payload.toString().includes('initQuery')) {
+                this.isInitQuery = true;
+            }
+            else {
+                this.isInitQuery = false;
+            }
             const gqlResponse = yield apollo_server_core_1.runHttpQuery([request], {
                 method: request.method.toUpperCase(),
                 options: this.config.graphqlOptions,

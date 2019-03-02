@@ -25,6 +25,7 @@ export interface HapiGraphiQLPluginOptions {
 
 export interface GRAPHQL_PLUGIN_CONFIG {
     path?: string;
+    initQuery?: boolean;
     graphiQlPlayground?: boolean;
     graphiql?: boolean;
     graphiQlPath?: string;
@@ -49,11 +50,6 @@ export const GRAPHQL_PLUGIN_CONFIG = new InjectionToken<GRAPHQL_PLUGIN_CONFIG>('
 export const CUSTOM_SCHEMA_DEFINITION = new InjectionToken<GraphQLSchema>('gapi-custom-schema-definition');
 export const SCHEMA_OVERRIDE = new InjectionToken<(schema: GraphQLSchema) => GraphQLSchema>('gapi-custom-schema-override');
 export const ON_REQUEST_HANDLER = new InjectionToken<(next: any, context?: any, request?: Request, h?: ResponseToolkit, err?: Error) => any>('gapi-on-request-handler');
-
-export interface Neo4JInjectionInterface {
-    makeAugmentedSchema(options: { typeDefs: string }): GraphQLSchema;
-    augmentSchema(schema): GraphQLSchema;
-}
 
 export interface IRegister {
     (server: Server, options: any): void;

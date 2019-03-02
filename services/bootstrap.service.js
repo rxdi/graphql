@@ -70,13 +70,31 @@ let BootstrapService = class BootstrapService {
     getResolverByName(resolverName) {
         return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
     }
+    validateResolver(desc, self) {
+        if (!desc.type) {
+            throw new Error(`Missing type for resolver ${desc.method_name} inside @Controller ${self.constructor['originalName']}`);
+        }
+    }
+    applyInitStatus() {
+        return {
+            type: new graphql_1.GraphQLObjectType({ name: 'StatusQueryType', fields: () => ({ status: { type: graphql_1.GraphQLString } }) }),
+            method_name: 'status',
+            method_type: 'query',
+            target: () => { },
+            resolve: function initQuery() { return { status: 200 }; }
+        };
+    }
     collectAppSchema() {
         const Fields = this.Fields;
+        if (this.config.initQuery) {
+            Fields.query.status = this.applyInitStatus();
+        }
         this.applyGlobalControllerOptions();
         this.getMetaDescriptors()
             .forEach(({ descriptor, self }) => {
             const desc = descriptor();
             desc.target = self;
+            this.validateResolver(desc, self);
             Fields[desc.method_type][desc.method_name] = desc;
         });
         this.Fields = Fields;

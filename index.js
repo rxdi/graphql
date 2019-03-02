@@ -18,6 +18,7 @@ const bootstrap_service_1 = require("./services/bootstrap.service");
 const graphiql_service_1 = require("./services/graphiql.service");
 const start_service_1 = require("./services/start.service");
 const playground_1 = require("@gapi/playground");
+const plugin_init_1 = require("./plugin-init");
 let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
     static forRoot(config) {
         return {
@@ -50,7 +51,7 @@ GraphQLModule = GraphQLModule_1 = __decorate([
             graphiql_service_1.GraphiQLService,
             start_service_1.StartService
         ],
-        plugins: [services_1.ServerPushPlugin]
+        plugins: [services_1.ServerPushPlugin, plugin_init_1.PluginInit]
     })
 ], GraphQLModule);
 exports.GraphQLModule = GraphQLModule;

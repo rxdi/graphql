@@ -154,6 +154,9 @@ let BootstrapService = class BootstrapService {
             });
         };
     }
+    getFieldsFromType(schema) {
+        return schema.getQueryType().getFields().findUser.type['getFields']();
+    }
     generateSchema() {
         const Fields = this.collectAppSchema();
         let schema = new graphql_1.GraphQLSchema({

@@ -73,10 +73,10 @@ const DEFAULT_CONFIG = {
     },
     graphql: {
         path: '/graphql',
-        openBrowser: true,
+        openBrowser: false,
         writeEffects: false,
         graphiql: false,
-        graphiQlPlayground: true,
+        graphiQlPlayground: false,
         graphiQlPath: '/graphiql',
         watcherPort: '',
         graphiqlOptions: {

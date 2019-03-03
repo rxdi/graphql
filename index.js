@@ -58,3 +58,4 @@ exports.GraphQLModule = GraphQLModule;
 __export(require("./decorators"));
 __export(require("./services"));
 __export(require("./config.tokens"));
+// export * from './test/index';

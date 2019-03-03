@@ -35,10 +35,7 @@ export class PluginInit implements PluginInterface {
         private afterStarter: AfterStarterService
     ) { }
 
-    private tester = tester({
-        url: `http://localhost:${this.server.info.port}/graphql`,
-        contentType: 'application/json'
-    });
+    private tester;
 
     async register() {
         if (!this.config.initQuery) {
@@ -52,6 +49,11 @@ export class PluginInit implements PluginInterface {
     }
 
     sendRequest<T>(request: SendRequestQueryType): PromiseLike<Response<T>> {
+        const url = `http://localhost:${this.server.info.port}/graphql`;
+        this.tester = tester({
+            url,
+            contentType: 'application/json'
+        });
         return this.tester(JSON.stringify(request));
     }
 

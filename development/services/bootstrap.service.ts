@@ -154,6 +154,10 @@ export class BootstrapService {
         };
     }
 
+    getFieldsFromType(schema: GraphQLSchema): {[key: string]: { type: any, resolve: () => {}, isDeprecated: boolean, name: string, args: any[]}} {
+        return schema.getQueryType().getFields().findUser.type['getFields']();
+    }
+
     generateSchema(): GraphQLSchema {
         const Fields = this.collectAppSchema();
         let schema: GraphQLSchema = new GraphQLSchema({

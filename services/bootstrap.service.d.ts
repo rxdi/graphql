@@ -52,6 +52,15 @@ export declare class BootstrapService {
     };
     collectAppSchema(): InternalFields;
     applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
+    getFieldsFromType(schema: GraphQLSchema): {
+        [key: string]: {
+            type: any;
+            resolve: () => {};
+            isDeprecated: boolean;
+            name: string;
+            args: any[];
+        };
+    };
     generateSchema(): GraphQLSchema;
     private generateType;
     writeEffectTypes(effects?: Array<string>): void;

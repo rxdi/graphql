@@ -45,3 +45,4 @@ export class GraphQLModule {
 export * from './decorators';
 export * from './services';
 export * from './config.tokens';
+// export * from './test/index';

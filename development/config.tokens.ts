@@ -6,7 +6,7 @@ import {
     runHttpQuery,
     HttpQueryError,
 } from 'apollo-server-core';
-import { GraphQLSchema } from 'graphql';
+import { GraphQLSchema, GraphQLField } from 'graphql';
 import { Server, ResponseToolkit } from 'hapi';
 
 export interface HapiOptionsFunction {
@@ -61,3 +61,5 @@ export interface IPlugin {
     version?: string;
     register: IRegister;
 }
+
+export const RESOLVER_HOOK = new InjectionToken<(resolver: GraphQLField<any, any>) => void>('graphql-resolver-hook');

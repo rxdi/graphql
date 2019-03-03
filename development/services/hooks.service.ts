@@ -1,6 +1,6 @@
 import { errorUnauthorized } from './error.service';
 import { Service, Inject, Container, BootstrapLogger } from '@rxdi/core';
-import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG, RESOLVER_HOOK } from '../config.tokens';
 import { BootstrapService } from './bootstrap.service';
 import { GraphQLObjectType, GraphQLField, GraphQLResolveInfo } from 'graphql';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
@@ -60,9 +60,6 @@ export type EffectTypes = keyof typeof EffectTypes;
     applyMeta(resolver: GraphQLField<any, any>) {
         const rxdiResolver = this.bootstrap.getResolverByName(resolver.name);
         if (rxdiResolver) {
-            if (!resolver['public']) {
-                this.AddHooks(resolver);
-            }
             resolver.resolve = rxdiResolver.resolve;
             resolver.subscribe = rxdiResolver.subscribe;
             resolver['target'] = rxdiResolver['target'];
@@ -70,7 +67,6 @@ export type EffectTypes = keyof typeof EffectTypes;
             resolver['method_type'] = rxdiResolver['method_type'];
             resolver['interceptor'] = rxdiResolver['interceptor'];
             resolver['effect'] = rxdiResolver['effect'];
-
             const typeFields = rxdiResolver['type']['getFields']();
             const typeRes = resolver['type']['getFields']();
             Object.keys(typeFields).forEach(f => {
@@ -78,10 +74,10 @@ export type EffectTypes = keyof typeof EffectTypes;
                     typeRes[f].resolve = typeFields[f].resolve;
                 }
             });
-
             resolver['guards'] = rxdiResolver['guards'];
             resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-            this.applyMetaToResolvers(<any>resolver, resolver['target']);
+            this.AddHooks(resolver);
+            this.applyMetaToResolver(<any>resolver);
         }
     }
 
@@ -106,34 +102,34 @@ export type EffectTypes = keyof typeof EffectTypes;
         }
     }
 
-    applyMetaToResolvers(desc: GenericGapiResolversType, self: any) {
+    applyMetaToResolver(resolver: GenericGapiResolversType) {
         const events = this.effectService;
         const currentConstructor = this;
-        const effectName = desc.effect ? desc.effect : desc.method_name;
+        const effectName = resolver.effect ? resolver.effect : resolver.method_name;
         this.methodBasedEffects.push(effectName);
-        const originalResolve = desc.resolve.bind(self);
+        const originalResolve = resolver.resolve.bind(resolver.target);
 
-        if (desc.subscribe) {
-            const originalSubscribe = desc.subscribe;
-            desc.subscribe = function subscribe(...args: any[]) {
-                return originalSubscribe.bind(self)(self, ...args);
+        if (resolver.subscribe) {
+            const originalSubscribe = resolver.subscribe;
+            resolver.subscribe = function subscribe(...args: any[]) {
+                return originalSubscribe.bind(resolver.target)(resolver.target, ...args);
             };
         }
-        desc.resolve = async function resolve(...args: any[]) {
+        resolver.resolve = async function resolve(...args: any[]) {
 
-            if (!desc.public
-                && desc.guards && desc.guards.length
+            if (!resolver.public
+                && resolver.guards && resolver.guards.length
                 && currentConstructor.config.authentication
             ) {
-                await currentConstructor.applyGuards(desc, args);
+                await currentConstructor.applyGuards(resolver, args);
             }
 
-            let val = originalResolve.apply(self, args);
+            let val = originalResolve.apply(resolver.target, args);
             if (!val && !process.env.STRICT_RETURN_TYPE) {
                 val = {};
             }
             if (!val && process.env.STRICT_RETURN_TYPE) {
-                throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
+                throw new Error(`Return type of graph: ${resolver.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
             }
 
             if (val.constructor === Object
@@ -145,10 +141,10 @@ export type EffectTypes = keyof typeof EffectTypes;
             }
 
             let observable = from(val);
-            if (desc.interceptor) {
+            if (resolver.interceptor) {
                 observable = await Container
-                    .get<InterceptResolver>(desc.interceptor)
-                    .intercept(observable, args[2], args[1], desc);
+                    .get<InterceptResolver>(resolver.interceptor)
+                    .intercept(observable, args[2], args[1], resolver);
             }
             let result: any;
 
@@ -158,7 +154,7 @@ export type EffectTypes = keyof typeof EffectTypes;
             } else {
                 result = await observable.toPromise();
             }
-            if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
+            if (events.map.has(resolver.method_name) || events.map.has(resolver.effect)) {
                 events
                     .getLayer<Array<any>>(effectName)
                     .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
@@ -180,14 +176,24 @@ export type EffectTypes = keyof typeof EffectTypes;
     }
 
     AddHooks<T, K>(resolver: GraphQLField<T, K>) {
+        const resolve = resolver.resolve;
+        const self = this;
         if (this.config.authentication) {
-            const resolve = resolver.resolve;
-            const self = this;
+            console.log('Should be depreceted in the next minor release consider using RESOLVER_HOOK token');
             resolver.resolve = function (root, args, context, info, ...a) {
                 self.ResolverHooks(resolver, root, args, context, info);
                 return resolve(root, args, context, info, ...a);
             };
+        } else {
+            let resolverHook: (resolver: GraphQLField<any, any>) => void;
+            try {
+                resolverHook = Container.get(RESOLVER_HOOK);
+            } catch (e) { }
+            if (resolverHook) {
+                resolverHook(resolver);
+            }
         }
+
     }
 
 }

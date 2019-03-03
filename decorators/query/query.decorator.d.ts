@@ -9,15 +9,14 @@ export declare class GenericGapiResolversType implements GraphQLControllerOption
     interceptor?: Function;
     interceptors?: any[];
     method_name?: string;
-    subscribe?: () => {};
+    subscribe?: (root: any, params: any, context: any, info: any, ...args: any[]) => {};
     method_type?: 'query' | 'subscription' | 'mutation' | 'event';
     type: GraphQLObjectType;
-    resolve?(root: any, args: Object, context: any): any;
+    resolve?(root: any, params: any, context: any, info: any, ...args: any[]): {};
     args?: {
         [key: string]: {
             [type: string]: GraphQLObjectType | GraphQLNonNull<any>;
         };
     };
-    self?: any;
 }
 export declare function Query<T>(options?: any): (t: any, propKey: string, descriptor: TypedPropertyDescriptor<any>) => TypedPropertyDescriptor<any>;

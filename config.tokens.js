@@ -5,3 +5,4 @@ exports.GRAPHQL_PLUGIN_CONFIG = new core_1.InjectionToken('graphql-configuration
 exports.CUSTOM_SCHEMA_DEFINITION = new core_1.InjectionToken('gapi-custom-schema-definition');
 exports.SCHEMA_OVERRIDE = new core_1.InjectionToken('gapi-custom-schema-override');
 exports.ON_REQUEST_HANDLER = new core_1.InjectionToken('gapi-on-request-handler');
+exports.RESOLVER_HOOK = new core_1.InjectionToken('graphql-resolver-hook');

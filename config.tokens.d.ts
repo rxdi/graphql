@@ -1,7 +1,7 @@
 import { InjectionToken } from '@rxdi/core';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLOptions } from 'apollo-server-core';
-import { GraphQLSchema } from 'graphql';
+import { GraphQLSchema, GraphQLField } from 'graphql';
 import { Server, ResponseToolkit } from 'hapi';
 export interface HapiOptionsFunction {
     (req?: Request): GraphQLOptions | Promise<GraphQLOptions>;
@@ -49,3 +49,6 @@ export interface IPlugin {
     version?: string;
     register: IRegister;
 }
+export declare const RESOLVER_HOOK: InjectionToken<(resolver: GraphQLField<any, any, {
+    [key: string]: any;
+}>) => void>;

@@ -71,9 +71,6 @@ export type EffectTypes = keyof typeof EffectTypes;
     applyMeta(resolver) {
         const rxdiResolver = this.bootstrap.getResolverByName(resolver.name);
         if (rxdiResolver) {
-            if (!resolver['public']) {
-                this.AddHooks(resolver);
-            }
             resolver.resolve = rxdiResolver.resolve;
             resolver.subscribe = rxdiResolver.subscribe;
             resolver['target'] = rxdiResolver['target'];
@@ -90,7 +87,8 @@ export type EffectTypes = keyof typeof EffectTypes;
             });
             resolver['guards'] = rxdiResolver['guards'];
             resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-            this.applyMetaToResolvers(resolver, resolver['target']);
+            this.AddHooks(resolver);
+            this.applyMetaToResolver(resolver);
         }
     }
     applyGuards(desc, a) {
@@ -118,31 +116,31 @@ export type EffectTypes = keyof typeof EffectTypes;
             }
         });
     }
-    applyMetaToResolvers(desc, self) {
+    applyMetaToResolver(resolver) {
         const events = this.effectService;
         const currentConstructor = this;
-        const effectName = desc.effect ? desc.effect : desc.method_name;
+        const effectName = resolver.effect ? resolver.effect : resolver.method_name;
         this.methodBasedEffects.push(effectName);
-        const originalResolve = desc.resolve.bind(self);
-        if (desc.subscribe) {
-            const originalSubscribe = desc.subscribe;
-            desc.subscribe = function subscribe(...args) {
-                return originalSubscribe.bind(self)(self, ...args);
+        const originalResolve = resolver.resolve.bind(resolver.target);
+        if (resolver.subscribe) {
+            const originalSubscribe = resolver.subscribe;
+            resolver.subscribe = function subscribe(...args) {
+                return originalSubscribe.bind(resolver.target)(resolver.target, ...args);
             };
         }
-        desc.resolve = function resolve(...args) {
+        resolver.resolve = function resolve(...args) {
             return __awaiter(this, void 0, void 0, function* () {
-                if (!desc.public
-                    && desc.guards && desc.guards.length
+                if (!resolver.public
+                    && resolver.guards && resolver.guards.length
                     && currentConstructor.config.authentication) {
-                    yield currentConstructor.applyGuards(desc, args);
+                    yield currentConstructor.applyGuards(resolver, args);
                 }
-                let val = originalResolve.apply(self, args);
+                let val = originalResolve.apply(resolver.target, args);
                 if (!val && !process.env.STRICT_RETURN_TYPE) {
                     val = {};
                 }
                 if (!val && process.env.STRICT_RETURN_TYPE) {
-                    throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
+                    throw new Error(`Return type of graph: ${resolver.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
                 }
                 if (val.constructor === Object
                     || val.constructor === Array
@@ -151,10 +149,10 @@ export type EffectTypes = keyof typeof EffectTypes;
                     val = rxjs_1.of(val);
                 }
                 let observable = rxjs_1.from(val);
-                if (desc.interceptor) {
+                if (resolver.interceptor) {
                     observable = yield core_1.Container
-                        .get(desc.interceptor)
-                        .intercept(observable, args[2], args[1], desc);
+                        .get(resolver.interceptor)
+                        .intercept(observable, args[2], args[1], resolver);
                 }
                 let result;
                 if (observable.constructor === Object) {
@@ -163,7 +161,7 @@ export type EffectTypes = keyof typeof EffectTypes;
                 else {
                     result = yield observable.toPromise();
                 }
-                if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
+                if (events.map.has(resolver.method_name) || events.map.has(resolver.effect)) {
                     events
                         .getLayer(effectName)
                         .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
@@ -182,13 +180,24 @@ export type EffectTypes = keyof typeof EffectTypes;
         this.AuthenticationHooks(resolver, context);
     }
     AddHooks(resolver) {
+        const resolve = resolver.resolve;
+        const self = this;
         if (this.config.authentication) {
-            const resolve = resolver.resolve;
-            const self = this;
+            console.log('Should be depreceted in the next minor release consider using RESOLVER_HOOK token');
             resolver.resolve = function (root, args, context, info, ...a) {
                 self.ResolverHooks(resolver, root, args, context, info);
                 return resolve(root, args, context, info, ...a);
             };
+        }
+        else {
+            let resolverHook;
+            try {
+                resolverHook = core_1.Container.get(config_tokens_1.RESOLVER_HOOK);
+            }
+            catch (e) { }
+            if (resolverHook) {
+                resolverHook(resolver);
+            }
         }
     }
 };

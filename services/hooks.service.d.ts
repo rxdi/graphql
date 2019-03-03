@@ -15,7 +15,7 @@ export declare class HookService {
     applyMeta(resolver: GraphQLField<any, any>): void;
     applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
     validateGuard(res: Function): Promise<void>;
-    applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
+    applyMetaToResolver(resolver: GenericGapiResolversType): void;
     canAccess<K extends {
         user: {
             type: string;

@@ -1,7 +1,7 @@
-import { GRAPHQL_PLUGIN_CONFIG, SCHEMA_OVERRIDE } from '../../config.tokens';
+import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HapiConfigModel, HapiModule } from '@rxdi/hapi';
 import { GraphQLModule } from '../..';
-import { Module, ModuleWithServices, Controller, Container } from '@rxdi/core';
+import { Module, Controller, Container } from '@rxdi/core';
 import { Type, Query } from '../../../development/decorators';
 import { GraphQLNonNull, GraphQLInt, GraphQLObjectType } from 'graphql';
 
@@ -10,7 +10,7 @@ export interface CoreModuleConfig {
     graphql?: GRAPHQL_PLUGIN_CONFIG;
 }
 
-const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG = {
     server: {
         randomPort: true,
         hapi: {
@@ -20,7 +20,7 @@ const DEFAULT_CONFIG = {
     graphql: {
         path: '/graphql',
         initQuery: true,
-        buildAstDefinitions: false,
+        buildAstDefinitions: true,
         openBrowser: false,
         writeEffects: false,
         graphiql: false,
@@ -84,11 +84,20 @@ class AppModule { }
 
 
 @Module()
-class CoreModule {}
+class CoreModule { }
 
-export const createTestBed = () => {
-    Container.get(<any>HapiModule.forRoot(DEFAULT_CONFIG.server));
-    Container.get(<any>GraphQLModule.forRoot(DEFAULT_CONFIG.graphql));
+export const setConfigServer = (config: HapiConfigModel = {}) => {
+    return { ...DEFAULT_CONFIG.server, ...config };
+};
+
+export const setConfigGraphql = (config: GRAPHQL_PLUGIN_CONFIG = {}) => {
+    return { ...DEFAULT_CONFIG.graphql, ...config };
+};
+
+
+export const createTestBed = (config: CoreModuleConfig = {}) => {
+    Container.get(<any>HapiModule.forRoot(setConfigServer(config.server)));
+    Container.get(<any>GraphQLModule.forRoot(setConfigGraphql(config.graphql)));
     return CoreModule;
 };
 

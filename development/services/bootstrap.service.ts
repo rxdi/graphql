@@ -1,12 +1,8 @@
-import { ModuleService, Service, Inject, Container, BootstrapLogger } from '@rxdi/core';
+import { ModuleService, Service, Inject } from '@rxdi/core';
 import { GraphQLObjectType, GraphQLSchema, printSchema, GraphQLFieldConfigMap, buildSchema, GraphQLString } from 'graphql';
-import { ensureDirSync, writeFileSync } from 'fs-extra';
-import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
-import { CanActivateResolver, GraphQLControllerOptions } from '../decorators/guard/guard.interface';
-import { Observable, from, of } from 'rxjs';
-import { InterceptResolver } from '../decorators/intercept/intercept.interface';
+import { GraphQLControllerOptions } from '../decorators/guard/guard.interface';
 // import { makeExecutableSchema, addMockFunctionsToSchema, mergeSchemas, } from 'graphql-tools';
 
 export class FieldsModule { query: {}; mutation: {}; subscription: {}; }
@@ -26,35 +22,15 @@ export interface InternalFields {
 @Service()
 export class BootstrapService {
 
-    methodBasedEffects = [];
     Fields: InternalFields = { query: {}, mutation: {}, subscription: {} };
+    schema: GraphQLSchema;
+
     constructor(
         private moduleService: ModuleService,
-        private effectService: EffectService,
-        private logger: BootstrapLogger,
+
         @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
     ) { }
 
-    async validateGuard(res: Function) {
-        if (res.constructor === Boolean) {
-            if (!res) {
-                this.logger.error(`Guard activated!`);
-                throw new Error('unauthorized');
-            }
-        } else if (res.constructor === Promise) {
-            await this.validateGuard(await res);
-        } else if (res.constructor === Observable) {
-            await this.validateGuard((await res['toPromise']()));
-        }
-    }
-
-    async applyGuards(desc: GenericGapiResolversType, a) {
-        const args = a;
-        await Promise.all(desc.guards.map(async (guard) => {
-            const currentGuard = Container.get<CanActivateResolver>(guard);
-            await this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
-        }));
-    }
 
     getResolverByName(resolverName: string) {
         return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
@@ -93,67 +69,6 @@ export class BootstrapService {
         return this.Fields;
     }
 
-    applyMetaToResolvers(desc: GenericGapiResolversType, self: any) {
-        const events = this.effectService;
-        const currentConstructor = this;
-        const effectName = desc.effect ? desc.effect : desc.method_name;
-        this.methodBasedEffects.push(effectName);
-        const originalResolve = desc.resolve.bind(self);
-
-        if (desc.subscribe) {
-            const originalSubscribe = desc.subscribe;
-            desc.subscribe = function subscribe(...args: any[]) {
-                return originalSubscribe.bind(self)(self, ...args);
-            };
-        }
-        desc.resolve = async function resolve(...args: any[]) {
-
-            if (!desc.public
-                && desc.guards && desc.guards.length
-                && currentConstructor.config.authentication
-            ) {
-                await currentConstructor.applyGuards(desc, args);
-            }
-
-            let val = originalResolve.apply(self, args);
-            if (!val && !process.env.STRICT_RETURN_TYPE) {
-                val = {};
-            }
-            if (!val && process.env.STRICT_RETURN_TYPE) {
-                throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
-            }
-
-            if (val.constructor === Object
-                || val.constructor === Array
-                || val.constructor === String
-                || val.constructor === Number
-            ) {
-                val = of(val);
-            }
-
-            let observable = from(val);
-            if (desc.interceptor) {
-                observable = await Container
-                    .get<InterceptResolver>(desc.interceptor)
-                    .intercept(observable, args[2], args[1], desc);
-            }
-            let result: any;
-
-
-            if (observable.constructor === Object) {
-                result = observable;
-            } else {
-                result = await observable.toPromise();
-            }
-            if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
-                events
-                    .getLayer<Array<any>>(effectName)
-                    .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
-            }
-            return result;
-        };
-    }
-
     getFieldsFromType(schema: GraphQLSchema): {[key: string]: { type: any, resolve: () => {}, isDeprecated: boolean, name: string, args: any[]}} {
         return schema.getQueryType().getFields().findUser.type['getFields']();
     }
@@ -169,6 +84,7 @@ export class BootstrapService {
         if (this.config.buildAstDefinitions) {
             schema = buildSchema(printSchema(schema));
         }
+        this.schema = schema;
         return schema;
     }
 
@@ -177,30 +93,6 @@ export class BootstrapService {
             return;
         }
         return new GraphQLObjectType({ name, description, fields });
-    }
-
-    writeEffectTypes(effects?: Array<string>): void {
-        if (!this.config.writeEffects) {
-            return;
-        }
-        const types = `
-/* tslint:disable */
-function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
-    return o.reduce((res, key) => {
-        res[key] = key;
-        return res;
-    }, Object.create(null));
-}
-export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects).replace(/'/g, `'`).replace(/,/g, ',\n')});
-export type EffectTypes = keyof typeof EffectTypes;
-`;
-        try {
-            const folder = process.env.INTROSPECTION_FOLDER || `./src/app/core/api-introspection/`;
-            ensureDirSync(folder);
-            writeFileSync(folder + 'EffectTypes.ts', types, 'utf8');
-        } catch (e) {
-            console.error(e, 'Effects are not saved to directory');
-        }
     }
 
 

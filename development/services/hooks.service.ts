@@ -1,16 +1,25 @@
 import { errorUnauthorized } from './error.service';
-import { Service, Inject } from '@rxdi/core';
+import { Service, Inject, Container, BootstrapLogger } from '@rxdi/core';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { BootstrapService } from './bootstrap.service';
 import { GraphQLObjectType, GraphQLField, GraphQLResolveInfo } from 'graphql';
+import { GenericGapiResolversType } from '../decorators/query/query.decorator';
+import { EffectService } from './effect.service';
+import { CanActivateResolver } from '../decorators/guard/guard.interface';
+import { Observable, of, from } from 'rxjs';
+import { InterceptResolver } from '../decorators/intercept/intercept.interface';
+import { ensureDirSync, writeFileSync } from 'fs-extra';
 
 @Service()
 export class HookService {
 
     @Inject(() => BootstrapService) private bootstrap: BootstrapService;
+    methodBasedEffects = [];
 
     constructor(
-        @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG
+        @Inject(GRAPHQL_PLUGIN_CONFIG) private config: GRAPHQL_PLUGIN_CONFIG,
+        private effectService: EffectService,
+        private logger: BootstrapLogger,
     ) {}
 
     AttachHooks(graphQLFields: GraphQLObjectType[]) {
@@ -21,25 +30,141 @@ export class HookService {
             const resolvers = type.getFields();
             Object.keys(resolvers).forEach(resolver => this.applyMeta(resolvers[resolver]));
         });
+        this.writeEffectTypes();
+    }
+
+    writeEffectTypes(effects?: Array<string>): void {
+        if (!this.config.writeEffects) {
+            return;
+        }
+        const types = `
+/* tslint:disable */
+function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
+    return o.reduce((res, key) => {
+        res[key] = key;
+        return res;
+    }, Object.create(null));
+}
+export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects).replace(/'/g, `'`).replace(/,/g, ',\n')});
+export type EffectTypes = keyof typeof EffectTypes;
+`;
+        try {
+            const folder = process.env.INTROSPECTION_FOLDER || `./src/app/core/api-introspection/`;
+            ensureDirSync(folder);
+            writeFileSync(folder + 'EffectTypes.ts', types, 'utf8');
+        } catch (e) {
+            console.error(e, 'Effects are not saved to directory');
+        }
     }
 
     applyMeta(resolver: GraphQLField<any, any>) {
-        const cr = this.bootstrap.getResolverByName(resolver['name']);
-        if (cr) {
+        const rxdiResolver = this.bootstrap.getResolverByName(resolver.name);
+        if (rxdiResolver) {
             if (!resolver['public']) {
                 this.AddHooks(resolver);
             }
-            resolver.resolve = cr.resolve;
-            resolver.subscribe = cr.subscribe;
-            resolver['target'] = cr['target'];
-            resolver['method_name'] = cr['method_name'];
-            resolver['method_type'] = cr['method_type'];
-            resolver['interceptor'] = cr['interceptor'];
-            resolver['effect'] = cr['effect'];
-            resolver['guards'] = cr['guards'];
-            resolver['scope'] = cr['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-            this.bootstrap.applyMetaToResolvers(<any>resolver, resolver['target']);
+            resolver.resolve = rxdiResolver.resolve;
+            resolver.subscribe = rxdiResolver.subscribe;
+            resolver['target'] = rxdiResolver['target'];
+            resolver['method_name'] = rxdiResolver['method_name'];
+            resolver['method_type'] = rxdiResolver['method_type'];
+            resolver['interceptor'] = rxdiResolver['interceptor'];
+            resolver['effect'] = rxdiResolver['effect'];
+
+            const typeFields = rxdiResolver['type']['getFields']();
+            const typeRes = resolver['type']['getFields']();
+            Object.keys(typeFields).forEach(f => {
+                if (typeFields[f].resolve) {
+                    typeRes[f].resolve = typeFields[f].resolve;
+                }
+            });
+
+            resolver['guards'] = rxdiResolver['guards'];
+            resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
+            this.applyMetaToResolvers(<any>resolver, resolver['target']);
         }
+    }
+
+    async applyGuards(desc: GenericGapiResolversType, a) {
+        const args = a;
+        await Promise.all(desc.guards.map(async (guard) => {
+            const currentGuard = Container.get<CanActivateResolver>(guard);
+            await this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
+        }));
+    }
+
+    async validateGuard(res: Function) {
+        if (res.constructor === Boolean) {
+            if (!res) {
+                this.logger.error(`Guard activated!`);
+                throw new Error('unauthorized');
+            }
+        } else if (res.constructor === Promise) {
+            await this.validateGuard(await res);
+        } else if (res.constructor === Observable) {
+            await this.validateGuard((await res['toPromise']()));
+        }
+    }
+
+    applyMetaToResolvers(desc: GenericGapiResolversType, self: any) {
+        const events = this.effectService;
+        const currentConstructor = this;
+        const effectName = desc.effect ? desc.effect : desc.method_name;
+        this.methodBasedEffects.push(effectName);
+        const originalResolve = desc.resolve.bind(self);
+
+        if (desc.subscribe) {
+            const originalSubscribe = desc.subscribe;
+            desc.subscribe = function subscribe(...args: any[]) {
+                return originalSubscribe.bind(self)(self, ...args);
+            };
+        }
+        desc.resolve = async function resolve(...args: any[]) {
+
+            if (!desc.public
+                && desc.guards && desc.guards.length
+                && currentConstructor.config.authentication
+            ) {
+                await currentConstructor.applyGuards(desc, args);
+            }
+
+            let val = originalResolve.apply(self, args);
+            if (!val && !process.env.STRICT_RETURN_TYPE) {
+                val = {};
+            }
+            if (!val && process.env.STRICT_RETURN_TYPE) {
+                throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
+            }
+
+            if (val.constructor === Object
+                || val.constructor === Array
+                || val.constructor === String
+                || val.constructor === Number
+            ) {
+                val = of(val);
+            }
+
+            let observable = from(val);
+            if (desc.interceptor) {
+                observable = await Container
+                    .get<InterceptResolver>(desc.interceptor)
+                    .intercept(observable, args[2], args[1], desc);
+            }
+            let result: any;
+
+
+            if (observable.constructor === Object) {
+                result = observable;
+            } else {
+                result = await observable.toPromise();
+            }
+            if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
+                events
+                    .getLayer<Array<any>>(effectName)
+                    .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
+            }
+            return result;
+        };
     }
 
     canAccess<K extends {user: {type: string}}>(resolverScope: string[], context: K) {

@@ -11,21 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@rxdi/core");
 const graphql_1 = require("graphql");
-const fs_extra_1 = require("fs-extra");
-const effect_service_1 = require("./effect.service");
 const config_tokens_1 = require("../config.tokens");
-const rxjs_1 = require("rxjs");
 // import { makeExecutableSchema, addMockFunctionsToSchema, mergeSchemas, } from 'graphql-tools';
 class FieldsModule {
 }
@@ -34,38 +23,10 @@ class MetaDescriptor {
 }
 exports.MetaDescriptor = MetaDescriptor;
 let BootstrapService = class BootstrapService {
-    constructor(moduleService, effectService, logger, config) {
+    constructor(moduleService, config) {
         this.moduleService = moduleService;
-        this.effectService = effectService;
-        this.logger = logger;
         this.config = config;
-        this.methodBasedEffects = [];
         this.Fields = { query: {}, mutation: {}, subscription: {} };
-    }
-    validateGuard(res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (res.constructor === Boolean) {
-                if (!res) {
-                    this.logger.error(`Guard activated!`);
-                    throw new Error('unauthorized');
-                }
-            }
-            else if (res.constructor === Promise) {
-                yield this.validateGuard(yield res);
-            }
-            else if (res.constructor === rxjs_1.Observable) {
-                yield this.validateGuard((yield res['toPromise']()));
-            }
-        });
-    }
-    applyGuards(desc, a) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const args = a;
-            yield Promise.all(desc.guards.map((guard) => __awaiter(this, void 0, void 0, function* () {
-                const currentGuard = core_1.Container.get(guard);
-                yield this.validateGuard(currentGuard.canActivate.bind(currentGuard)(args[2], args[1], desc));
-            })));
-        });
     }
     getResolverByName(resolverName) {
         return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
@@ -100,60 +61,6 @@ let BootstrapService = class BootstrapService {
         this.Fields = Fields;
         return this.Fields;
     }
-    applyMetaToResolvers(desc, self) {
-        const events = this.effectService;
-        const currentConstructor = this;
-        const effectName = desc.effect ? desc.effect : desc.method_name;
-        this.methodBasedEffects.push(effectName);
-        const originalResolve = desc.resolve.bind(self);
-        if (desc.subscribe) {
-            const originalSubscribe = desc.subscribe;
-            desc.subscribe = function subscribe(...args) {
-                return originalSubscribe.bind(self)(self, ...args);
-            };
-        }
-        desc.resolve = function resolve(...args) {
-            return __awaiter(this, void 0, void 0, function* () {
-                if (!desc.public
-                    && desc.guards && desc.guards.length
-                    && currentConstructor.config.authentication) {
-                    yield currentConstructor.applyGuards(desc, args);
-                }
-                let val = originalResolve.apply(self, args);
-                if (!val && !process.env.STRICT_RETURN_TYPE) {
-                    val = {};
-                }
-                if (!val && process.env.STRICT_RETURN_TYPE) {
-                    throw new Error(`Return type of graph: ${desc.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
-                }
-                if (val.constructor === Object
-                    || val.constructor === Array
-                    || val.constructor === String
-                    || val.constructor === Number) {
-                    val = rxjs_1.of(val);
-                }
-                let observable = rxjs_1.from(val);
-                if (desc.interceptor) {
-                    observable = yield core_1.Container
-                        .get(desc.interceptor)
-                        .intercept(observable, args[2], args[1], desc);
-                }
-                let result;
-                if (observable.constructor === Object) {
-                    result = observable;
-                }
-                else {
-                    result = yield observable.toPromise();
-                }
-                if (events.map.has(desc.method_name) || events.map.has(desc.effect)) {
-                    events
-                        .getLayer(effectName)
-                        .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
-                }
-                return result;
-            });
-        };
-    }
     getFieldsFromType(schema) {
         return schema.getQueryType().getFields().findUser.type['getFields']();
     }
@@ -168,6 +75,7 @@ let BootstrapService = class BootstrapService {
         if (this.config.buildAstDefinitions) {
             schema = graphql_1.buildSchema(graphql_1.printSchema(schema));
         }
+        this.schema = schema;
         return schema;
     }
     generateType(fields, name, description) {
@@ -175,30 +83,6 @@ let BootstrapService = class BootstrapService {
             return;
         }
         return new graphql_1.GraphQLObjectType({ name, description, fields });
-    }
-    writeEffectTypes(effects) {
-        if (!this.config.writeEffects) {
-            return;
-        }
-        const types = `
-/* tslint:disable */
-function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
-    return o.reduce((res, key) => {
-        res[key] = key;
-        return res;
-    }, Object.create(null));
-}
-export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects).replace(/'/g, `'`).replace(/,/g, ',\n')});
-export type EffectTypes = keyof typeof EffectTypes;
-`;
-        try {
-            const folder = process.env.INTROSPECTION_FOLDER || `./src/app/core/api-introspection/`;
-            fs_extra_1.ensureDirSync(folder);
-            fs_extra_1.writeFileSync(folder + 'EffectTypes.ts', types, 'utf8');
-        }
-        catch (e) {
-            console.error(e, 'Effects are not saved to directory');
-        }
     }
     applyGlobalControllerOptions() {
         Array.from(this.moduleService.watcherService._constructors.keys())
@@ -245,9 +129,7 @@ export type EffectTypes = keyof typeof EffectTypes;
 };
 BootstrapService = __decorate([
     core_1.Service(),
-    __param(3, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
-    __metadata("design:paramtypes", [core_1.ModuleService,
-        effect_service_1.EffectService,
-        core_1.BootstrapLogger, Object])
+    __param(1, core_1.Inject(config_tokens_1.GRAPHQL_PLUGIN_CONFIG)),
+    __metadata("design:paramtypes", [core_1.ModuleService, Object])
 ], BootstrapService);
 exports.BootstrapService = BootstrapService;

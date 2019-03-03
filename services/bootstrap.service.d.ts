@@ -1,6 +1,5 @@
-import { ModuleService, BootstrapLogger } from '@rxdi/core';
+import { ModuleService } from '@rxdi/core';
 import { GraphQLObjectType, GraphQLSchema, GraphQLFieldConfigMap } from 'graphql';
-import { EffectService } from './effect.service';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 export declare class FieldsModule {
@@ -27,14 +26,10 @@ export interface InternalFields {
 }
 export declare class BootstrapService {
     private moduleService;
-    private effectService;
-    private logger;
     private config;
-    methodBasedEffects: any[];
     Fields: InternalFields;
-    constructor(moduleService: ModuleService, effectService: EffectService, logger: BootstrapLogger, config: GRAPHQL_PLUGIN_CONFIG);
-    validateGuard(res: Function): Promise<void>;
-    applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
+    schema: GraphQLSchema;
+    constructor(moduleService: ModuleService, config: GRAPHQL_PLUGIN_CONFIG);
     getResolverByName(resolverName: string): import("graphql/type/definition").GraphQLFieldConfig<any, any, {
         [key: string]: any;
     }>;
@@ -51,7 +46,6 @@ export declare class BootstrapService {
         };
     };
     collectAppSchema(): InternalFields;
-    applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
     getFieldsFromType(schema: GraphQLSchema): {
         [key: string]: {
             type: any;
@@ -63,7 +57,6 @@ export declare class BootstrapService {
     };
     generateSchema(): GraphQLSchema;
     private generateType;
-    writeEffectTypes(effects?: Array<string>): void;
     private applyGlobalControllerOptions;
     getMetaDescriptors(): MetaDescriptor[];
 }

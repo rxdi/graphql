@@ -1,11 +1,21 @@
+import { BootstrapLogger } from '@rxdi/core';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GraphQLObjectType, GraphQLField, GraphQLResolveInfo } from 'graphql';
+import { GenericGapiResolversType } from '../decorators/query/query.decorator';
+import { EffectService } from './effect.service';
 export declare class HookService {
     private config;
+    private effectService;
+    private logger;
     private bootstrap;
-    constructor(config: GRAPHQL_PLUGIN_CONFIG);
+    methodBasedEffects: any[];
+    constructor(config: GRAPHQL_PLUGIN_CONFIG, effectService: EffectService, logger: BootstrapLogger);
     AttachHooks(graphQLFields: GraphQLObjectType[]): void;
+    writeEffectTypes(effects?: Array<string>): void;
     applyMeta(resolver: GraphQLField<any, any>): void;
+    applyGuards(desc: GenericGapiResolversType, a: any): Promise<void>;
+    validateGuard(res: Function): Promise<void>;
+    applyMetaToResolvers(desc: GenericGapiResolversType, self: any): void;
     canAccess<K extends {
         user: {
             type: string;

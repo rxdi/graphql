@@ -156,12 +156,16 @@ export class BootstrapService {
 
     generateSchema(): GraphQLSchema {
         const Fields = this.collectAppSchema();
-        // Build astNode https://github.com/graphql/graphql-js/issues/1575
-        return buildSchema(printSchema(new GraphQLSchema({
+        let schema: GraphQLSchema = new GraphQLSchema({
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
-        })));
+        });
+        // Build astNode https://github.com/graphql/graphql-js/issues/1575
+        if (this.config.buildAstDefinitions) {
+            schema = buildSchema(printSchema(schema));
+        }
+        return schema;
     }
 
     private generateType(fields: GraphQLFieldConfigMap<any, any>, name: string, description: string): GraphQLObjectType {

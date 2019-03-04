@@ -78,6 +78,15 @@ export type EffectTypes = keyof typeof EffectTypes;
             resolver['method_type'] = rxdiResolver['method_type'];
             resolver['interceptor'] = rxdiResolver['interceptor'];
             resolver['effect'] = rxdiResolver['effect'];
+            resolver['guards'] = rxdiResolver['guards'];
+            resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
+            this.applyTypeFields(resolver, rxdiResolver);
+            this.AddHooks(resolver);
+            this.applyMetaToResolver(resolver);
+        }
+    }
+    applyTypeFields(resolver, rxdiResolver) {
+        if (rxdiResolver['type']['getFields']) {
             const typeFields = rxdiResolver['type']['getFields']();
             const typeRes = resolver['type']['getFields']();
             Object.keys(typeFields).forEach(f => {
@@ -85,10 +94,6 @@ export type EffectTypes = keyof typeof EffectTypes;
                     typeRes[f].resolve = typeFields[f].resolve;
                 }
             });
-            resolver['guards'] = rxdiResolver['guards'];
-            resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-            this.AddHooks(resolver);
-            this.applyMetaToResolver(resolver);
         }
     }
     applyGuards(desc, a) {

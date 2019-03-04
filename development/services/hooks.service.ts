@@ -2,7 +2,7 @@ import { errorUnauthorized } from './error.service';
 import { Service, Inject, Container, BootstrapLogger } from '@rxdi/core';
 import { GRAPHQL_PLUGIN_CONFIG, RESOLVER_HOOK } from '../config.tokens';
 import { BootstrapService } from './bootstrap.service';
-import { GraphQLObjectType, GraphQLField, GraphQLResolveInfo } from 'graphql';
+import { GraphQLObjectType, GraphQLField, GraphQLResolveInfo, GraphQLFieldConfig } from 'graphql';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 import { EffectService } from './effect.service';
 import { CanActivateResolver } from '../decorators/guard/guard.interface';
@@ -67,6 +67,16 @@ export type EffectTypes = keyof typeof EffectTypes;
             resolver['method_type'] = rxdiResolver['method_type'];
             resolver['interceptor'] = rxdiResolver['interceptor'];
             resolver['effect'] = rxdiResolver['effect'];
+            resolver['guards'] = rxdiResolver['guards'];
+            resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
+            this.applyTypeFields(resolver, rxdiResolver);
+            this.AddHooks(resolver);
+            this.applyMetaToResolver(<any>resolver);
+        }
+    }
+
+    applyTypeFields<T, K>(resolver: GraphQLField<T, K>, rxdiResolver: GraphQLFieldConfig<T, K>) {
+        if (rxdiResolver['type']['getFields']) {
             const typeFields = rxdiResolver['type']['getFields']();
             const typeRes = resolver['type']['getFields']();
             Object.keys(typeFields).forEach(f => {
@@ -74,10 +84,6 @@ export type EffectTypes = keyof typeof EffectTypes;
                     typeRes[f].resolve = typeFields[f].resolve;
                 }
             });
-            resolver['guards'] = rxdiResolver['guards'];
-            resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
-            this.AddHooks(resolver);
-            this.applyMetaToResolver(<any>resolver);
         }
     }
 

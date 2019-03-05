@@ -40,8 +40,8 @@
     "@types/hapi": "^18.0.1"
   },
   "devDependencies": {
-    "@rxdi/core": "^0.0.378",
-    "@rxdi/hapi": "^0.0.378",
+    "@rxdi/core": "^0.0.380",
+    "@rxdi/hapi": "^0.0.380",
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.5",
     "jest": "^24.1.0",

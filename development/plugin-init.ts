@@ -5,7 +5,7 @@ import { Server } from 'hapi';
 import { take, switchMap, tap } from 'rxjs/operators';
 import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
 
-interface Response<T> {
+export interface Response<T> {
     raw: string;
     data: T;
     errors: Array<{ message: string, name: string; time_thrown: string, data: {} }>;
@@ -18,7 +18,7 @@ export interface SIGNITURE {
     token: string;
 }
 
-interface SendRequestQueryType {
+export interface SendRequestQueryType {
     query: string;
     variables?: any;
     signiture?: SIGNITURE;
@@ -48,7 +48,7 @@ export class PluginInit implements PluginInterface {
         ).subscribe();
     }
 
-    sendRequest<T>(request: SendRequestQueryType): PromiseLike<Response<T>> {
+    sendRequest = <T>(request: SendRequestQueryType): PromiseLike<Response<T>> => {
         const url = `http://localhost:${this.server.info.port}/graphql`;
         this.tester = tester({
             url,

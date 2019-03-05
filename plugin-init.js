@@ -32,6 +32,14 @@ let PluginInit = class PluginInit {
         this.config = config;
         this.afterStarter = afterStarter;
         this.defaultQuery = `query { status { status } } `;
+        this.sendRequest = (request) => {
+            const url = `http://localhost:${this.server.info.port}/graphql`;
+            this.tester = graphql_tester_1.tester({
+                url,
+                contentType: 'application/json'
+            });
+            return this.tester(JSON.stringify(request));
+        };
     }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -40,14 +48,6 @@ let PluginInit = class PluginInit {
             }
             this.afterStarter.appStarted.pipe(operators_1.take(1), operators_1.switchMap(() => __awaiter(this, void 0, void 0, function* () { return yield this.sendRequest({ query: this.defaultQuery }); })), operators_1.tap(res => this.checkStatus(res))).subscribe();
         });
-    }
-    sendRequest(request) {
-        const url = `http://localhost:${this.server.info.port}/graphql`;
-        this.tester = graphql_tester_1.tester({
-            url,
-            contentType: 'application/json'
-        });
-        return this.tester(JSON.stringify(request));
     }
     checkStatus(request) {
         return __awaiter(this, void 0, void 0, function* () {

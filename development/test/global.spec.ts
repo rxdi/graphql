@@ -2,7 +2,7 @@ import 'jest';
 
 import { Container, Bootstrap, Controller } from '@rxdi/core';
 import { PluginInit } from '../plugin-init';
-import { createTestBed, startServer } from './helpers/core-module';
+import { createTestBed, startServer, stopServer, getGraphqlSchema } from './helpers/core-module';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { Server } from 'hapi';
 import { GRAPHQL_PLUGIN_CONFIG } from '../../development/config.tokens';
@@ -38,21 +38,19 @@ class UserQueriesController {
 }
 
 describe('Global Server Tests', () => {
-    let server: Server;
     let pluginInit: PluginInit;
     let schema: GraphQLSchema;
 
     beforeEach(async () => {
         await createTestBed({ controllers: [UserQueriesController] })
         .pipe(
-            switchMapTo(startServer())
+            switchMapTo(startServer()),
         ).toPromise();
-        server = Container.get<Server>(HAPI_SERVER);
         pluginInit = Container.get(PluginInit);
-        schema = Container.get(GRAPHQL_PLUGIN_CONFIG).graphqlOptions.schema;
+        schema = await getGraphqlSchema().toPromise();
     });
 
-    afterEach(async () => await server.stop());
+    afterEach(async () => await stopServer());
 
     it('Should create query to test resolvers', async (done) => {
         const res = await pluginInit.sendRequest<{ findUser: { id: number } }>({
@@ -78,5 +76,5 @@ describe('Global Server Tests', () => {
         done();
     });
 
-    afterAll(async () => await server.stop());
+    afterAll(async () => await stopServer());
 });

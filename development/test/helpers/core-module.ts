@@ -1,10 +1,10 @@
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
-import { HapiConfigModel, HapiModule } from '@rxdi/hapi';
+import { HapiConfigModel, HapiModule, HAPI_SERVER } from '@rxdi/hapi';
 import { GraphQLModule } from '../..';
-import { Module, Controller, Container, Bootstrap, BootstrapFramework, ModuleService, ModuleArguments, ConfigModel } from '@rxdi/core';
-import { Type, Query } from '../../../development/decorators';
-import { GraphQLNonNull, GraphQLInt, GraphQLObjectType } from 'graphql';
-import { BootstrapService } from '@rxdi/core/services/bootstrap/bootstrap.service';
+import { Module, BootstrapFramework, ModuleArguments, ConfigModel, Container } from '@rxdi/core';
+import { PluginInit, SendRequestQueryType } from '../../plugin-init';
+import { Server } from 'hapi';
+import { of } from 'rxjs';
 
 export interface CoreModuleConfig {
     server?: HapiConfigModel;
@@ -50,35 +50,6 @@ export const DEFAULT_CONFIG = {
 
 
 
-
-const UserType = new GraphQLObjectType({
-    name: 'UserType',
-    fields: () => ({
-        id: {
-            type: GraphQLInt,
-            resolve: () => {
-                return 2;
-            }
-        }
-    })
-});
-
-@Controller()
-export class UserQueriesController {
-
-    @Type(UserType)
-    @Query({
-        id: {
-            type: new GraphQLNonNull(GraphQLInt)
-        }
-    })
-    findUser(root, { id }, context) {
-        return { id: id };
-    }
-
-}
-
-
 export const setConfigServer = (config: HapiConfigModel = {}) => {
     return { ...DEFAULT_CONFIG.server, ...config };
 };
@@ -97,6 +68,11 @@ export const startServer = (config: CoreModuleConfig = {}, bootstrapOptions?: Co
     }, [], bootstrapOptions);
 };
 
+export const stopServer = () => Container.get<Server>(HAPI_SERVER).stop();
+export const getServer = () => of(Container.get<Server>(HAPI_SERVER));
+
+export const getGraphqlSchema = () => of(Container.get(GRAPHQL_PLUGIN_CONFIG).graphqlOptions.schema);
+
 export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: any[] = [], bootstrapOptions?: ConfigModel) => {
     @Module({
         imports: options.imports || [],
@@ -113,3 +89,5 @@ export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: 
 };
 
 export const setup = createTestBed;
+
+export const sendRequest = <T = {}>(request: SendRequestQueryType) => Container.get(PluginInit).sendRequest<T>(request);

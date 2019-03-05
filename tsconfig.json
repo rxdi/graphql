@@ -27,7 +27,7 @@
     ]
   },
   "files": [
-    "./development/index.ts"
+    "./development/index"
   ],
   "exclude": [
     "node_modules"

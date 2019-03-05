@@ -1,7 +1,7 @@
 import { PluginInterface, AfterStarterService } from '@rxdi/core';
 import { Server } from 'hapi';
 import { GRAPHQL_PLUGIN_CONFIG } from './config.tokens';
-interface Response<T> {
+export interface Response<T> {
     raw: string;
     data: T;
     errors: Array<{
@@ -17,7 +17,7 @@ interface Response<T> {
 export interface SIGNITURE {
     token: string;
 }
-interface SendRequestQueryType {
+export interface SendRequestQueryType {
     query: string;
     variables?: any;
     signiture?: SIGNITURE;
@@ -30,7 +30,6 @@ export declare class PluginInit implements PluginInterface {
     constructor(server: Server, config: GRAPHQL_PLUGIN_CONFIG, afterStarter: AfterStarterService);
     private tester;
     register(): Promise<void>;
-    sendRequest<T>(request: SendRequestQueryType): PromiseLike<Response<T>>;
+    sendRequest: <T>(request: SendRequestQueryType) => PromiseLike<Response<T>>;
     checkStatus<T = {}>(request: Response<T>): Promise<void>;
 }
-export {};

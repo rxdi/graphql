@@ -1,20 +1,52 @@
 import 'jest';
 
-import { Container, Bootstrap } from '@rxdi/core';
+import { Container, Bootstrap, Controller } from '@rxdi/core';
 import { PluginInit } from '../plugin-init';
-import { createTestBed, createAppModule } from './helpers/core-module';
+import { createTestBed, startServer } from './helpers/core-module';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { Server } from 'hapi';
 import { GRAPHQL_PLUGIN_CONFIG } from '../../development/config.tokens';
-import { GraphQLSchema } from 'graphql';
+import { GraphQLSchema, GraphQLNonNull, GraphQLInt, GraphQLObjectType } from 'graphql';
+import { switchMapTo } from 'rxjs/operators';
+import { Type, Query } from '../decorators';
+
+const UserType = new GraphQLObjectType({
+    name: 'UserType',
+    fields: () => ({
+        id: {
+            type: GraphQLInt,
+            resolve: () => {
+                return 2;
+            }
+        }
+    })
+});
+
+@Controller()
+class UserQueriesController {
+
+    @Type(UserType)
+    @Query({
+        id: {
+            type: new GraphQLNonNull(GraphQLInt)
+        }
+    })
+    findUser(root, { id }, context) {
+        return { id: id };
+    }
+
+}
 
 describe('Global Server Tests', () => {
     let server: Server;
     let pluginInit: PluginInit;
     let schema: GraphQLSchema;
+
     beforeEach(async () => {
-        createTestBed();
-        await Bootstrap(createAppModule()).toPromise();
+        await createTestBed({ controllers: [UserQueriesController] })
+        .pipe(
+            switchMapTo(startServer())
+        ).toPromise();
         server = Container.get<Server>(HAPI_SERVER);
         pluginInit = Container.get(PluginInit);
         schema = Container.get(GRAPHQL_PLUGIN_CONFIG).graphqlOptions.schema;

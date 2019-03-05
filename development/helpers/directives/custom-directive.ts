@@ -197,7 +197,7 @@ export interface GraphQLCustomDirectiveInterface<T = {}, A = {}, K = {}> {
     name: string;
     description?: string;
     locations: DirectiveLocationEnum[];
-    args: {[key: string]: {description: string, type: any }};
+    args?: {[key: string]: {description: string, type: any }};
     resolve: (resolve: () => Promise<T>, source: any, args: A, context: K, info: any) => Promise<T>;
 }
 

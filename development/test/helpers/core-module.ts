@@ -1,9 +1,10 @@
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HapiConfigModel, HapiModule } from '@rxdi/hapi';
 import { GraphQLModule } from '../..';
-import { Module, Controller, Container } from '@rxdi/core';
+import { Module, Controller, Container, Bootstrap, BootstrapFramework, ModuleService, ModuleArguments, ConfigModel } from '@rxdi/core';
 import { Type, Query } from '../../../development/decorators';
 import { GraphQLNonNull, GraphQLInt, GraphQLObjectType } from 'graphql';
+import { BootstrapService } from '@rxdi/core/services/bootstrap/bootstrap.service';
 
 export interface CoreModuleConfig {
     server?: HapiConfigModel;
@@ -77,14 +78,6 @@ export class UserQueriesController {
 
 }
 
-@Module({
-    controllers: [UserQueriesController]
-})
-class AppModule { }
-
-
-@Module()
-class CoreModule { }
 
 export const setConfigServer = (config: HapiConfigModel = {}) => {
     return { ...DEFAULT_CONFIG.server, ...config };
@@ -95,15 +88,28 @@ export const setConfigGraphql = (config: GRAPHQL_PLUGIN_CONFIG = {}) => {
 };
 
 
-export const createTestBed = (config: CoreModuleConfig = {}) => {
-    Container.get(<any>HapiModule.forRoot(setConfigServer(config.server)));
-    Container.get(<any>GraphQLModule.forRoot(setConfigGraphql(config.graphql)));
-    return CoreModule;
+export const startServer = (config: CoreModuleConfig = {}, bootstrapOptions?: ConfigModel) => {
+    return createTestBed({
+        imports: [
+            HapiModule.forRoot(setConfigServer(config.server)),
+            GraphQLModule.forRoot(setConfigGraphql(config.graphql))
+        ]
+    }, [], bootstrapOptions);
 };
 
-
-export const createAppModule = () => {
-    return AppModule;
+export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: any[] = [], bootstrapOptions?: ConfigModel) => {
+    @Module({
+        imports: options.imports || [],
+        providers: options.providers || [],
+        services: options.services || [],
+        bootstrap: options.bootstrap || [],
+        components: options.components || [],
+        controllers: options.controllers || [],
+        effects: options.effects || [],
+        plugins: options.plugins || []
+    })
+    class AppModule { }
+    return BootstrapFramework(AppModule, frameworks, bootstrapOptions);
 };
 
-
+export const setup = createTestBed;

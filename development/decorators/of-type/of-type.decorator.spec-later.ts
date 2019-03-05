@@ -45,7 +45,7 @@ Container.get(UserEffectsService);
 
 describe('Decorators: @OfType', () => {
     it('Should emit effect based on resolved resolver', (done) => {
-        const mutation: TestingMutation = <any>Container.get(ClassTestProvider).mutation(null, {id: null}, null);
+        // const mutation: TestingMutation = <any>Container.get(ClassTestProvider).mutation(null, {id: null}, null);
 
         done();
     });

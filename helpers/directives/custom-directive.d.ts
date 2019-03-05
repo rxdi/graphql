@@ -8,7 +8,7 @@ export interface GraphQLCustomDirectiveInterface<T = {}, A = {}, K = {}> {
     name: string;
     description?: string;
     locations: DirectiveLocationEnum[];
-    args: {
+    args?: {
         [key: string]: {
             description: string;
             type: any;

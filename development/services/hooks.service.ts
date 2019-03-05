@@ -178,7 +178,9 @@ export type EffectTypes = keyof typeof EffectTypes;
     }
 
     ResolverHooks<T, K>(resolver: GraphQLField<T, K>, root: T, args: {[key: string]: any}, context: K, info: GraphQLResolveInfo) {
-        this.AuthenticationHooks(resolver, context);
+        if (!resolver['public']) {
+            this.AuthenticationHooks(resolver, context);
+        }
     }
 
     AddHooks<T, K>(resolver: GraphQLField<T, K>) {

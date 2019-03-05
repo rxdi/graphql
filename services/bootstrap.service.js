@@ -41,6 +41,7 @@ let BootstrapService = class BootstrapService {
         return {
             type: new graphql_1.GraphQLObjectType({ name: 'StatusQueryType', fields: () => ({ status: { type: graphql_1.GraphQLString } }) }),
             method_name: 'status',
+            public: true,
             method_type: 'query',
             target: () => { },
             resolve: function initQuery() { return { status: 200 }; }

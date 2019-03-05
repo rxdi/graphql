@@ -39,6 +39,7 @@ export declare class BootstrapService {
             [key: string]: any;
         }>;
         method_name: string;
+        public: boolean;
         method_type: string;
         target: () => void;
         resolve: () => {

@@ -182,7 +182,9 @@ export type EffectTypes = keyof typeof EffectTypes;
         this.canAccess(resolver['scope'], context);
     }
     ResolverHooks(resolver, root, args, context, info) {
-        this.AuthenticationHooks(resolver, context);
+        if (!resolver['public']) {
+            this.AuthenticationHooks(resolver, context);
+        }
     }
     AddHooks(resolver) {
         const resolve = resolver.resolve;

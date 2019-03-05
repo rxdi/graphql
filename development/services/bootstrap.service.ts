@@ -46,6 +46,7 @@ export class BootstrapService {
         return {
             type: new GraphQLObjectType({ name: 'StatusQueryType', fields: () => ({ status: { type: GraphQLString } }) }),
             method_name: 'status',
+            public: true,
             method_type: 'query',
             target: () => { },
             resolve: function initQuery() { return { status: 200 }; }

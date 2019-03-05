@@ -1,6 +1,6 @@
 {
   "name": "@rxdi/graphql",
-  "version": "0.0.382",
+  "version": "0.0.383",
   "repository": {
     "type": "git",
     "url": "https://github.com/rxdi/graphql.git"
@@ -35,15 +35,15 @@
     "boom": "^7.3.0",
     "fs-extra": "7.0.1",
     "graphql": "14.1.1",
-    "graphql-tester": "0.0.5",
-    "@types/graphql": "^14.0.7",
-    "@types/hapi": "^18.0.1"
+    "graphql-tester": "0.0.5"
   },
   "devDependencies": {
     "@rxdi/core": "^0.0.382",
     "@rxdi/hapi": "^0.0.382",
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.5",
+    "@types/graphql": "^14.0.7",
+    "@types/hapi": "^18.0.1",
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "rxjs": "6.4.0",

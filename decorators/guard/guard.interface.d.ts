@@ -8,7 +8,7 @@ export interface CanActivateResolver {
 }
 export interface GraphQLControllerOptions {
     guards?: Function[];
-    type?: GraphQLObjectType;
+    type?: GraphQLObjectType | any;
     scope?: string[];
     interceptor?: Function;
 }

@@ -1,7 +1,7 @@
 import { InjectionToken } from '@rxdi/core';
 import * as GraphiQL from 'apollo-server-module-graphiql';
 import { GraphQLOptions } from 'apollo-server-core';
-import { GraphQLSchema, GraphQLField } from 'graphql';
+import { GraphQLSchema, GraphQLField, GraphQLDirective } from 'graphql';
 import { Server, ResponseToolkit } from 'hapi';
 export interface HapiOptionsFunction {
     (req?: Request): GraphQLOptions | Promise<GraphQLOptions>;
@@ -17,6 +17,7 @@ export interface HapiGraphiQLPluginOptions {
 export interface GRAPHQL_PLUGIN_CONFIG {
     path?: string;
     initQuery?: boolean;
+    directives?: GraphQLDirective[] | any[];
     buildAstDefinitions?: boolean;
     graphiQlPlayground?: boolean;
     graphiql?: boolean;

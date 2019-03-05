@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@rxdi/core");
 const graphql_1 = require("graphql");
 const config_tokens_1 = require("../config.tokens");
+const custom_directive_1 = require("../helpers/directives/custom-directive");
 // import { makeExecutableSchema, addMockFunctionsToSchema, mergeSchemas, } from 'graphql-tools';
 class FieldsModule {
 }
@@ -67,6 +68,7 @@ let BootstrapService = class BootstrapService {
     generateSchema() {
         const Fields = this.collectAppSchema();
         let schema = new graphql_1.GraphQLSchema({
+            directives: this.getDirectives(),
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
@@ -75,8 +77,14 @@ let BootstrapService = class BootstrapService {
         if (this.config.buildAstDefinitions) {
             schema = graphql_1.buildSchema(graphql_1.printSchema(schema));
         }
+        if (this.config.directives && this.config.directives.length) {
+            custom_directive_1.applySchemaCustomDirectives(schema);
+        }
         this.schema = schema;
         return schema;
+    }
+    getDirectives() {
+        return [...this.config.directives || []].map(d => d.metadata ? new custom_directive_1.GraphQLCustomDirective(core_1.Container.get(d)) : d);
     }
     generateType(fields, name, description) {
         if (!Object.keys(fields).length) {

@@ -56,6 +56,7 @@ export declare class BootstrapService {
         };
     };
     generateSchema(): GraphQLSchema;
+    private getDirectives;
     private generateType;
     private applyGlobalControllerOptions;
     getMetaDescriptors(): MetaDescriptor[];

@@ -1,8 +1,9 @@
-import { ModuleService, Service, Inject } from '@rxdi/core';
+import { ModuleService, Service, Inject, Container } from '@rxdi/core';
 import { GraphQLObjectType, GraphQLSchema, printSchema, GraphQLFieldConfigMap, buildSchema, GraphQLString } from 'graphql';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 import { GraphQLControllerOptions } from '../decorators/guard/guard.interface';
+import { applySchemaCustomDirectives, GraphQLCustomDirective } from '../helpers/directives/custom-directive';
 // import { makeExecutableSchema, addMockFunctionsToSchema, mergeSchemas, } from 'graphql-tools';
 
 export class FieldsModule { query: {}; mutation: {}; subscription: {}; }
@@ -69,23 +70,32 @@ export class BootstrapService {
         return this.Fields;
     }
 
-    getFieldsFromType(schema: GraphQLSchema): {[key: string]: { type: any, resolve: () => {}, isDeprecated: boolean, name: string, args: any[]}} {
+    getFieldsFromType(schema: GraphQLSchema): { [key: string]: { type: any, resolve: () => {}, isDeprecated: boolean, name: string, args: any[] } } {
         return schema.getQueryType().getFields().findUser.type['getFields']();
     }
 
     generateSchema(): GraphQLSchema {
         const Fields = this.collectAppSchema();
         let schema: GraphQLSchema = new GraphQLSchema({
+            directives: this.getDirectives(),
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
         });
+
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         if (this.config.buildAstDefinitions) {
             schema = buildSchema(printSchema(schema));
         }
+        if (this.config.directives && this.config.directives.length) {
+            applySchemaCustomDirectives(schema);
+        }
         this.schema = schema;
         return schema;
+    }
+
+    private getDirectives() {
+        return [...this.config.directives || []].map(d => d.metadata ? new GraphQLCustomDirective(Container.get(d)) : d);
     }
 
     private generateType(fields: GraphQLFieldConfigMap<any, any>, name: string, description: string): GraphQLObjectType {

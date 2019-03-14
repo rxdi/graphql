@@ -1,10 +1,4 @@
 "use strict";
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const config_tokens_1 = require("../../config.tokens");
 const hapi_1 = require("@rxdi/hapi");
@@ -51,7 +45,7 @@ exports.setConfigGraphql = (config = {}) => {
     return Object.assign({}, exports.DEFAULT_CONFIG.graphql, config);
 };
 exports.startServer = (config = {}, bootstrapOptions) => {
-    return exports.createTestBed({
+    return core_1.createTestBed({
         imports: [
             hapi_1.HapiModule.forRoot(exports.setConfigServer(config.server)),
             __1.GraphQLModule.forRoot(exports.setConfigGraphql(config.graphql))
@@ -61,22 +55,19 @@ exports.startServer = (config = {}, bootstrapOptions) => {
 exports.stopServer = () => core_1.Container.get(hapi_1.HAPI_SERVER).stop();
 exports.getServer = () => rxjs_1.of(core_1.Container.get(hapi_1.HAPI_SERVER));
 exports.getGraphqlSchema = () => rxjs_1.of(core_1.Container.get(config_tokens_1.GRAPHQL_PLUGIN_CONFIG).graphqlOptions.schema);
-exports.createTestBed = (options, frameworks = [], bootstrapOptions) => {
-    let AppModule = class AppModule {
-    };
-    AppModule = __decorate([
-        core_1.Module({
-            imports: options.imports || [],
-            providers: options.providers || [],
-            services: options.services || [],
-            bootstrap: options.bootstrap || [],
-            components: options.components || [],
-            controllers: options.controllers || [],
-            effects: options.effects || [],
-            plugins: options.plugins || []
-        })
-    ], AppModule);
-    return core_1.BootstrapFramework(AppModule, frameworks, bootstrapOptions);
-};
-exports.setup = exports.createTestBed;
+// export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: any[] = [], bootstrapOptions?: ConfigModel) => {
+//     @Module({
+//         imports: options.imports || [],
+//         providers: options.providers || [],
+//         services: options.services || [],
+//         bootstrap: options.bootstrap || [],
+//         components: options.components || [],
+//         controllers: options.controllers || [],
+//         effects: options.effects || [],
+//         plugins: options.plugins || []
+//     })
+//     class AppModule { }
+//     return BootstrapFramework(AppModule, frameworks, bootstrapOptions);
+// };
+// export const setup = createTestBed;
 exports.sendRequest = (request) => core_1.Container.get(plugin_init_1.PluginInit).sendRequest(request);

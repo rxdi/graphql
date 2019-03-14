@@ -84,7 +84,7 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
     let server;
     let pluginInit;
     beforeEach(() => __awaiter(this, void 0, void 0, function* () {
-        yield core_module_1.createTestBed({ controllers: [UserQueriesController] })
+        yield core_1.createTestBed({ controllers: [UserQueriesController] })
             .pipe(operators_1.switchMapTo(core_module_1.startServer({
             graphql: {
                 directives: [

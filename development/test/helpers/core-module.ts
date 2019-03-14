@@ -1,7 +1,7 @@
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HapiConfigModel, HapiModule, HAPI_SERVER } from '@rxdi/hapi';
 import { GraphQLModule } from '../..';
-import { Module, BootstrapFramework, ModuleArguments, ConfigModel, Container } from '@rxdi/core';
+import { Module, BootstrapFramework, ModuleArguments, ConfigModel, Container, createTestBed } from '@rxdi/core';
 import { PluginInit, SendRequestQueryType } from '../../plugin-init';
 import { Server } from 'hapi';
 import { of } from 'rxjs';
@@ -73,21 +73,21 @@ export const getServer = () => of(Container.get<Server>(HAPI_SERVER));
 
 export const getGraphqlSchema = () => of(Container.get(GRAPHQL_PLUGIN_CONFIG).graphqlOptions.schema);
 
-export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: any[] = [], bootstrapOptions?: ConfigModel) => {
-    @Module({
-        imports: options.imports || [],
-        providers: options.providers || [],
-        services: options.services || [],
-        bootstrap: options.bootstrap || [],
-        components: options.components || [],
-        controllers: options.controllers || [],
-        effects: options.effects || [],
-        plugins: options.plugins || []
-    })
-    class AppModule { }
-    return BootstrapFramework(AppModule, frameworks, bootstrapOptions);
-};
+// export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: any[] = [], bootstrapOptions?: ConfigModel) => {
+//     @Module({
+//         imports: options.imports || [],
+//         providers: options.providers || [],
+//         services: options.services || [],
+//         bootstrap: options.bootstrap || [],
+//         components: options.components || [],
+//         controllers: options.controllers || [],
+//         effects: options.effects || [],
+//         plugins: options.plugins || []
+//     })
+//     class AppModule { }
+//     return BootstrapFramework(AppModule, frameworks, bootstrapOptions);
+// };
 
-export const setup = createTestBed;
+// export const setup = createTestBed;
 
 export const sendRequest = <T = {}>(request: SendRequestQueryType) => Container.get(PluginInit).sendRequest<T>(request);

@@ -1,8 +1,8 @@
 import 'jest';
 
-import { Container, Bootstrap, Controller } from '@rxdi/core';
+import { Container, Bootstrap, Controller, createTestBed } from '@rxdi/core';
 import { PluginInit } from '../plugin-init';
-import { createTestBed, startServer, stopServer, getGraphqlSchema } from './helpers/core-module';
+import { startServer, stopServer, getGraphqlSchema } from './helpers/core-module';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { Server } from 'hapi';
 import { GRAPHQL_PLUGIN_CONFIG } from '../../development/config.tokens';

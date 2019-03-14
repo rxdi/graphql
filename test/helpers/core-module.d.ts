@@ -1,6 +1,6 @@
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HapiConfigModel } from '@rxdi/hapi';
-import { ModuleArguments, ConfigModel } from '@rxdi/core';
+import { ConfigModel, Container } from '@rxdi/core';
 import { SendRequestQueryType } from '../../plugin-init';
 import { Server } from 'hapi';
 export interface CoreModuleConfig {
@@ -71,10 +71,8 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
         };
     };
 };
-export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs/internal/Observable").Observable<any>;
+export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs/internal/Observable").Observable<Container>;
 export declare const stopServer: () => Promise<void>;
 export declare const getServer: () => import("rxjs/internal/Observable").Observable<Server>;
 export declare const getGraphqlSchema: () => import("rxjs/internal/Observable").Observable<import("graphql/type/schema").GraphQLSchema>;
-export declare const createTestBed: <T, K>(options: ModuleArguments<T, K>, frameworks?: any[], bootstrapOptions?: ConfigModel) => import("rxjs/internal/Observable").Observable<any>;
-export declare const setup: <T, K>(options: ModuleArguments<T, K>, frameworks?: any[], bootstrapOptions?: ConfigModel) => import("rxjs/internal/Observable").Observable<any>;
 export declare const sendRequest: <T = {}>(request: SendRequestQueryType) => PromiseLike<import("../../plugin-init").Response<T>>;

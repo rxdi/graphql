@@ -2,9 +2,9 @@
 
 import 'jest';
 
-import { Container, Injectable, Controller } from '@rxdi/core';
+import { Container, Injectable, Controller, createTestBed } from '@rxdi/core';
 import { PluginInit } from '../../plugin-init';
-import { createTestBed, startServer } from '../../test/helpers/core-module';
+import { startServer } from '../../test/helpers/core-module';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { Server } from 'hapi';
 import { GraphQLNonNull, DirectiveLocation, GraphQLObjectType, GraphQLString } from 'graphql';

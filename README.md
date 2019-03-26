@@ -135,7 +135,7 @@ import { Request, ResponseToolkit } from 'hapi';
         },
         {
             provide: ON_REQUEST_HANDLER,
-            useFactory: () => async (next, context, request: Request, h: ResponseToolkit, err: Error) => {
+            useFactory: () => async (next, request: Request, h: ResponseToolkit, err: Error) => {
                 // Authenticate user here if it is not authenticated return Boom.unauthorized()
                 // if (request.headers.authorization) {
                 //     const tokenData = ValidateToken(request.headers.authorization);

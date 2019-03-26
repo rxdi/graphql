@@ -14,6 +14,6 @@ export declare class ApolloService implements PluginInterface {
     init(): void;
     register(): Promise<void>;
     defaultOrNew: (request: Request, response: ResponseToolkit, error: Error) => Promise<any>;
-    makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error): Promise<import("hapi").ResponseObject>;
+    makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error, context?: {}): Promise<import("hapi").ResponseObject>;
     handler: (request: Request, h: ResponseToolkit, err?: Error) => Promise<any>;
 }

@@ -41,7 +41,7 @@ let ApolloService = class ApolloService {
             }
             catch (e) { }
             if (onRequest) {
-                return yield onRequest(() => this.makeGQLRequest(request, response, error), this.config.graphqlOptions.context, request, response, error);
+                return yield onRequest((context) => this.makeGQLRequest(request, response, error, context), request, response, error);
             }
             this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
             if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
@@ -129,7 +129,7 @@ let ApolloService = class ApolloService {
             });
         });
     }
-    makeGQLRequest(request, h, err) {
+    makeGQLRequest(request, h, err, context) {
         return __awaiter(this, void 0, void 0, function* () {
             if (request.payload && request.payload.toString().includes('initQuery')) {
                 this.isInitQuery = true;
@@ -137,6 +137,7 @@ let ApolloService = class ApolloService {
             else {
                 this.isInitQuery = false;
             }
+            this.config.graphqlOptions.context = Object.assign({}, this.config.graphqlOptions.context, context);
             const { graphqlResponse, responseInit } = yield apollo_server_core_1.runHttpQuery([request, h], {
                 method: request.method.toUpperCase(),
                 options: this.config.graphqlOptions,

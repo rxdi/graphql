@@ -1,7 +1,7 @@
 import { Service, Inject, PluginInterface, Container } from '@rxdi/core';
 import * as Boom from 'boom';
 import { Server, Request, ResponseToolkit } from 'hapi';
-import { runHttpQuery, convertNodeHttpToRequest } from 'apollo-server-core';
+import { runHttpQuery, convertNodeHttpToRequest, GraphQLOptions } from 'apollo-server-core';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { GRAPHQL_PLUGIN_CONFIG, SCHEMA_OVERRIDE, CUSTOM_SCHEMA_DEFINITION, ON_REQUEST_HANDLER } from '../config.tokens';
 import { BootstrapService } from '../services/bootstrap.service';
@@ -55,14 +55,13 @@ export class ApolloService implements PluginInterface {
         });
     }
     defaultOrNew = async (request: Request, response: ResponseToolkit, error: Error) => {
-        let onRequest: (next: any, context?: any, request?: Request, h?: ResponseToolkit, err?: Error) => Promise<any>;
+        let onRequest: (next: (context?: {}) => Promise<any>, request?: Request, h?: ResponseToolkit, err?: Error) => Promise<any>;
         try {
             onRequest = <any>Container.get(ON_REQUEST_HANDLER);
         } catch (e) { }
         if (onRequest) {
             return await onRequest(
-                () => this.makeGQLRequest(request, response, error),
-                this.config.graphqlOptions.context,
+                (context) => this.makeGQLRequest(request, response, error, context),
                 request,
                 response,
                 error,
@@ -82,12 +81,13 @@ export class ApolloService implements PluginInterface {
         return this.makeGQLRequest(request, response, error);
 
     }
-    async makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error) {
+    async makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error, context?: {}) {
         if (request.payload && request.payload.toString().includes('initQuery')) {
             this.isInitQuery = true;
         } else {
             this.isInitQuery = false;
         }
+        this.config.graphqlOptions.context = {...this.config.graphqlOptions.context, ...context};
         const { graphqlResponse, responseInit } = await runHttpQuery(
             [request, h],
             {

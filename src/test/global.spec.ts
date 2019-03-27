@@ -1,11 +1,8 @@
 import 'jest';
 
-import { Container, Bootstrap, Controller, createTestBed } from '@rxdi/core';
+import { Container, Controller, createTestBed } from '@rxdi/core';
 import { PluginInit } from '../plugin-init';
 import { startServer, stopServer, getGraphqlSchema } from './helpers/core-module';
-import { HAPI_SERVER } from '@rxdi/hapi';
-import { Server } from 'hapi';
-import { GRAPHQL_PLUGIN_CONFIG } from '../../development/config.tokens';
 import { GraphQLSchema, GraphQLNonNull, GraphQLInt, GraphQLObjectType } from 'graphql';
 import { switchMapTo } from 'rxjs/operators';
 import { Type, Query } from '../decorators';

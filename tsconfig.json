@@ -8,8 +8,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
-    "outDir": ".",
-    "rootDir": "./development",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "lib": [
       "es2017",
       "es2016",
@@ -27,7 +27,7 @@
     ]
   },
   "files": [
-    "./development/index"
+    "./src/index"
   ],
   "exclude": [
     "node_modules"

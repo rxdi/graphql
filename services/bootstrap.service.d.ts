@@ -56,7 +56,8 @@ export declare class BootstrapService {
             args: any[];
         };
     };
-    generateSchema(): GraphQLSchema;
+    isEmptySchemaFields(Fields: any): boolean;
+    generateSchema(schemaOverride?: boolean): GraphQLSchema;
     private getDirectives;
     private generateType;
     private applyGlobalControllerOptions;

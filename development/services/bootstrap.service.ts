@@ -1,5 +1,5 @@
 import { ModuleService, Service, Inject, Container } from '@rxdi/core';
-import { GraphQLObjectType, GraphQLSchema, printSchema, GraphQLFieldConfigMap, buildSchema, GraphQLString } from 'graphql';
+import { GraphQLObjectType, GraphQLSchema, printSchema, GraphQLFieldConfigMap, buildSchema, GraphQLString, validateSchema } from 'graphql';
 import { GRAPHQL_PLUGIN_CONFIG } from '../config.tokens';
 import { GenericGapiResolversType } from '../decorators/query/query.decorator';
 import { GraphQLControllerOptions } from '../decorators/guard/guard.interface';
@@ -75,15 +75,26 @@ export class BootstrapService {
         return schema.getQueryType().getFields().findUser.type['getFields']();
     }
 
-    generateSchema(): GraphQLSchema {
+    isEmptySchemaFields(Fields) {
+        return !Object.keys(Fields).map(f => Fields[f]).filter(f => !!Object.keys(f).length).length;
+    }
+
+    generateSchema(schemaOverride?: boolean): GraphQLSchema {
         const Fields = this.collectAppSchema();
+        if (this.isEmptySchemaFields(Fields) && schemaOverride) {
+            return null;
+        }
         let schema: GraphQLSchema = new GraphQLSchema({
             directives: this.getDirectives(),
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
         });
-
+        const schemaErrors = validateSchema(schema);
+        if (schemaErrors.length) {
+            console.error(schemaErrors);
+            throw new Error('Shema has errors');
+        }
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         if (this.config.buildAstDefinitions) {
             schema = buildSchema(printSchema(schema));

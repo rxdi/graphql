@@ -103,7 +103,7 @@ let ApolloService = class ApolloService {
         }
         catch (e) { }
         if (schemaOverride) {
-            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema());
+            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema(true));
         }
         else {
             let customSchemaDefinition;

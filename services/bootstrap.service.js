@@ -66,14 +66,25 @@ let BootstrapService = class BootstrapService {
     getFieldsFromType(schema) {
         return schema.getQueryType().getFields().findUser.type['getFields']();
     }
-    generateSchema() {
+    isEmptySchemaFields(Fields) {
+        return !Object.keys(Fields).map(f => Fields[f]).filter(f => !!Object.keys(f).length).length;
+    }
+    generateSchema(schemaOverride) {
         const Fields = this.collectAppSchema();
+        if (this.isEmptySchemaFields(Fields) && schemaOverride) {
+            return null;
+        }
         let schema = new graphql_1.GraphQLSchema({
             directives: this.getDirectives(),
             query: this.generateType(Fields.query, 'Query', 'Query type for all get requests which will not change persistent data'),
             mutation: this.generateType(Fields.mutation, 'Mutation', 'Mutation type for all requests which will change persistent data'),
             subscription: this.generateType(Fields.subscription, 'Subscription', 'Subscription type for all subscriptions via pub sub')
         });
+        const schemaErrors = graphql_1.validateSchema(schema);
+        if (schemaErrors.length) {
+            console.error(schemaErrors);
+            throw new Error('Shema has errors');
+        }
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         if (this.config.buildAstDefinitions) {
             schema = graphql_1.buildSchema(graphql_1.printSchema(schema));

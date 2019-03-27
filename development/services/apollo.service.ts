@@ -30,7 +30,7 @@ export class ApolloService implements PluginInterface {
         } catch (e) { }
 
         if (schemaOverride) {
-            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema());
+            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema(true));
         } else {
             let customSchemaDefinition: GraphQLSchema;
             try {

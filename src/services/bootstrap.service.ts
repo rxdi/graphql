@@ -75,7 +75,7 @@ export class BootstrapService {
         return schema.getQueryType().getFields().findUser.type['getFields']();
     }
 
-    isEmptySchemaFields(Fields) {
+    isEmptySchemaFields(Fields: InternalFields) {
         return !Object.keys(Fields).map(f => Fields[f]).filter(f => !!Object.keys(f).length).length;
     }
 
@@ -92,15 +92,14 @@ export class BootstrapService {
         });
         const schemaErrors = validateSchema(schema);
         if (schemaErrors.length) {
-            console.error(schemaErrors);
-            throw new Error('Shema has errors');
+            throw new Error(JSON.stringify(schemaErrors));
         }
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         if (this.config.buildAstDefinitions) {
             schema = buildSchema(printSchema(schema));
         }
         if (this.config.directives && this.config.directives.length) {
-            applySchemaCustomDirectives(schema);
+            schema = applySchemaCustomDirectives(schema);
         }
         this.schema = schema;
         return schema;
@@ -122,9 +121,9 @@ export class BootstrapService {
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
             .map(key => {
-                const currentConstructor: CurrentConstructorInteraface = <any>this.moduleService.watcherService.getConstructor(key);
+                const currentConstructor: CurrentConstructorInteraface = this.moduleService.watcherService.getConstructor(key) as any;
                 const options: GraphQLControllerOptions = currentConstructor.type['metadata'].options;
-                currentConstructor.type._descriptors = <any>currentConstructor.type._descriptors || [];
+                currentConstructor.type._descriptors = currentConstructor.type._descriptors || [] as any;
                 Array.from(currentConstructor.type._descriptors.keys()).map((k => {
                     if (!options) {
                         return;
@@ -158,7 +157,7 @@ export class BootstrapService {
         const descriptors: MetaDescriptor[] = [];
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
-            .map((key => <any>this.moduleService.watcherService.getConstructor(key)))
+            .map((key => this.moduleService.watcherService.getConstructor(key) as unknown))
             .forEach((map: CurrentConstructorInteraface) => Array.from(map.type._descriptors.keys())
                 .map((k) => map.type._descriptors.get(k))
                 .map(d => d.value)

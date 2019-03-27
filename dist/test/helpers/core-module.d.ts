@@ -47,6 +47,7 @@ export declare const setConfigServer: (config?: HapiConfigModel) => {
 export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
     path: string;
     initQuery: boolean;
+    disableGlobalGuards?: boolean;
     directives?: any[] | import("graphql/type/directives").GraphQLDirective[];
     buildAstDefinitions: boolean;
     graphiQlPlayground: boolean;

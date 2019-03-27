@@ -110,7 +110,7 @@ export type EffectTypes = keyof typeof EffectTypes;
 
     applyMetaToResolver(resolver: GenericGapiResolversType) {
         const events = this.effectService;
-        const currentConstructor = this;
+        const self = this;
         const effectName = resolver.effect ? resolver.effect : resolver.method_name;
         this.methodBasedEffects.push(effectName);
         const originalResolve = resolver.resolve.bind(resolver.target);
@@ -125,9 +125,9 @@ export type EffectTypes = keyof typeof EffectTypes;
 
             if (!resolver.public
                 && resolver.guards && resolver.guards.length
-                && currentConstructor.config.authentication
+                && !self.config.disableGlobalGuards
             ) {
-                await currentConstructor.applyGuards(resolver, args);
+                await self.applyGuards(resolver, args);
             }
 
             let val = originalResolve.apply(resolver.target, args);

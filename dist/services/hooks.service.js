@@ -123,7 +123,7 @@ export type EffectTypes = keyof typeof EffectTypes;
     }
     applyMetaToResolver(resolver) {
         const events = this.effectService;
-        const currentConstructor = this;
+        const self = this;
         const effectName = resolver.effect ? resolver.effect : resolver.method_name;
         this.methodBasedEffects.push(effectName);
         const originalResolve = resolver.resolve.bind(resolver.target);
@@ -137,8 +137,8 @@ export type EffectTypes = keyof typeof EffectTypes;
             return __awaiter(this, void 0, void 0, function* () {
                 if (!resolver.public
                     && resolver.guards && resolver.guards.length
-                    && currentConstructor.config.authentication) {
-                    yield currentConstructor.applyGuards(resolver, args);
+                    && !self.config.disableGlobalGuards) {
+                    yield self.applyGuards(resolver, args);
                 }
                 let val = originalResolve.apply(resolver.target, args);
                 if (!val && !process.env.STRICT_RETURN_TYPE) {

@@ -17,6 +17,7 @@ export interface HapiGraphiQLPluginOptions {
 export interface GRAPHQL_PLUGIN_CONFIG {
     path?: string;
     initQuery?: boolean;
+    disableGlobalGuards?: boolean;
     directives?: GraphQLDirective[] | any[];
     buildAstDefinitions?: boolean;
     graphiQlPlayground?: boolean;

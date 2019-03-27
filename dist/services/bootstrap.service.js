@@ -82,15 +82,14 @@ let BootstrapService = class BootstrapService {
         });
         const schemaErrors = graphql_1.validateSchema(schema);
         if (schemaErrors.length) {
-            console.error(schemaErrors);
-            throw new Error('Shema has errors');
+            throw new Error(JSON.stringify(schemaErrors));
         }
         // Build astNode https://github.com/graphql/graphql-js/issues/1575
         if (this.config.buildAstDefinitions) {
             schema = graphql_1.buildSchema(graphql_1.printSchema(schema));
         }
         if (this.config.directives && this.config.directives.length) {
-            custom_directive_1.applySchemaCustomDirectives(schema);
+            schema = custom_directive_1.applySchemaCustomDirectives(schema);
         }
         this.schema = schema;
         return schema;

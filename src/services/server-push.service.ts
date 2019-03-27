@@ -56,7 +56,7 @@ export class ServerPushPlugin implements PluginInterface {
                 path: '/devtools/{param*}',
                 handler: {
                     directory: {
-                        path: `${__dirname.replace('services', '')}/public`,
+                        path: `${__dirname.replace('dist/services', '')}/public`,
                         index: ['index.html', 'default.html']
                     }
                 }

@@ -56,7 +56,7 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
     writeEffects: boolean;
     openBrowser: boolean;
     watcherPort: string | number;
-    authentication?: Function | import("@rxdi/core/container/Token").Token<any>;
+    authentication?: Function | import("@rxdi/core/dist/container/Token").Token<any>;
     vhost?: string;
     route?: {
         cors?: boolean;

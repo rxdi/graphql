@@ -56,7 +56,7 @@ let ApolloService = class ApolloService {
             else {
                 this.config.graphqlOptions.context.user = null;
             }
-            return this.makeGQLRequest(request, response, error);
+            return this.makeGQLRequest(request, response, error, this.config.graphqlOptions.context);
         });
         this.handler = (request, h, err) => __awaiter(this, void 0, void 0, function* () {
             try {

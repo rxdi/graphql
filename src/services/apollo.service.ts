@@ -78,7 +78,7 @@ export class ApolloService implements PluginInterface {
         } else {
             this.config.graphqlOptions.context.user = null;
         }
-        return this.makeGQLRequest(request, response, error);
+        return this.makeGQLRequest(request, response, error, this.config.graphqlOptions.context);
 
     }
     async makeGQLRequest(request: Request, h: ResponseToolkit, err?: Error, context?: {}) {

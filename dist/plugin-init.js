@@ -32,8 +32,7 @@ let PluginInit = class PluginInit {
         this.config = config;
         this.afterStarter = afterStarter;
         this.defaultQuery = `query { status { status } } `;
-        this.sendRequest = (request) => {
-            const url = `http://localhost:${this.server.info.port}/graphql`;
+        this.sendRequest = (request, url = `http://localhost:${this.server.info.port}/graphql`) => {
             this.tester = graphql_tester_1.tester({
                 url,
                 contentType: 'application/json'

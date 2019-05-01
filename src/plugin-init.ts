@@ -48,8 +48,10 @@ export class PluginInit implements PluginInterface {
         ).subscribe();
     }
 
-    sendRequest = <T>(request: SendRequestQueryType): PromiseLike<Response<T>> => {
-        const url = `http://localhost:${this.server.info.port}/graphql`;
+    sendRequest = <T>(
+        request: SendRequestQueryType,
+        url: string = `http://localhost:${this.server.info.port}/graphql`
+    ): PromiseLike<Response<T>> => {
         this.tester = tester({
             url,
             contentType: 'application/json'

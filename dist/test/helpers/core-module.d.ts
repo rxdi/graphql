@@ -48,7 +48,7 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
     path: string;
     initQuery: boolean;
     disableGlobalGuards?: boolean;
-    directives?: any[] | import("graphql/type/directives").GraphQLDirective[];
+    directives?: any[] | import("graphql").GraphQLDirective[];
     buildAstDefinitions: boolean;
     graphiQlPlayground: boolean;
     graphiql: boolean;
@@ -56,15 +56,15 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
     writeEffects: boolean;
     openBrowser: boolean;
     watcherPort: string | number;
-    authentication?: Function | import("@rxdi/core/dist/container/Token").Token<any>;
+    authentication?: Function | import("@rxdi/core").InjectionToken<any>;
     vhost?: string;
     route?: {
         cors?: boolean;
     };
-    graphqlOptions: import("apollo-server-core/dist/graphqlOptions").GraphQLServerOptions<Record<string, any>, any> | {
+    graphqlOptions: import("apollo-server-core").GraphQLOptions<Record<string, any>, any> | {
         schema: any;
     };
-    graphiqlOptions: import("apollo-server-module-graphiql/dist/renderGraphiQL").GraphiQLData | {
+    graphiqlOptions: import("apollo-server-module-graphiql").GraphiQLData | {
         endpointURL: string;
         subscriptionsEndpoint: string;
         websocketConnectionParams: {
@@ -72,8 +72,8 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
         };
     };
 };
-export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs/internal/Observable").Observable<Container>;
+export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs").Observable<Container>;
 export declare const stopServer: () => Promise<void>;
-export declare const getServer: () => import("rxjs/internal/Observable").Observable<Server>;
-export declare const getGraphqlSchema: () => import("rxjs/internal/Observable").Observable<import("graphql/type/schema").GraphQLSchema>;
-export declare const sendRequest: <T = {}>(request: SendRequestQueryType) => PromiseLike<import("../../plugin-init").Response<T>>;
+export declare const getServer: () => import("rxjs").Observable<Server>;
+export declare const getGraphqlSchema: () => import("rxjs").Observable<import("graphql").GraphQLSchema>;
+export declare const sendRequest: <T = {}>(request: SendRequestQueryType, url?: string) => PromiseLike<import("../../plugin-init").Response<T>>;

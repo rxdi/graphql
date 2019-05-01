@@ -70,4 +70,4 @@ exports.getGraphqlSchema = () => rxjs_1.of(core_1.Container.get(config_tokens_1.
 //     return BootstrapFramework(AppModule, frameworks, bootstrapOptions);
 // };
 // export const setup = createTestBed;
-exports.sendRequest = (request) => core_1.Container.get(plugin_init_1.PluginInit).sendRequest(request);
+exports.sendRequest = (request, url) => core_1.Container.get(plugin_init_1.PluginInit).sendRequest(request, url);

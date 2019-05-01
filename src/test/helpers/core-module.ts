@@ -90,4 +90,4 @@ export const getGraphqlSchema = () => of(Container.get(GRAPHQL_PLUGIN_CONFIG).gr
 
 // export const setup = createTestBed;
 
-export const sendRequest = <T = {}>(request: SendRequestQueryType) => Container.get(PluginInit).sendRequest<T>(request);
+export const sendRequest = <T = {}>(request: SendRequestQueryType, url?: string) => Container.get(PluginInit).sendRequest<T>(request, url);

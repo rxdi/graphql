@@ -30,6 +30,6 @@ export declare class PluginInit implements PluginInterface {
     constructor(server: Server, config: GRAPHQL_PLUGIN_CONFIG, afterStarter: AfterStarterService);
     private tester;
     register(): Promise<void>;
-    sendRequest: <T>(request: SendRequestQueryType) => PromiseLike<Response<T>>;
+    sendRequest: <T>(request: SendRequestQueryType, url?: string) => PromiseLike<Response<T>>;
     checkStatus<T = {}>(request: Response<T>): Promise<void>;
 }

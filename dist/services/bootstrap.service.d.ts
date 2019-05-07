@@ -30,7 +30,7 @@ export declare class BootstrapService {
     Fields: InternalFields;
     schema: GraphQLSchema;
     constructor(moduleService: ModuleService, config: GRAPHQL_PLUGIN_CONFIG);
-    getResolverByName(resolverName: string): import('graphql').GraphQLFieldConfig<any, any, {
+    getResolverByName(resolverName: string): import("graphql").GraphQLFieldConfig<any, any, {
         [key: string]: any;
     }>;
     validateResolver(desc: GenericGapiResolversType, self: Function): void;

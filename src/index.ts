@@ -9,37 +9,40 @@ import { PlaygroundModule } from '@gapi/playground';
 import { PluginInit } from './plugin-init';
 
 @Module({
-    services: [
-        HookService,
-        BootstrapService,
-        ApolloService,
-        GraphiQLService,
-        StartService
-    ],
-    plugins: [ServerPushPlugin, PluginInit]
+  services: [
+    HookService,
+    BootstrapService,
+    ApolloService,
+    GraphiQLService,
+    StartService
+  ],
+  plugins: [ServerPushPlugin, PluginInit]
 })
 export class GraphQLModule {
-    public static forRoot(config: GRAPHQL_PLUGIN_CONFIG): ModuleWithServices {
-        return {
-            module: GraphQLModule,
-            services: [
-                EffectService,
-                {
-                    provide: GRAPHQL_PLUGIN_CONFIG,
-                    useValue: config
-                },
-                HookService,
-            ],
-            frameworkImports: [
-                PlaygroundModule.forRoot({
-                    path: config.graphiQlPath || '/graphiql',
-                    endpoint: config.path || '/graphql',
-                    version: '1.7.1',
-                    graphiqlPlayground: config.graphiQlPlayground
-                }),
-            ]
-        };
-    }
+  public static forRoot(config: GRAPHQL_PLUGIN_CONFIG): ModuleWithServices {
+    config.graphiqlPlaygroundConfig = config.graphiqlPlaygroundConfig || {};
+    config.graphiqlPlaygroundConfig.subscriptionEndpoint = config.graphiqlOptions.subscriptionsEndpoint || 'ws://localhost:9000/subscriptions';
+    return {
+      module: GraphQLModule,
+      services: [
+        EffectService,
+        {
+          provide: GRAPHQL_PLUGIN_CONFIG,
+          useValue: config
+        },
+        HookService
+      ],
+      frameworkImports: [
+        PlaygroundModule.forRoot({
+          path: config.graphiQlPath || '/graphiql',
+          endpoint: config.path || '/graphql',
+          version: '1.7.1',
+          ...config.graphiqlPlaygroundConfig,
+          graphiqlPlayground: config.graphiQlPlayground
+        })
+      ]
+    };
+  }
 }
 
 export * from './decorators';

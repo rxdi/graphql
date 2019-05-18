@@ -42,17 +42,17 @@
   "devDependencies": {
     "@rxdi/core": "^0.2.21",
     "@rxdi/hapi": "^0.2.21",
-    "@types/jest": "^24.0.6",
-    "@types/node": "^11.9.5",
     "@types/graphql": "^14.0.7",
     "@types/hapi": "^18.0.1",
+    "@types/jest": "^24.0.6",
+    "@types/node": "^11.9.5",
     "jest": "^24.1.0",
     "jest-cli": "^24.1.0",
     "rxjs": "6.5.1",
     "ts-jest": "^24.0.0",
     "tslint": "^5.12.1",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.3.3333"
+    "typescript": "^3.5.0-rc"
   },
   "jest": {
     "testEnvironment": "node",

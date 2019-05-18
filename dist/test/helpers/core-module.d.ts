@@ -71,6 +71,7 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
             token: string;
         };
     };
+    graphiqlPlaygroundConfig?: import("graphql-playground-html").RenderPageOptions;
 };
 export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs").Observable<Container>;
 export declare const stopServer: () => Promise<void>;

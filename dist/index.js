@@ -21,6 +21,8 @@ const playground_1 = require("@gapi/playground");
 const plugin_init_1 = require("./plugin-init");
 let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
     static forRoot(config) {
+        config.graphiqlPlaygroundConfig = config.graphiqlPlaygroundConfig || {};
+        config.graphiqlPlaygroundConfig.subscriptionEndpoint = config.graphiqlOptions.subscriptionsEndpoint || 'ws://localhost:9000/subscriptions';
         return {
             module: GraphQLModule_1,
             services: [
@@ -29,15 +31,10 @@ let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
                     provide: config_tokens_1.GRAPHQL_PLUGIN_CONFIG,
                     useValue: config
                 },
-                services_1.HookService,
+                services_1.HookService
             ],
             frameworkImports: [
-                playground_1.PlaygroundModule.forRoot({
-                    path: config.graphiQlPath || '/graphiql',
-                    endpoint: config.path || '/graphql',
-                    version: '1.7.1',
-                    graphiqlPlayground: config.graphiQlPlayground
-                }),
+                playground_1.PlaygroundModule.forRoot(Object.assign({ path: config.graphiQlPath || '/graphiql', endpoint: config.path || '/graphql', version: '1.7.1' }, config.graphiqlPlaygroundConfig, { graphiqlPlayground: config.graphiQlPlayground }))
             ]
         };
     }

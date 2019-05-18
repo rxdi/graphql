@@ -1,8 +1,9 @@
 import { InjectionToken } from '@rxdi/core';
 import * as GraphiQL from 'apollo-server-module-graphiql';
-import { GraphQLOptions } from 'apollo-server-core';
+import { GraphQLOptions, PlaygroundConfig } from 'apollo-server-core';
 import { GraphQLSchema, GraphQLField, GraphQLDirective } from 'graphql';
 import { Server, ResponseToolkit } from 'hapi';
+import { RenderPageOptions } from 'graphql-playground-html';
 
 export interface HapiOptionsFunction {
     (req?: Request): GraphQLOptions | Promise<GraphQLOptions>;
@@ -37,6 +38,7 @@ export interface GRAPHQL_PLUGIN_CONFIG {
     };
     graphqlOptions?: GraphQLOptions;
     graphiqlOptions?: GraphiQL.GraphiQLData;
+    graphiqlPlaygroundConfig?: RenderPageOptions;
 }
 export interface GRAPHQL_AUTHENTICATION_FAKE {
     validateToken(authorization: string): any;

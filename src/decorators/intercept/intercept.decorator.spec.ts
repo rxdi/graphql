@@ -3,7 +3,6 @@ import { Container, Controller, Service } from '@rxdi/core';
 import { Interceptor } from './intercept.decorator';
 import { Observable, of } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import 'jest';
 
 
 

@@ -8,8 +8,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 var GraphQLModule_1;
+Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("@rxdi/core");
 const services_1 = require("./services");
 const apollo_service_1 = require("./services/apollo.service");
@@ -22,34 +22,32 @@ const plugin_init_1 = require("./plugin-init");
 let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
     static forRoot(config) {
         config.graphiqlPlaygroundConfig = config.graphiqlPlaygroundConfig || {};
-        config.graphiqlPlaygroundConfig.subscriptionEndpoint = config.graphiqlOptions.subscriptionsEndpoint || 'ws://localhost:9000/subscriptions';
+        config.graphiqlPlaygroundConfig.subscriptionEndpoint =
+            config.graphiqlOptions.subscriptionsEndpoint ||
+                'ws://localhost:9000/subscriptions';
         return {
             module: GraphQLModule_1,
-            services: [
+            providers: [
                 services_1.EffectService,
                 {
                     provide: config_tokens_1.GRAPHQL_PLUGIN_CONFIG,
                     useValue: config
                 },
-                services_1.HookService
+                services_1.HookService,
+                bootstrap_service_1.BootstrapService,
+                apollo_service_1.ApolloService,
+                graphiql_service_1.GraphiQLService,
+                start_service_1.StartService
             ],
             frameworkImports: [
                 playground_1.PlaygroundModule.forRoot(Object.assign({ path: config.graphiQlPath || '/graphiql', endpoint: config.path || '/graphql', version: '1.7.1' }, config.graphiqlPlaygroundConfig, { graphiqlPlayground: config.graphiQlPlayground }))
-            ]
+            ],
+            plugins: [services_1.ServerPushPlugin, plugin_init_1.PluginInit]
         };
     }
 };
 GraphQLModule = GraphQLModule_1 = __decorate([
-    core_1.Module({
-        services: [
-            services_1.HookService,
-            bootstrap_service_1.BootstrapService,
-            apollo_service_1.ApolloService,
-            graphiql_service_1.GraphiQLService,
-            start_service_1.StartService
-        ],
-        plugins: [services_1.ServerPushPlugin, plugin_init_1.PluginInit]
-    })
+    core_1.Module()
 ], GraphQLModule);
 exports.GraphQLModule = GraphQLModule;
 __export(require("./decorators"));

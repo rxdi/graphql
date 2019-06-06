@@ -1,7 +1,7 @@
 import { Scope, Mutation, Type, GapiObjectType } from '../index';
 import { GraphQLInt, GraphQLScalarType, GraphQLNonNull, GraphQLObjectType } from 'graphql';
 import { Controller, Container } from '@rxdi/core';
-import 'jest';
+jest.useFakeTimers();
 
 @GapiObjectType()
 class UserType {

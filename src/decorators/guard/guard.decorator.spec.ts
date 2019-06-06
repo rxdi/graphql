@@ -2,7 +2,6 @@ import { Query, CanActivateResolver, ResolverContext } from '../index';
 import { Container, Controller, Service } from '@rxdi/core';
 import { Guard } from './guard.decorator';
 import { Observable } from 'rxjs';
-import 'jest';
 
 @Service()
 export class AuthGuard implements CanActivateResolver {

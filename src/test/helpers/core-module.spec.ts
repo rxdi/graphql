@@ -1,4 +1,3 @@
-import 'jest';
 import { setConfigGraphql, setConfigServer } from './core-module';
 
 describe('Core module helper', () => {

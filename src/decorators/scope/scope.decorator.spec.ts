@@ -1,6 +1,5 @@
 import { Scope, Query } from '../index';
 import { Container, Controller } from '@rxdi/core';
-import 'jest';
 
 describe('Decorators: @Scope', () => {
     it('Should decorate findUser to have scope ADMIN type', (done) => {

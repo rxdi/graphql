@@ -1,10 +1,6 @@
-
-
-import 'jest';
-
 import { Container, Injectable, Controller, createTestBed } from '@rxdi/core';
 import { PluginInit } from '../../plugin-init';
-import { startServer } from '../../test/helpers/core-module';
+import { startServer, sendRequest } from '../../test/helpers/core-module';
 import { HAPI_SERVER } from '@rxdi/hapi';
 import { Server } from 'hapi';
 import { GraphQLNonNull, DirectiveLocation, GraphQLObjectType, GraphQLString } from 'graphql';
@@ -65,7 +61,6 @@ class UserQueriesController {
 
 describe('Custom Graphql Directives aka Schema Decorators', () => {
     let server: Server;
-    let pluginInit: PluginInit;
     beforeEach(async () => {
         await createTestBed({ controllers: [UserQueriesController] })
             .pipe(
@@ -81,13 +76,12 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
             ).toPromise();
 
         server = Container.get<Server>(HAPI_SERVER);
-        pluginInit = Container.get(PluginInit);
     });
 
     afterEach(async () => await server.stop());
 
     it('Should decorete name return property to become UPPERCASE', async (done) => {
-        const res = await pluginInit.sendRequest<{ findUser: { name: number } }>({
+        const res = await sendRequest<{ findUser: { name: number } }>({
             query: `query findUser($name: String!) { findUser(name: $name) { name @toUpperCase } }`,
             variables: { name: 'imetomi' }
         });
@@ -96,16 +90,17 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
     });
 
     it('Should decorete name return property to have text outside', async (done) => {
-        const res = await pluginInit.sendRequest<{ findUser: { name: number } }>({
+        const res = await sendRequest<{ findUser: { name: number } }>({
             query: `query findUser($name: String!) { findUser(name: $name) { name @addText(inside: "", outside: "test") } }`,
             variables: { name: 'imetomi' }
         });
+        console.log(res.data.findUser.name);
         expect(res.data.findUser.name).toBe('IMETOMItest');
         done();
     });
 
     it('Should decorete name return property to have text inside', async (done) => {
-        const res = await pluginInit.sendRequest<{ findUser: { name: number } }>({
+        const res = await sendRequest<{ findUser: { name: number } }>({
             query: `query findUser($name: String!) { findUser(name: $name) { name @addText(inside: "test", outside: "") } }`,
             variables: { name: 'imetomi' }
         });

@@ -19,7 +19,7 @@ export declare class ServerPushPlugin implements PluginInterface {
     constructor(config: GRAPHQL_PLUGIN_CONFIG, server: HapiServer, exitHandler: ExitHandlerService, afterStarterService: AfterStarterService, startService: StartService);
     waitXSeconds(sec: any): Observable<any>;
     register(): Promise<void>;
-    stopServerWatcher(): Promise<{}>;
+    stopServerWatcher(): Promise<unknown>;
     createServerWatcher(): void;
     OnRequest(req: IncomingMessage, res: ServerResponse): void;
 }

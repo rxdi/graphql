@@ -9,7 +9,7 @@
     "postpublish": "git push -f ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git && git push --tags && git push ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git --tags",
     "lint": "tslint -c tslint.json 'development/**/*.{ts,tsx}'",
     "pretest": "npm run lint",
-    "test": "jest --forceExit --detectOpenHandles"
+    "test": "jest "
   },
   "author": {
     "name": "Kristian Tachev(Stradivario)",
@@ -44,12 +44,12 @@
     "@rxdi/hapi": "^0.4.22",
     "@types/graphql": "^14.0.7",
     "@types/hapi": "^18.0.1",
-    "@types/jest": "^24.0.6",
+    "@types/jest": "^24.0.13",
     "@types/node": "^11.9.5",
-    "jest": "^24.1.0",
-    "jest-cli": "^24.1.0",
+    "jest": "^24.8.0",
+    "jest-cli": "^24.8.0",
     "rxjs": "6.5.1",
-    "ts-jest": "^24.0.0",
+    "ts-jest": "^24.0.2",
     "tslint": "^5.12.1",
     "tslint-language-service": "^0.9.9",
     "typescript": "^3.5.0-rc"
@@ -70,6 +70,9 @@
       "js",
       "json",
       "node"
+    ],
+    "setupFilesAfterEnv": [
+      "./jest-setup.ts"
     ],
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"

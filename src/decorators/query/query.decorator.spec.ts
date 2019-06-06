@@ -4,7 +4,6 @@ import { Container, Service, Controller, Module, ModuleWithServices } from '@rxd
 import { HapiModule, HapiConfigModel } from '@rxdi/hapi';
 import { BootstrapService } from '../../services/bootstrap.service';
 import { GraphQLModule } from '../../index';
-import 'jest';
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HookService, ApolloService } from '../../services';
 import { of } from 'rxjs';

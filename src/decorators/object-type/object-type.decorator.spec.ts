@@ -1,7 +1,6 @@
 import { GapiObjectType, InjectType } from '../index';
 import { GraphQLInt, GraphQLScalarType, GraphQLObjectType, GraphQLString } from 'graphql';
 import { Container } from '@rxdi/core';
-import 'jest';
 
 @GapiObjectType()
 class TestType {

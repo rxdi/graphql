@@ -27,7 +27,7 @@
     ]
   },
   "files": [
-    "./src/index"
+    "./src/*/*",
   ],
   "exclude": [
     "node_modules"

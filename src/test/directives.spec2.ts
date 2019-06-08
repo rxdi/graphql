@@ -1,3 +1,5 @@
+import 'jest';
+
 import { Container, Controller, createTestBed } from '@rxdi/core';
 import { PluginInit } from '../plugin-init';
 import { startServer, stopServer, getGraphqlSchema } from './helpers/core-module';

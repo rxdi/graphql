@@ -40,8 +40,8 @@
     "graphql-tester": "0.0.5"
   },
   "devDependencies": {
-    "@rxdi/core": "^0.5.20",
-    "@rxdi/hapi": "^0.5.20",
+    "@rxdi/core": "^0.6.0",
+    "@rxdi/hapi": "^0.6.0",
     "@types/graphql": "^14.0.7",
     "@types/hapi": "^18.0.1",
     "@types/jest": "^24.0.13",

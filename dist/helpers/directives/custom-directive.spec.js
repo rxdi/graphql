@@ -81,7 +81,7 @@ UserQueriesController = __decorate([
 ], UserQueriesController);
 describe('Custom Graphql Directives aka Schema Decorators', () => {
     let server;
-    beforeEach(() => __awaiter(this, void 0, void 0, function* () {
+    beforeAll(() => __awaiter(this, void 0, void 0, function* () {
         yield core_1.createTestBed({ controllers: [UserQueriesController] })
             .pipe(operators_1.switchMapTo(core_module_1.startServer({
             graphql: {
@@ -94,7 +94,7 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         }))).toPromise();
         server = core_1.Container.get(hapi_1.HAPI_SERVER);
     }));
-    afterEach(() => __awaiter(this, void 0, void 0, function* () { return yield server.stop(); }));
+    afterAll(() => __awaiter(this, void 0, void 0, function* () { return yield server.stop(); }));
     it('Should decorete name return property to become UPPERCASE', (done) => __awaiter(this, void 0, void 0, function* () {
         const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @toUpperCase } }`,

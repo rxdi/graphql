@@ -62,7 +62,7 @@ class UserQueriesController {
 
 describe('Custom Graphql Directives aka Schema Decorators', () => {
     let server: Server;
-    beforeEach(async () => {
+    beforeAll(async () => {
         await createTestBed({ controllers: [UserQueriesController] })
             .pipe(
                 switchMapTo(startServer({
@@ -79,7 +79,7 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         server = Container.get<Server>(HAPI_SERVER);
     });
 
-    afterEach(async () => await server.stop());
+    afterAll(async () => await server.stop());
 
     it('Should decorete name return property to become UPPERCASE', async (done) => {
         const res = await sendRequest<{ findUser: { name: number } }>({

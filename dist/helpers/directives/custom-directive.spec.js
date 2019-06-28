@@ -19,7 +19,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 require("jest");
 const core_1 = require("@rxdi/core");
-const plugin_init_1 = require("../../plugin-init");
 const core_module_1 = require("../../test/helpers/core-module");
 const hapi_1 = require("@rxdi/hapi");
 const graphql_1 = require("graphql");
@@ -82,7 +81,6 @@ UserQueriesController = __decorate([
 ], UserQueriesController);
 describe('Custom Graphql Directives aka Schema Decorators', () => {
     let server;
-    let pluginInit;
     beforeEach(() => __awaiter(this, void 0, void 0, function* () {
         yield core_1.createTestBed({ controllers: [UserQueriesController] })
             .pipe(operators_1.switchMapTo(core_module_1.startServer({
@@ -95,11 +93,10 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
             }
         }))).toPromise();
         server = core_1.Container.get(hapi_1.HAPI_SERVER);
-        pluginInit = core_1.Container.get(plugin_init_1.PluginInit);
     }));
     afterEach(() => __awaiter(this, void 0, void 0, function* () { return yield server.stop(); }));
     it('Should decorete name return property to become UPPERCASE', (done) => __awaiter(this, void 0, void 0, function* () {
-        const res = yield pluginInit.sendRequest({
+        const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @toUpperCase } }`,
             variables: { name: 'imetomi' }
         });
@@ -107,15 +104,16 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         done();
     }));
     it('Should decorete name return property to have text outside', (done) => __awaiter(this, void 0, void 0, function* () {
-        const res = yield pluginInit.sendRequest({
+        const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @addText(inside: "", outside: "test") } }`,
             variables: { name: 'imetomi' }
         });
+        console.log(res.data.findUser.name);
         expect(res.data.findUser.name).toBe('IMETOMItest');
         done();
     }));
     it('Should decorete name return property to have text inside', (done) => __awaiter(this, void 0, void 0, function* () {
-        const res = yield pluginInit.sendRequest({
+        const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @addText(inside: "test", outside: "") } }`,
             variables: { name: 'imetomi' }
         });

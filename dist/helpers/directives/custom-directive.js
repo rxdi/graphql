@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const directives_1 = require("graphql/type/directives");
 const graphql_1 = require("graphql");
 const DEFAULT_DIRECTIVES = ['skip', 'include'];
 /**
@@ -114,7 +113,7 @@ function wrapFieldsWithMiddleware(type, deepWrap = true, typeMet = {}) {
  * function for altering the execution of the graphql
  */
 const GraphQLCustomDirectivePrivate = function (config) {
-    const directive = new directives_1.GraphQLDirective(config);
+    const directive = new graphql_1.GraphQLDirective(config);
     if (config.resolve) {
         directive['resolve'] = config.resolve;
     }

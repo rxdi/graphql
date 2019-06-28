@@ -1,5 +1,4 @@
-import { GraphQLDirective } from 'graphql/type/directives';
-import { GraphQLSchema, parse, DirectiveLocationEnum } from 'graphql';
+import { GraphQLDirective, GraphQLSchema, parse, DirectiveLocationEnum } from 'graphql';
 
 const DEFAULT_DIRECTIVES = ['skip', 'include'];
 

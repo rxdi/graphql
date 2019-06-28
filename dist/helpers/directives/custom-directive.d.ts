@@ -1,5 +1,4 @@
-import { GraphQLDirective } from 'graphql/type/directives';
-import { GraphQLSchema, DirectiveLocationEnum } from 'graphql';
+import { GraphQLDirective, GraphQLSchema, DirectiveLocationEnum } from 'graphql';
 /**
  * Apply custom directives support in the graphql schema
  */

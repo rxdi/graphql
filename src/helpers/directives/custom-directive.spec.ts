@@ -1,3 +1,4 @@
+import 'jest';
 import { Container, Injectable, Controller, createTestBed } from '@rxdi/core';
 import { PluginInit } from '../../plugin-init';
 import { startServer, sendRequest } from '../../test/helpers/core-module';

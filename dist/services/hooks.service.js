@@ -56,7 +56,9 @@ function strEnum<T extends string>(o: Array<T>): {[K in T]: K} {
         return res;
     }, Object.create(null));
 }
-export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects).replace(/'/g, `'`).replace(/,/g, ',\n')});
+export const EffectTypes = strEnum(${JSON.stringify(effects || this.methodBasedEffects)
+            .replace(/'/g, `'`)
+            .replace(/,/g, ',\n')});
 export type EffectTypes = keyof typeof EffectTypes;
 `;
         try {
@@ -79,7 +81,9 @@ export type EffectTypes = keyof typeof EffectTypes;
             resolver['interceptor'] = rxdiResolver['interceptor'];
             resolver['effect'] = rxdiResolver['effect'];
             resolver['guards'] = rxdiResolver['guards'];
-            resolver['scope'] = rxdiResolver['scope'] || [process.env.APP_DEFAULT_SCOPE || 'ADMIN'];
+            resolver['scope'] = rxdiResolver['scope'] || [
+                process.env.APP_DEFAULT_SCOPE || 'ADMIN'
+            ];
             this.applyTypeFields(resolver, rxdiResolver);
             this.AddHooks(resolver);
             this.applyMetaToResolver(resolver);
@@ -117,7 +121,7 @@ export type EffectTypes = keyof typeof EffectTypes;
                 yield this.validateGuard(yield res);
             }
             else if (res.constructor === rxjs_1.Observable) {
-                yield this.validateGuard((yield res['toPromise']()));
+                yield this.validateGuard(yield res['toPromise']());
             }
         });
     }
@@ -135,48 +139,67 @@ export type EffectTypes = keyof typeof EffectTypes;
         }
         resolver.resolve = function resolve(...args) {
             return __awaiter(this, void 0, void 0, function* () {
-                if (!resolver.public
-                    && resolver.guards && resolver.guards.length
-                    && !self.config.disableGlobalGuards) {
-                    yield self.applyGuards(resolver, args);
-                }
-                let val = originalResolve.apply(resolver.target, args);
-                if (!val && !process.env.STRICT_RETURN_TYPE) {
-                    val = {};
-                }
-                if (!val && process.env.STRICT_RETURN_TYPE) {
-                    throw new Error(`Return type of graph: ${resolver.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
-                }
-                if (val.constructor === Object
-                    || val.constructor === Array
-                    || val.constructor === String
-                    || val.constructor === Number) {
-                    val = rxjs_1.of(val);
-                }
-                let observable = rxjs_1.from(val);
-                if (resolver.interceptor) {
-                    observable = yield core_1.Container
-                        .get(resolver.interceptor)
-                        .intercept(observable, args[2], args[1], resolver);
-                }
                 let result;
-                if (observable.constructor === Object) {
-                    result = observable;
+                try {
+                    if (!resolver.public &&
+                        resolver.guards &&
+                        resolver.guards.length &&
+                        !self.config.disableGlobalGuards) {
+                        yield self.applyGuards(resolver, args);
+                    }
+                    let val = originalResolve.apply(resolver.target, args);
+                    if (!val && !process.env.STRICT_RETURN_TYPE) {
+                        val = {};
+                    }
+                    if (!val && process.env.STRICT_RETURN_TYPE) {
+                        throw new Error(`Return type of graph: ${resolver.method_name} is undefined or null \n To remove strict return type check remove environment variable STRICT_RETURN_TYPE=true`);
+                    }
+                    if (val.constructor === Object ||
+                        val.constructor === Array ||
+                        val.constructor === String ||
+                        val.constructor === Number) {
+                        val = rxjs_1.of(val);
+                    }
+                    let observable = rxjs_1.from(val);
+                    if (resolver.interceptor) {
+                        observable = yield core_1.Container.get(resolver.interceptor).intercept(observable, args[2], args[1], resolver);
+                    }
+                    if (observable.constructor === Object) {
+                        result = observable;
+                    }
+                    else {
+                        result = yield observable.toPromise();
+                    }
+                    if (events.map.has(resolver.method_name) ||
+                        events.map.has(resolver.effect)) {
+                        events
+                            .getLayer(effectName)
+                            .putItem({
+                            key: effectName,
+                            data: [result, ...args].filter(i => i && i !== 'undefined')
+                        });
+                    }
                 }
-                else {
-                    result = yield observable.toPromise();
-                }
-                if (events.map.has(resolver.method_name) || events.map.has(resolver.effect)) {
-                    events
-                        .getLayer(effectName)
-                        .putItem({ key: effectName, data: [result, ...args].filter(i => i && i !== 'undefined') });
+                catch (error) {
+                    result = error;
+                    console.error({
+                        method_type: resolver.method_type,
+                        method_name: resolver.method_name,
+                        hasInterceptor: !!resolver.interceptor,
+                        args,
+                        error,
+                    });
                 }
                 return result;
             });
         };
     }
     canAccess(resolverScope, context) {
-        return context && context.user && resolverScope.filter(scope => scope === context.user.type).length ? true : error_service_1.errorUnauthorized();
+        return context &&
+            context.user &&
+            resolverScope.filter(scope => scope === context.user.type).length
+            ? true
+            : error_service_1.errorUnauthorized();
     }
     AuthenticationHooks(resolver, context) {
         this.canAccess(resolver['scope'], context);

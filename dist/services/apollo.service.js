@@ -98,44 +98,41 @@ let ApolloService = class ApolloService {
         });
     }
     OnInit() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.init();
-            yield this.register();
-        });
+        this.init();
+        this.register();
     }
     init() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let schemaOverride;
+        let schemaOverride;
+        try {
+            schemaOverride = core_1.Container.get(config_tokens_1.SCHEMA_OVERRIDE);
+        }
+        catch (e) { }
+        if (schemaOverride) {
+            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema(true));
+        }
+        else {
+            let customSchemaDefinition;
             try {
-                schemaOverride = core_1.Container.get(config_tokens_1.SCHEMA_OVERRIDE);
+                customSchemaDefinition = core_1.Container.get(config_tokens_1.CUSTOM_SCHEMA_DEFINITION);
             }
             catch (e) { }
-            if (schemaOverride) {
-                this.config.graphqlOptions.schema = yield schemaOverride(this.bootstrapService.generateSchema(true));
-            }
-            else {
-                let customSchemaDefinition;
-                try {
-                    customSchemaDefinition = core_1.Container.get(config_tokens_1.CUSTOM_SCHEMA_DEFINITION);
-                }
-                catch (e) { }
-                this.config.graphqlOptions.schema =
-                    customSchemaDefinition ||
-                        this.config.graphqlOptions.schema ||
-                        this.bootstrapService.generateSchema();
-            }
-            this.hookService.AttachHooks([
-                this.config.graphqlOptions.schema.getQueryType(),
-                this.config.graphqlOptions.schema.getMutationType(),
-                this.config.graphqlOptions.schema.getSubscriptionType()
-            ]);
-        });
+            this.config.graphqlOptions.schema =
+                customSchemaDefinition ||
+                    this.config.graphqlOptions.schema ||
+                    this.bootstrapService.generateSchema();
+        }
     }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.config || !this.config.graphqlOptions) {
                 throw new Error('Apollo Server requires options.');
             }
+            this.config.graphqlOptions.schema = yield this.config.graphqlOptions.schema;
+            this.hookService.AttachHooks([
+                this.config.graphqlOptions.schema.getQueryType(),
+                this.config.graphqlOptions.schema.getMutationType(),
+                this.config.graphqlOptions.schema.getSubscriptionType()
+            ]);
             this.server.route({
                 method: ['GET', 'POST'],
                 path: this.config.path || '/graphql',

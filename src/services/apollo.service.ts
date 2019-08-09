@@ -16,6 +16,8 @@ import {
 import { BootstrapService } from '../services/bootstrap.service';
 import { GraphQLSchema } from 'graphql';
 import { HookService } from './hooks.service';
+import { from } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Service()
 export class ApolloService implements PluginInterface {
@@ -27,19 +29,19 @@ export class ApolloService implements PluginInterface {
     private hookService: HookService
   ) {}
 
-  async OnInit() {
-    await this.init();
-    await this.register();
+  OnInit() {
+    this.init();
+    this.register();
   }
 
-  async init() {
+  init() {
     let schemaOverride: (schema: GraphQLSchema) => GraphQLSchema;
     try {
       schemaOverride = Container.get(SCHEMA_OVERRIDE);
     } catch (e) {}
 
     if (schemaOverride) {
-      this.config.graphqlOptions.schema = await schemaOverride(
+      this.config.graphqlOptions.schema = schemaOverride(
         this.bootstrapService.generateSchema(true)
       );
     } else {
@@ -52,17 +54,19 @@ export class ApolloService implements PluginInterface {
         this.config.graphqlOptions.schema ||
         this.bootstrapService.generateSchema();
     }
-    this.hookService.AttachHooks([
-      this.config.graphqlOptions.schema.getQueryType(),
-      this.config.graphqlOptions.schema.getMutationType(),
-      this.config.graphqlOptions.schema.getSubscriptionType()
-    ]);
+
   }
 
   async register() {
     if (!this.config || !this.config.graphqlOptions) {
       throw new Error('Apollo Server requires options.');
     }
+    this.config.graphqlOptions.schema = await this.config.graphqlOptions.schema;
+    this.hookService.AttachHooks([
+      this.config.graphqlOptions.schema.getQueryType(),
+      this.config.graphqlOptions.schema.getMutationType(),
+      this.config.graphqlOptions.schema.getSubscriptionType()
+    ]);
     this.server.route(<any>{
       method: ['GET', 'POST'],
       path: this.config.path || '/graphql',
@@ -121,6 +125,7 @@ export class ApolloService implements PluginInterface {
       this.config.graphqlOptions.context
     );
   };
+
   async makeGQLRequest(
     request: Request,
     h: ResponseToolkit,

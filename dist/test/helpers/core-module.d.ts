@@ -1,6 +1,6 @@
 import { GRAPHQL_PLUGIN_CONFIG } from '../../config.tokens';
 import { HapiConfigModel } from '@rxdi/hapi';
-import { ConfigModel, Container } from '@rxdi/core';
+import { ConfigModel } from '@rxdi/core';
 import { SendRequestQueryType } from '../../plugin-init';
 import { Server } from 'hapi';
 export interface CoreModuleConfig {
@@ -73,7 +73,7 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
     };
     graphiqlPlaygroundConfig?: import("graphql-playground-html").RenderPageOptions;
 };
-export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs").Observable<Container>;
+export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs").Observable<import("@rxdi/core/dist/container/observable-interface").ObservableContainer>;
 export declare const stopServer: () => Promise<void>;
 export declare const getServer: () => import("rxjs").Observable<Server>;
 export declare const getGraphqlSchema: () => import("rxjs").Observable<import("graphql").GraphQLSchema>;

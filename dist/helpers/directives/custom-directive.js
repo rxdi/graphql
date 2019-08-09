@@ -122,7 +122,7 @@ const GraphQLCustomDirectivePrivate = function (config) {
 /**
  * Apply custom directives support in the graphql schema
  */
-exports.applySchemaCustomDirectives = (schema) => {
+exports.applySchemaCustomDirectives = schema => {
     if (!(schema instanceof graphql_1.GraphQLSchema)) {
         throw new Error('Schema must be instanceof GraphQLSchema');
     }

@@ -45,7 +45,13 @@ let PluginInit = class PluginInit {
             if (!this.config.initQuery) {
                 return;
             }
-            this.afterStarter.appStarted.pipe(operators_1.take(1), operators_1.switchMap(() => __awaiter(this, void 0, void 0, function* () { return yield this.sendRequest({ query: this.defaultQuery }); })), operators_1.tap(res => this.checkStatus(res))).subscribe();
+            this.afterStarter.appStarted
+                .pipe(operators_1.take(1), operators_1.switchMap(() => __awaiter(this, void 0, void 0, function* () {
+                return yield this.sendRequest({
+                    query: this.defaultQuery
+                });
+            })), operators_1.tap(res => this.checkStatus(res)))
+                .subscribe();
         });
     }
     checkStatus(request) {

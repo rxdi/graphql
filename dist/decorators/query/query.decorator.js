@@ -17,7 +17,8 @@ function Query(options) {
             returnValue.target = target;
             return returnValue;
         };
-        target.constructor._descriptors = target.constructor._descriptors || new Map();
+        target.constructor._descriptors =
+            target.constructor._descriptors || new Map();
         target.constructor._descriptors.set(propertyKey, descriptor);
         return descriptor;
     };

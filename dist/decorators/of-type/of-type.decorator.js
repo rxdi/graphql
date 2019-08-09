@@ -15,7 +15,8 @@ function OfType(type) {
     return (target, pk, descriptor) => {
         const self = target;
         const cacheService = core_1.Container.get(effect_service_1.EffectService);
-        cacheService.getLayer(type)
+        cacheService
+            .getLayer(type)
             .getItemObservable(type)
             .subscribe((item) => __awaiter(this, void 0, void 0, function* () {
             const currentConstructor = moduleService.watcherService.getConstructor(self.constructor.name);

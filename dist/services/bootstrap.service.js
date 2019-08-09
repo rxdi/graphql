@@ -30,7 +30,9 @@ let BootstrapService = class BootstrapService {
         this.Fields = { query: {}, mutation: {}, subscription: {} };
     }
     getResolverByName(resolverName) {
-        return this.Fields.query[resolverName] || this.Fields.mutation[resolverName] || this.Fields.subscription[resolverName];
+        return (this.Fields.query[resolverName] ||
+            this.Fields.mutation[resolverName] ||
+            this.Fields.subscription[resolverName]);
     }
     validateResolver(desc, self) {
         if (!desc.type) {
@@ -39,12 +41,17 @@ let BootstrapService = class BootstrapService {
     }
     applyInitStatus() {
         return {
-            type: new graphql_1.GraphQLObjectType({ name: 'StatusQueryType', fields: () => ({ status: { type: graphql_1.GraphQLString } }) }),
+            type: new graphql_1.GraphQLObjectType({
+                name: 'StatusQueryType',
+                fields: () => ({ status: { type: graphql_1.GraphQLString } })
+            }),
             method_name: 'status',
             public: true,
             method_type: 'query',
             target: () => { },
-            resolve: function initQuery() { return { status: 200 }; }
+            resolve: function initQuery() {
+                return { status: 200 };
+            }
         };
     }
     collectAppSchema() {
@@ -53,8 +60,7 @@ let BootstrapService = class BootstrapService {
             Fields.query.status = this.applyInitStatus();
         }
         this.applyGlobalControllerOptions();
-        this.getMetaDescriptors()
-            .forEach(({ descriptor, self }) => {
+        this.getMetaDescriptors().forEach(({ descriptor, self }) => {
             const desc = descriptor();
             desc.target = self;
             this.validateResolver(desc, self);
@@ -64,10 +70,15 @@ let BootstrapService = class BootstrapService {
         return this.Fields;
     }
     getFieldsFromType(schema) {
-        return schema.getQueryType().getFields().findUser.type['getFields']();
+        return schema
+            .getQueryType()
+            .getFields()
+            .findUser.type['getFields']();
     }
     isEmptySchemaFields(Fields) {
-        return !Object.keys(Fields).map(f => Fields[f]).filter(f => !!Object.keys(f).length).length;
+        return !Object.keys(Fields)
+            .map(f => Fields[f])
+            .filter(f => !!Object.keys(f).length).length;
     }
     generateSchema(schemaOverride) {
         const Fields = this.collectAppSchema();
@@ -95,7 +106,7 @@ let BootstrapService = class BootstrapService {
         return schema;
     }
     getDirectives() {
-        return [...this.config.directives || []].map(d => d.metadata ? new custom_directive_1.GraphQLCustomDirective(core_1.Container.get(d)) : d);
+        return [...(this.config.directives || [])].map(d => d.metadata ? new custom_directive_1.GraphQLCustomDirective(core_1.Container.get(d)) : d);
     }
     generateType(fields, name, description) {
         if (!Object.keys(fields).length) {
@@ -109,8 +120,9 @@ let BootstrapService = class BootstrapService {
             .map(key => {
             const currentConstructor = this.moduleService.watcherService.getConstructor(key);
             const options = currentConstructor.type['metadata'].options;
-            currentConstructor.type._descriptors = currentConstructor.type._descriptors || [];
-            Array.from(currentConstructor.type._descriptors.keys()).map((k => {
+            currentConstructor.type._descriptors =
+                currentConstructor.type._descriptors || [];
+            Array.from(currentConstructor.type._descriptors.keys()).map(k => {
                 if (!options) {
                     return;
                 }
@@ -130,7 +142,7 @@ let BootstrapService = class BootstrapService {
                 }
                 orig.value = () => descriptor;
                 currentConstructor.type._descriptors.set(k, orig);
-            }));
+            });
             return key;
         });
     }
@@ -138,9 +150,9 @@ let BootstrapService = class BootstrapService {
         const descriptors = [];
         Array.from(this.moduleService.watcherService._constructors.keys())
             .filter(key => this.moduleService.watcherService.getConstructor(key)['type']['metadata']['type'] === 'controller')
-            .map((key => this.moduleService.watcherService.getConstructor(key)))
+            .map(key => this.moduleService.watcherService.getConstructor(key))
             .forEach((map) => Array.from(map.type._descriptors.keys())
-            .map((k) => map.type._descriptors.get(k))
+            .map(k => map.type._descriptors.get(k))
             .map(d => d.value)
             .forEach(v => descriptors.push({ descriptor: v, self: map.value })));
         return descriptors;

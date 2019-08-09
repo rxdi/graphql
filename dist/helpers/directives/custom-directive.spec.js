@@ -38,7 +38,7 @@ let AddTextDirective = class AddTextDirective {
             outside: {
                 type: new graphql_1.GraphQLNonNull(graphql_1.GraphQLString),
                 description: 'the times to duplicate the string'
-            },
+            }
         };
         this.resolve = (resolve, root, args) => __awaiter(this, void 0, void 0, function* () { return args.inside + (yield resolve()).toUpperCase() + args.outside; });
     }
@@ -56,7 +56,7 @@ const UserType = new graphql_1.GraphQLObjectType({
     name: 'UserType',
     fields: () => ({
         name: {
-            type: graphql_1.GraphQLString,
+            type: graphql_1.GraphQLString
         }
     })
 });
@@ -85,13 +85,11 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         yield core_1.createTestBed({ controllers: [UserQueriesController] })
             .pipe(operators_1.switchMapTo(core_module_1.startServer({
             graphql: {
-                directives: [
-                    ToUpperCaseDirective,
-                    AddTextDirective
-                ],
+                directives: [ToUpperCaseDirective, AddTextDirective],
                 buildAstDefinitions: false // Removed ast definition since directives are lost
             }
-        }))).toPromise();
+        })))
+            .toPromise();
         server = core_1.Container.get(hapi_1.HAPI_SERVER);
     }));
     afterAll(() => __awaiter(this, void 0, void 0, function* () { return yield server.stop(); }));

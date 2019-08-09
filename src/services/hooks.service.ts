@@ -192,12 +192,10 @@ export type EffectTypes = keyof typeof EffectTypes;
           events.map.has(resolver.method_name) ||
           events.map.has(resolver.effect)
         ) {
-          events
-            .getLayer<Array<any>>(effectName)
-            .putItem({
-              key: effectName,
-              data: [result, ...args].filter(i => i && i !== 'undefined')
-            });
+          events.getLayer<Array<any>>(effectName).putItem({
+            key: effectName,
+            data: [result, ...args].filter(i => i && i !== 'undefined')
+          });
         }
       } catch (error) {
         result = error;
@@ -206,7 +204,7 @@ export type EffectTypes = keyof typeof EffectTypes;
           method_name: resolver.method_name,
           hasInterceptor: !!resolver.interceptor,
           args,
-          error,
+          error
         });
       }
 

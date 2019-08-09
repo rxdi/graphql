@@ -41,12 +41,15 @@ let ApolloService = class ApolloService {
             }
             catch (e) { }
             if (onRequest) {
-                return yield onRequest((context) => this.makeGQLRequest(request, response, error, context), request, response, error);
+                return yield onRequest(context => this.makeGQLRequest(request, response, error, context), request, response, error);
             }
-            this.config.graphqlOptions.context = this.config.graphqlOptions.context || {};
-            if (request.headers.authorization && request.headers.authorization !== 'undefined' && this.config.authentication) {
+            this.config.graphqlOptions.context =
+                this.config.graphqlOptions.context || {};
+            if (request.headers.authorization &&
+                request.headers.authorization !== 'undefined' &&
+                this.config.authentication) {
                 try {
-                    const serviceUtilsService = core_1.Container.get(this.config.authentication);
+                    const serviceUtilsService = core_1.Container.get((this.config.authentication));
                     this.config.graphqlOptions.context.user = yield serviceUtilsService.validateToken(request.headers.authorization);
                 }
                 catch (e) {
@@ -72,7 +75,9 @@ let ApolloService = class ApolloService {
                 if ('HttpQueryError' !== error.name) {
                     throw Boom.boomify(error);
                 }
-                if (error && error.message.constructor === String && error.message.includes('must be Output Type but got')) {
+                if (error &&
+                    error.message.constructor === String &&
+                    error.message.includes('must be Output Type but got')) {
                     console.log('Maybe you are trying to cross reference Schema Type? Instead of fields: {test: {type: GraphQLString }} try lazy evaluated fields: () => ({test: {type: GraphQLString }})');
                     console.error(error);
                 }
@@ -84,7 +89,7 @@ let ApolloService = class ApolloService {
                 }
                 const err = new Boom(error.message, { statusCode: error.statusCode });
                 if (error.headers) {
-                    Object.keys(error.headers).forEach(header => err.output.headers[header] = error.headers[header]);
+                    Object.keys(error.headers).forEach(header => (err.output.headers[header] = error.headers[header]));
                 }
                 // Boom hides the error when status code is 500
                 err.output.payload.message = error.message;
@@ -93,27 +98,38 @@ let ApolloService = class ApolloService {
         });
     }
     OnInit() {
-        this.init();
-        this.register();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.init();
+            yield this.register();
+        });
     }
     init() {
-        let schemaOverride;
-        try {
-            schemaOverride = core_1.Container.get(config_tokens_1.SCHEMA_OVERRIDE);
-        }
-        catch (e) { }
-        if (schemaOverride) {
-            this.config.graphqlOptions.schema = schemaOverride(this.bootstrapService.generateSchema(true));
-        }
-        else {
-            let customSchemaDefinition;
+        return __awaiter(this, void 0, void 0, function* () {
+            let schemaOverride;
             try {
-                customSchemaDefinition = core_1.Container.get(config_tokens_1.CUSTOM_SCHEMA_DEFINITION);
+                schemaOverride = core_1.Container.get(config_tokens_1.SCHEMA_OVERRIDE);
             }
             catch (e) { }
-            this.config.graphqlOptions.schema = customSchemaDefinition || this.config.graphqlOptions.schema || this.bootstrapService.generateSchema();
-        }
-        this.hookService.AttachHooks([this.config.graphqlOptions.schema.getQueryType(), this.config.graphqlOptions.schema.getMutationType(), this.config.graphqlOptions.schema.getSubscriptionType()]);
+            if (schemaOverride) {
+                this.config.graphqlOptions.schema = yield schemaOverride(this.bootstrapService.generateSchema(true));
+            }
+            else {
+                let customSchemaDefinition;
+                try {
+                    customSchemaDefinition = core_1.Container.get(config_tokens_1.CUSTOM_SCHEMA_DEFINITION);
+                }
+                catch (e) { }
+                this.config.graphqlOptions.schema =
+                    customSchemaDefinition ||
+                        this.config.graphqlOptions.schema ||
+                        this.bootstrapService.generateSchema();
+            }
+            this.hookService.AttachHooks([
+                this.config.graphqlOptions.schema.getQueryType(),
+                this.config.graphqlOptions.schema.getMutationType(),
+                this.config.graphqlOptions.schema.getSubscriptionType()
+            ]);
+        });
     }
     register() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -145,7 +161,7 @@ let ApolloService = class ApolloService {
                     ? // TODO type payload as string or Record
                         request.payload
                     : request.query,
-                request: apollo_server_core_1.convertNodeHttpToRequest(request.raw.req),
+                request: apollo_server_core_1.convertNodeHttpToRequest(request.raw.req)
             });
             const response = h.response(graphqlResponse);
             response.type('application/json');

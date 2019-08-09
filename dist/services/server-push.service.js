@@ -39,13 +39,19 @@ let ServerPushPlugin = class ServerPushPlugin {
         this.sendTime = new rxjs_1.Subject();
         this.clientConnected = new rxjs_1.Subject();
         this.exitHandler.errorHandler.subscribe((e) => __awaiter(this, void 0, void 0, function* () { return yield this.stopServerWatcher(); }));
-        this.server.events.on('response', (request) => this.sendToClient.next({ query: request.payload, response: request.response['source'] }));
-        rxjs_1.timer(0, 1000).pipe(operators_1.tap(() => this.sendTime.next(true))).subscribe();
+        this.server.events.on('response', request => this.sendToClient.next({
+            query: request.payload,
+            response: request.response['source']
+        }));
+        rxjs_1.timer(0, 1000)
+            .pipe(operators_1.tap(() => this.sendTime.next(true)))
+            .subscribe();
         this.afterStarterService.appStarted
-            .pipe(operators_1.switchMapTo(this.waitXSeconds(5)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser())).subscribe();
+            .pipe(operators_1.switchMapTo(this.waitXSeconds(5)), operators_1.take(1), operators_1.filter(() => !this.connected), operators_1.filter(() => this.config.openBrowser), operators_1.tap(() => this.startService.startBrowser()))
+            .subscribe();
     }
     waitXSeconds(sec) {
-        return rxjs_1.Observable.create((o) => {
+        return rxjs_1.Observable.create(o => {
             const timeout = setTimeout(() => o.next(true), sec * 1000);
             return () => clearTimeout(timeout);
         });
@@ -69,7 +75,7 @@ let ServerPushPlugin = class ServerPushPlugin {
     }
     stopServerWatcher() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield new Promise((resolve) => this.serverWatcher.close(resolve));
+            return yield new Promise(resolve => this.serverWatcher.close(resolve));
         });
     }
     createServerWatcher() {
@@ -87,16 +93,20 @@ let ServerPushPlugin = class ServerPushPlugin {
                 'Content-Type': 'text/event-stream',
                 'Access-Control-Allow-Origin': '*',
                 'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive'
+                Connection: 'keep-alive'
             });
-            this.sendToClient.subscribe((data) => res.write('data: ' + JSON.stringify(data) + '\n\n'));
-            this.sendTime.subscribe(() => res.write('data: ' + JSON.stringify({ time: new Date().toLocaleTimeString() }) + '\n\n'));
-            this.sendTime.subscribe(() => res.write('data: ' + JSON.stringify({
-                config: {
-                    graphql: Object.assign({}, this.config, { graphqlOptions: null }),
-                    hapi: this.server.info
-                }
-            }) + '\n\n'));
+            this.sendToClient.subscribe(data => res.write('data: ' + JSON.stringify(data) + '\n\n'));
+            this.sendTime.subscribe(() => res.write('data: ' +
+                JSON.stringify({ time: new Date().toLocaleTimeString() }) +
+                '\n\n'));
+            this.sendTime.subscribe(() => res.write('data: ' +
+                JSON.stringify({
+                    config: {
+                        graphql: Object.assign({}, this.config, { graphqlOptions: null }),
+                        hapi: this.server.info
+                    }
+                }) +
+                '\n\n'));
             req.on('end', () => {
                 this.connected = false;
                 req.destroy();

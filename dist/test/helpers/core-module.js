@@ -11,7 +11,7 @@ exports.DEFAULT_CONFIG = {
         randomPort: true,
         hapi: {
             port: 9000
-        },
+        }
     },
     graphql: {
         path: '/graphql',
@@ -27,8 +27,7 @@ exports.DEFAULT_CONFIG = {
             endpointURL: '/graphql',
             subscriptionsEndpoint: `${process.env.GRAPHIQL_WS_SSH ? 'wss' : 'ws'}://${process.env.GRAPHIQL_WS_PATH || 'localhost'}${process.env.DEPLOY_PLATFORM === 'heroku'
                 ? ''
-                : `:${process.env.API_PORT ||
-                    process.env.PORT || 9000}`}/subscriptions`,
+                : `:${process.env.API_PORT || process.env.PORT || 9000}`}/subscriptions`,
             websocketConnectionParams: {
                 token: process.env.GRAPHIQL_TOKEN
             }
@@ -36,7 +35,7 @@ exports.DEFAULT_CONFIG = {
         graphqlOptions: {
             schema: null
         }
-    },
+    }
 };
 exports.setConfigServer = (config = {}) => {
     return Object.assign({}, exports.DEFAULT_CONFIG.server, config);

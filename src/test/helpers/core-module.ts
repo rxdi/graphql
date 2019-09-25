@@ -78,7 +78,10 @@ export const startServer = (
   );
 };
 
-export const stopServer = () => Container.get<Server>(HAPI_SERVER).stop();
+export const stopServer = () => {
+  process.exit();
+  Container.get<Server>(HAPI_SERVER).stop();
+};
 export const getServer = () => of(Container.get<Server>(HAPI_SERVER));
 
 export const getGraphqlSchema = () =>

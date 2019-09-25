@@ -49,9 +49,7 @@ export interface GRAPHQL_AUTHENTICATION_FAKE {
 export const GRAPHQL_PLUGIN_CONFIG = new InjectionToken<GRAPHQL_PLUGIN_CONFIG>(
   'graphql-configuration-injection-token'
 );
-export const CUSTOM_SCHEMA_DEFINITION = new InjectionToken<GraphQLSchema>(
-  'gapi-custom-schema-definition'
-);
+export const CUSTOM_SCHEMA_DEFINITION = 'gapi-custom-schema-definition';
 export const SCHEMA_OVERRIDE = new InjectionToken<
   (schema: GraphQLSchema) => GraphQLSchema
 >('gapi-custom-schema-override');

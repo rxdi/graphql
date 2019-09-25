@@ -141,7 +141,7 @@ describe('Decorators: @Query', () => {
       queryFields.testInjection['target']
     );
     expect(queryFields.testInjection['method_name']).toBe('testInjection');
-    expect(await resolver()).toBe('pesho');
+    expect(await resolver().toPromise()).toBe('pesho');
     done();
   });
 });

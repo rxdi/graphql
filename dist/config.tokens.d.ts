@@ -42,7 +42,7 @@ export interface GRAPHQL_AUTHENTICATION_FAKE {
     onSubOperation(connectionParams: any, params: any, webSocket: any): any;
 }
 export declare const GRAPHQL_PLUGIN_CONFIG: InjectionToken<GRAPHQL_PLUGIN_CONFIG>;
-export declare const CUSTOM_SCHEMA_DEFINITION: InjectionToken<GraphQLSchema>;
+export declare const CUSTOM_SCHEMA_DEFINITION = "gapi-custom-schema-definition";
 export declare const SCHEMA_OVERRIDE: InjectionToken<(schema: GraphQLSchema) => GraphQLSchema>;
 export declare const ON_REQUEST_HANDLER: InjectionToken<(next: any, context?: any, request?: Request, h?: ResponseToolkit, err?: Error) => any>;
 export interface IRegister {

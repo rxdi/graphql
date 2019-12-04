@@ -4,7 +4,9 @@ const core_1 = require("@rxdi/core");
 const graphql_1 = require("graphql");
 function Type(type) {
     let currentType;
-    if (type.constructor === graphql_1.GraphQLObjectType || type.constructor === graphql_1.GraphQLList) {
+    if (type.constructor === graphql_1.GraphQLObjectType ||
+        type.constructor === graphql_1.GraphQLList ||
+        type.constructor === graphql_1.GraphQLScalarType) {
         currentType = type;
         type = { type: currentType };
     }

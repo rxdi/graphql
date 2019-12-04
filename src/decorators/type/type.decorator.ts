@@ -1,9 +1,12 @@
 import { Container } from '@rxdi/core';
-import { GraphQLObjectType, GraphQLList } from 'graphql';
+import { GraphQLObjectType, GraphQLList, GraphQLScalarType } from 'graphql';
 
 export function Type<T>(type): Function {
     let currentType;
-    if (type.constructor === GraphQLObjectType || type.constructor === GraphQLList) {
+    if (type.constructor === GraphQLObjectType ||
+        type.constructor === GraphQLList ||
+        type.constructor === GraphQLScalarType
+       ) {
         currentType = type;
         type = { type: currentType };
     } else {

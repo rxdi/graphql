@@ -51,7 +51,10 @@ exports.startServer = (config = {}, bootstrapOptions) => {
         ]
     }, [], bootstrapOptions);
 };
-exports.stopServer = () => core_1.Container.get(hapi_1.HAPI_SERVER).stop();
+exports.stopServer = () => {
+    process.exit();
+    core_1.Container.get(hapi_1.HAPI_SERVER).stop();
+};
 exports.getServer = () => rxjs_1.of(core_1.Container.get(hapi_1.HAPI_SERVER));
 exports.getGraphqlSchema = () => rxjs_1.of(core_1.Container.get(config_tokens_1.GRAPHQL_PLUGIN_CONFIG).graphqlOptions.schema);
 // export const createTestBed = <T, K>(options: ModuleArguments<T, K>, frameworks: any[] = [], bootstrapOptions?: ConfigModel) => {

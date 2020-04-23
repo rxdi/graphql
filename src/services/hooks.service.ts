@@ -83,8 +83,8 @@ export type EffectTypes = keyof typeof EffectTypes;
         process.env.APP_DEFAULT_SCOPE || 'ADMIN'
       ];
       this.applyTypeFields(resolver, rxdiResolver);
-      this.AddHooks(resolver);
       this.applyMetaToResolver(<any>resolver);
+      this.AddHooks(resolver);
     }
   }
 

@@ -74,7 +74,7 @@ export declare const setConfigGraphql: (config?: GRAPHQL_PLUGIN_CONFIG) => {
     graphiqlPlaygroundConfig?: import("graphql-playground-html").RenderPageOptions;
 };
 export declare const startServer: (config?: CoreModuleConfig, bootstrapOptions?: ConfigModel) => import("rxjs").Observable<import("@rxdi/core/dist/container/observable-interface").ObservableContainer>;
-export declare const stopServer: () => void;
+export declare const stopServer: () => never;
 export declare const getServer: () => import("rxjs").Observable<Server>;
 export declare const getGraphqlSchema: () => import("rxjs").Observable<import("graphql").GraphQLSchema>;
 export declare const sendRequest: <T = {}>(request: SendRequestQueryType, url?: string) => PromiseLike<import("../../plugin-init").Response<T>>;

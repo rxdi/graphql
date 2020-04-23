@@ -40,7 +40,7 @@ let GraphQLModule = GraphQLModule_1 = class GraphQLModule {
                 start_service_1.StartService
             ],
             frameworkImports: [
-                playground_1.PlaygroundModule.forRoot(Object.assign({ path: config.graphiQlPath || '/graphiql', endpoint: config.path || '/graphql', version: '1.7.1' }, config.graphiqlPlaygroundConfig, { graphiqlPlayground: config.graphiQlPlayground }))
+                playground_1.PlaygroundModule.forRoot(Object.assign(Object.assign({ path: config.graphiQlPath || '/graphiql', endpoint: config.path || '/graphql', version: '1.7.1' }, config.graphiqlPlaygroundConfig), { graphiqlPlayground: config.graphiQlPlayground }))
             ],
             plugins: [services_1.ServerPushPlugin, plugin_init_1.PluginInit]
         };

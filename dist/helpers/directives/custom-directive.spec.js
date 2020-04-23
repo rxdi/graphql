@@ -9,10 +9,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -50,7 +51,7 @@ const ToUpperCaseDirective = new custom_directive_1.GraphQLCustomDirective({
     name: 'toUpperCase',
     description: 'change the case of a string to uppercase',
     locations: [graphql_1.DirectiveLocation.FIELD],
-    resolve: (resolve) => __awaiter(this, void 0, void 0, function* () { return (yield resolve()).toUpperCase(); })
+    resolve: (resolve) => __awaiter(void 0, void 0, void 0, function* () { return (yield resolve()).toUpperCase(); })
 });
 const UserType = new graphql_1.GraphQLObjectType({
     name: 'UserType',
@@ -81,7 +82,7 @@ UserQueriesController = __decorate([
 ], UserQueriesController);
 describe('Custom Graphql Directives aka Schema Decorators', () => {
     let server;
-    beforeAll(() => __awaiter(this, void 0, void 0, function* () {
+    beforeAll(() => __awaiter(void 0, void 0, void 0, function* () {
         yield core_1.createTestBed({ controllers: [UserQueriesController] })
             .pipe(operators_1.switchMapTo(core_module_1.startServer({
             graphql: {
@@ -92,8 +93,8 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
             .toPromise();
         server = core_1.Container.get(hapi_1.HAPI_SERVER);
     }));
-    afterAll(() => __awaiter(this, void 0, void 0, function* () { return yield server.stop(); }));
-    it('Should decorete name return property to become UPPERCASE', (done) => __awaiter(this, void 0, void 0, function* () {
+    afterAll(() => __awaiter(void 0, void 0, void 0, function* () { return yield server.stop(); }));
+    it('Should decorete name return property to become UPPERCASE', (done) => __awaiter(void 0, void 0, void 0, function* () {
         const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @toUpperCase } }`,
             variables: { name: 'imetomi' }
@@ -101,7 +102,7 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         expect(res.data.findUser.name).toBe('IMETOMI');
         done();
     }));
-    it('Should decorete name return property to have text outside', (done) => __awaiter(this, void 0, void 0, function* () {
+    it('Should decorete name return property to have text outside', (done) => __awaiter(void 0, void 0, void 0, function* () {
         const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @addText(inside: "", outside: "test") } }`,
             variables: { name: 'imetomi' }
@@ -110,7 +111,7 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         expect(res.data.findUser.name).toBe('IMETOMItest');
         done();
     }));
-    it('Should decorete name return property to have text inside', (done) => __awaiter(this, void 0, void 0, function* () {
+    it('Should decorete name return property to have text inside', (done) => __awaiter(void 0, void 0, void 0, function* () {
         const res = yield core_module_1.sendRequest({
             query: `query findUser($name: String!) { findUser(name: $name) { name @addText(inside: "test", outside: "") } }`,
             variables: { name: 'imetomi' }
@@ -118,5 +119,5 @@ describe('Custom Graphql Directives aka Schema Decorators', () => {
         expect(res.data.findUser.name).toBe('testIMETOMI');
         done();
     }));
-    afterAll(() => __awaiter(this, void 0, void 0, function* () { return yield server.stop(); }));
+    afterAll(() => __awaiter(void 0, void 0, void 0, function* () { return yield server.stop(); }));
 });

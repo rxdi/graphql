@@ -38,10 +38,10 @@ exports.DEFAULT_CONFIG = {
     }
 };
 exports.setConfigServer = (config = {}) => {
-    return Object.assign({}, exports.DEFAULT_CONFIG.server, config);
+    return Object.assign(Object.assign({}, exports.DEFAULT_CONFIG.server), config);
 };
 exports.setConfigGraphql = (config = {}) => {
-    return Object.assign({}, exports.DEFAULT_CONFIG.graphql, config);
+    return Object.assign(Object.assign({}, exports.DEFAULT_CONFIG.graphql), config);
 };
 exports.startServer = (config = {}, bootstrapOptions) => {
     return core_1.createTestBed({

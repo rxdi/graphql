@@ -1,12 +1,11 @@
 {
   "name": "@rxdi/graphql",
-  "version": "0.7.45",
+  "version": "0.7.46",
   "repository": {
     "type": "git",
     "url": "https://github.com/rxdi/graphql"
   },
   "scripts": {
-    "postpublish": "git push -f ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git && git push --tags && git push ssh://git@gitlab.youvolio.com:522/rxdi/graphql.git --tags",
     "lint": "tslint -c tslint.json 'development/**/*.{ts,tsx}'",
     "pretest": "npm run lint",
     "test": "jest "
